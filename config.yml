@@ -1,0 +1,80 @@
+settings : 
+  url : https://ayushsinghal1510-vx-database.hf.space
+
+stt : 
+  settings : 
+    standard-sample-rates : [
+      8000 , 16000 , 
+      22050 , 24000 , 
+      44100 , 48000
+    ]
+
+  groq : 
+    models : [
+      whisper-large-v3 , 
+      whisper-large-v3-turbo
+    ]
+  deepgram : 
+    models : [
+      nova-2 , 
+      nova-2-general , 
+      nova-2-meeting , 
+      nova-2-phonecall , 
+      nova-2-finance
+    ]
+
+llm : 
+  settings : 
+    
+  groq : 
+    models : [
+      llama-3.3-70b-versatile , 
+      llama-3.1-8b-instant , 
+      llama-3.1-70b-versatile , 
+      llama3-8b-8192 , 
+      llama3-70b-8192 , 
+      mixtral-8x7b-32768 , 
+      gemma2-9b-it , 
+      gemma-7b-it
+    ]
+  gemini : 
+    models : [
+      gemini-2.5-pro , 
+      gemini-2.5-flash , 
+      gemini-2.5-flash-lite , 
+      gemini-2.0-flash-001 , 
+      gemini-2.0-flash-lite-001 , 
+      gemini-1.5-pro , 
+      gemini-1.5-flash , 
+      gemini-1.5-flash-8b
+  ]
+
+stt-section : 
+
+  heading : 🎤 Speech-to-Text (STT)
+  base : 
+
+    service : groq 
+    sample-rate : 16000  
+  services : [groq , deepgram]
+  sample-rate-range : [1000 , 96000]
+  sample-rate-step : 1000
+
+llm-section : 
+
+  heading : 🤖 Large Language Model (LLM)
+  base : 
+
+    service : groq
+
+  services : ['groq' , 'gemini']
+
+tts-section : 
+
+  heading : 🔊 Text-to-Speech (TTS)
+
+dashboard : 
+  title : 🔧 API Configuration Dashboard
+  subheader : 🔑 Your API Key
+  logout : 
+    label : 🚪 Logout
