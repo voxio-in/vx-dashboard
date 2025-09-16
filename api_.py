@@ -86,7 +86,7 @@ def update_config(api_key : str , service_type : str , config : dict , updating_
     response : Response | None = hit_api(
         method = 'POST' , 
         url = f"{config['settings']['url']}/{api_key}/{service_type}" , 
-        json_data = config
+        json_data = updating_config
     )
 
     if (
