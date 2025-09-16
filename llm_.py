@@ -49,7 +49,7 @@ def render_llm_section(config : dict) :
             index = model_options.index(current_model) if current_model in model_options else 0
         )
 
-        if model == '' : st.warning('Currently this model is not supported')
+        if model != 'groq' : st.warning('Currently this model is not supported')
         else :  
             current_prompt = current_llm.get('prompt' , '') if current_llm else ''
 
