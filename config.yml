@@ -72,7 +72,7 @@ llm-section :
 
     service : groq
 
-  services : ['groq']
+  services : ['groq' , '']
 
 tts-section : 
 
