@@ -48,30 +48,28 @@ def render_llm_section(config : dict) :
             options = model_options , 
             index = model_options.index(current_model) if current_model in model_options else 0
         )
+        
+        current_prompt = current_llm.get('prompt' , '') if current_llm else ''
 
-        if model != 'groq' : st.warning('Currently this model is not supported')
-        else :  
-            current_prompt = current_llm.get('prompt' , '') if current_llm else ''
+        prompt = st.text_area(
+            'System Prompt' , 
+            value = current_prompt , 
+            help = "System prompt to guide the model's behavior"
+        )
+        
+        if st.form_submit_button('Update LLM Config' , use_container_width = True) : 
 
-            prompt = st.text_area(
-                'System Prompt' , 
-                value = current_prompt , 
-                help = "System prompt to guide the model's behavior"
-            )
+            service_config = {
+                'service' : provider , 
+                'model' : model
+            }
+
+            if prompt : service_config['prompt'] = prompt
             
-            if st.form_submit_button('Update LLM Config' , use_container_width = True) : 
-
-                service_config = {
-                    'service' : provider , 
-                    'model' : model
-                }
-
-                if prompt : service_config['prompt'] = prompt
-                
-                if update_config(
-                    api_key = st.session_state.api_key , 
-                    service_type = 'llm' , 
-                    config = config , 
-                    updating_config = service_config
-                ) : st.success('LLM configuration updated!') ; st.rerun()
-                else : st.error('Failed to update LLM configuration')
+            if update_config(
+                api_key = st.session_state.api_key , 
+                service_type = 'llm' , 
+                config = config , 
+                updating_config = service_config
+            ) : st.success('LLM configuration updated!') ; st.rerun()
+            else : st.error('Failed to update LLM configuration')
