@@ -59,12 +59,17 @@ def render_llm_section(config : dict) :
         
         if st.form_submit_button('Update LLM Config' , use_container_width = True) : 
 
-            config = {
+            service_config = {
                 'service' : provider , 
                 'model' : model
             }
 
             if prompt : config['prompt'] = prompt
             
-            if update_config(st.session_state.api_key, 'llm', config) : st.success('LLM configuration updated!') ; st.rerun()
+            if update_config(
+                api_key = st.session_state.api_key , 
+                service_type = 'llm' , 
+                config = config , 
+                updating_config = service_config
+            ) : st.success('LLM configuration updated!') ; st.rerun()
             else : st.error('Failed to update LLM configuration')

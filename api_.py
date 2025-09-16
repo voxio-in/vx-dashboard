@@ -30,7 +30,7 @@ def hit_api(
 
         print(f'invalid method {method}')
 
-    except : print('Encountered Error while trying to hit the api')
+    except Exception as e : print(f'Encountered Error while trying to hit the api {e}')
 
 def signup_user(username : str , password : str , config : dict) -> str | None : 
 
@@ -81,7 +81,7 @@ def get_current_config(api_key : str , service_type : str , config : dict)  :
         response.status_code == 200 
     ) : return json.loads(response.text)
     return None 
-def update_config(api_key : str , service_type : str , config : dict) -> bool :
+def update_config(api_key : str , service_type : str , config : dict , updating_config : dict) -> bool :
 
     response : Response | None = hit_api(
         method = 'POST' , 

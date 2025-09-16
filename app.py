@@ -22,7 +22,7 @@ def init_session_state() :
 
 def main_dashboard(config : dict):
 
-    with st.sidebar:
+    with st.sidebar : 
         st.write(f"Welcome, **{st.session_state.username}**!")
         
         st.divider()
