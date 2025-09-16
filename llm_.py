@@ -64,7 +64,7 @@ def render_llm_section(config : dict) :
                 'model' : model
             }
 
-            if prompt : config['prompt'] = prompt
+            if prompt : service_config['prompt'] = prompt
             
             if update_config(
                 api_key = st.session_state.api_key , 
