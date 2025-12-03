@@ -14,7 +14,6 @@ import {
 export default function Home() {
   const { user, isLoading } = useAuth();
 
-  // Helper to determine where the dashboard button should link
   const getDashboardLink = () => {
     if (!user) return "/login";
     switch (user.role) {
@@ -73,7 +72,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <main className="flex-1">
         <section className="mx-auto flex max-w-[980px] flex-col items-center gap-4 py-24 text-center md:py-32 px-6">
           <div className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium">
@@ -108,7 +106,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Feature Grid */}
         <section className="container mx-auto px-6 py-12 lg:py-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center p-6 border rounded-xl bg-card">
@@ -143,7 +140,6 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
         <p>
           &copy; {new Date().getFullYear()} BrandName Inc. All rights reserved.

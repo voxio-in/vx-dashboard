@@ -6,7 +6,6 @@ import { UserRole } from "@/features/auth/types";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // === EXTRACT NEW FIELDS ===
     const { username, email, password, name, role, flows, api_key } = body;
 
     if (!username || !email || !password) {
@@ -39,9 +38,8 @@ export async function POST(req: Request) {
       password,
       name,
       role: assignedRole,
-      // === SAVE NEW FIELDS ===
-      api_key: api_key || undefined, // Only save if provided
-      flows: flows || [], // Save provided flows or empty array
+      api_key: api_key || undefined,
+      flows: flows || [],
     });
 
     return NextResponse.json(
@@ -52,7 +50,7 @@ export async function POST(req: Request) {
           id: user._id.toString(),
           username: user.username,
           role: user.role,
-          flows: user.flows, // Return flows in response
+          flows: user.flows,
         },
       },
       { status: 201 }
