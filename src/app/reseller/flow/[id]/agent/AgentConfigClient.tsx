@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronRight,
@@ -11,8 +12,8 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquare,
-  Cpu,
   Box,
+  Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,10 +29,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import Link from "next/link";
 import { IFlow } from "@/types";
 import { saveAgentConfiguration } from "@/features/agent/actions";
+// 1. Import Global Context & Hook
+import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
+// --- COMPONENTS ---
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -127,6 +131,11 @@ export default function AgentConfigClient({
   flow: IFlow;
   initialConfig?: any;
 }) {
+  const router = useRouter();
+
+  // 2. Get proceedWithAction from Global Context
+  const { proceedWithAction } = useUnsavedChangesContext();
+
   const [systemPrompt, setSystemPrompt] = useState(
     initialConfig?.systemPrompt || ""
   );
@@ -139,17 +148,29 @@ export default function AgentConfigClient({
 
   const [isSaving, setIsSaving] = useState(false);
 
+  // 3. Removed local Modal state (showExitModal)
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     status: "success" | "error" | null;
     title: string;
     message: string;
-  }>({
-    isOpen: false,
-    status: null,
-    title: "",
-    message: "",
-  });
+  }>({ isOpen: false, status: null, title: "", message: "" });
+
+  const isDirty =
+    systemPrompt !== (initialConfig?.systemPrompt || "") ||
+    provider !== (initialConfig?.provider || "groq") ||
+    model !== (initialConfig?.model || "llama-3.1-8b-instant");
+
+  // 4. Hook updates the Global Context's isDirty state
+  useUnsavedChanges(isDirty);
+
+  // 5. HELPER FOR NAVIGATION
+  const handleNavigation = (path: string) => {
+    proceedWithAction(() => {
+      router.push(path);
+    });
+  };
 
   const handleProviderChange = (value: string) => {
     setProvider(value);
@@ -164,7 +185,6 @@ export default function AgentConfigClient({
 
     try {
       const result = await saveAgentConfiguration(flow._id, formData);
-
       if (result.success) {
         setModalState({
           isOpen: true,
@@ -172,21 +192,21 @@ export default function AgentConfigClient({
           title: "Agent Updated",
           message: "Agent LLM settings have been saved successfully.",
         });
+        router.refresh();
       } else {
         setModalState({
           isOpen: true,
           status: "error",
           title: "Save Failed",
-          message: result.message || "Could not save configuration.",
+          message: result.message || "Error saving.",
         });
       }
     } catch (error) {
-      console.error(error);
       setModalState({
         isOpen: true,
         status: "error",
         title: "Connection Error",
-        message: "Could not reach the server.",
+        message: "Could not reach server.",
       });
     } finally {
       setIsSaving(false);
@@ -206,31 +226,35 @@ export default function AgentConfigClient({
         message={modalState.message}
       />
 
-      <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 flex-shrink-0 sticky top-0">
+      {/* 6. Removed local UnsavedChangesModal here */}
+
+      <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
-          <Link href={`/reseller/flow/${flow._id}`}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          {/* 7. USE handleNavigation FOR BACK BUTTON */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleNavigation(`/reseller/flow/${flow._id}`)}
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+
           <div className="flex items-center gap-2 text-lg">
-            <Link
-              href="/reseller/panel"
+            {/* 8. REPLACE LINKS WITH BUTTONS/SPANS to trap clicks */}
+            <button
+              onClick={() => handleNavigation("/reseller/panel")}
               className="font-medium text-slate-500 hover:text-indigo-600 transition-colors"
             >
               My Flows
-            </Link>
+            </button>
             <ChevronRight className="h-4 w-4 text-slate-400" />
-            <Link
-              href={`/reseller/flow/${flow._id}`}
+            <button
+              onClick={() => handleNavigation(`/reseller/flow/${flow._id}`)}
               className="font-medium text-slate-500 hover:text-indigo-600 transition-colors"
             >
               {flow.name}
-            </Link>
+            </button>
             <ChevronRight className="h-4 w-4 text-slate-400" />
             <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Bot className="h-4 w-4 text-indigo-500" />
@@ -256,7 +280,7 @@ export default function AgentConfigClient({
               <div className="space-y-2">
                 <LabelWithInfo
                   label="System Prompt"
-                  info="The core instructions that define the agent's personality and behavior."
+                  info="Core instructions."
                 />
                 <div className="relative">
                   <MessageSquare className="absolute top-3 left-3 h-5 w-5 text-slate-400 pointer-events-none" />
@@ -269,14 +293,12 @@ export default function AgentConfigClient({
                   />
                 </div>
               </div>
-
               <div className="h-[1px] bg-slate-200 dark:bg-slate-800 my-6" />
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Provider"
-                    info="The AI infrastructure provider."
+                    info="AI infrastructure provider."
                   />
                   <div className="relative">
                     <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
@@ -297,12 +319,8 @@ export default function AgentConfigClient({
                     </Select>
                   </div>
                 </div>
-
                 <div className="space-y-2">
-                  <LabelWithInfo
-                    label="Model"
-                    info="The specific AI model to use."
-                  />
+                  <LabelWithInfo label="Model" info="Specific AI model." />
                   <div className="relative">
                     <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
                     <Select value={model} onValueChange={setModel}>
@@ -321,19 +339,26 @@ export default function AgentConfigClient({
                 </div>
               </div>
             </div>
-
             <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
               <Button
                 onClick={handleSave}
-                disabled={isSaving}
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-indigo-500/20 transition-all"
+                disabled={isSaving || !isDirty}
+                className={`w-full h-12 font-semibold text-base transition-all ${
+                  !isDirty
+                    ? "bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg hover:shadow-indigo-500/20"
+                }`}
               >
                 {isSaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                {isSaving ? "Saving..." : "Save Configuration"}
+                {isSaving
+                  ? "Saving..."
+                  : isDirty
+                  ? "Save Configuration"
+                  : "No Changes to Save"}
               </Button>
             </div>
           </div>

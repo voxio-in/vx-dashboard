@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronRight,
@@ -25,12 +26,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import Link from "next/link";
 import { IFlow } from "@/types";
 import { saveSTTConfiguration } from "@/features/stt/actions";
+// 1. Import Global Context
+import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
-type ProviderType = "groq" | "deepgram";
-
+// --- COMPONENTS (LabelWithInfo, StatusModal) ---
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -151,12 +153,11 @@ const STT_CONFIG = {
       { value: "no", label: "Norwegian" },
       { value: "hu", label: "Hungarian" },
     ],
-    deepgram: [
-      { value: "multi", label: "Multi-language" },
-      { value: "en", label: "English" },
-    ],
+    deepgram: [{ value: "multi", label: "Multi-language" }],
   },
 };
+
+type ProviderType = "groq" | "deepgram";
 
 export default function STTConfigClient({
   flow,
@@ -165,6 +166,11 @@ export default function STTConfigClient({
   flow: IFlow;
   initialConfig?: any;
 }) {
+  const router = useRouter();
+
+  // 2. Use Global Context
+  const { proceedWithAction } = useUnsavedChangesContext();
+
   const [provider, setProvider] = useState<ProviderType>(
     (initialConfig?.service as ProviderType) || "groq"
   );
@@ -177,19 +183,29 @@ export default function STTConfigClient({
     initialConfig?.temperature || 0
   );
   const [keywords, setKeywords] = useState(initialConfig?.keywords || "");
-  const [isSaving, setIsSaving] = useState(false);
 
+  const [isSaving, setIsSaving] = useState(false);
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
-    status: "success" | "error" | null;
+    status: any;
     title: string;
     message: string;
-  }>({
-    isOpen: false,
-    status: null,
-    title: "",
-    message: "",
-  });
+  }>({ isOpen: false, status: null, title: "", message: "" });
+
+  const isDirty =
+    provider !== (initialConfig?.service || "groq") ||
+    model !== (initialConfig?.["model-name"] || "whisper-large-v3") ||
+    language !== (initialConfig?.language || "en") ||
+    prompt !== (initialConfig?.prompt || "") ||
+    temperature !== (initialConfig?.temperature || 0) ||
+    keywords !== (initialConfig?.keywords || "");
+
+  useUnsavedChanges(isDirty);
+
+  // 3. Navigation Helper
+  const handleNavigation = (path: string) => {
+    proceedWithAction(() => router.push(path));
+  };
 
   const handleProviderChange = (value: string) => {
     const newProvider = value as ProviderType;
@@ -208,32 +224,30 @@ export default function STTConfigClient({
       temperature,
       keywords,
     };
-
     try {
       const result = await saveSTTConfiguration(flow._id, formData);
-
       if (result.success) {
         setModalState({
           isOpen: true,
           status: "success",
           title: "Configuration Saved",
-          message: result.message || "Your settings have been updated.",
+          message: "Your STT settings have been successfully updated.",
         });
+        router.refresh();
       } else {
         setModalState({
           isOpen: true,
           status: "error",
           title: "Save Failed",
-          message: result.message || "An unknown error occurred.",
+          message: result.message || "Error saving.",
         });
       }
     } catch (error) {
-      console.error(error);
       setModalState({
         isOpen: true,
         status: "error",
-        title: "Network Error",
-        message: "Could not connect to the server.",
+        title: "Connection Error",
+        message: "Could not reach server.",
       });
     } finally {
       setIsSaving(false);
@@ -255,29 +269,31 @@ export default function STTConfigClient({
 
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
-          <Link href={`/reseller/flow/${flow._id}`}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          {/* 4. Use handleNavigation */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleNavigation(`/reseller/flow/${flow._id}`)}
+            className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+
           <div className="flex items-center gap-2 text-lg">
-            <Link
-              href="/reseller/panel"
+            {/* 5. Trap Link clicks */}
+            <button
+              onClick={() => handleNavigation("/reseller/panel")}
               className="font-medium text-slate-500 hover:text-indigo-600 transition-colors"
             >
               My Flows
-            </Link>
+            </button>
             <ChevronRight className="h-4 w-4 text-slate-400" />
-            <Link
-              href={`/reseller/flow/${flow._id}`}
+            <button
+              onClick={() => handleNavigation(`/reseller/flow/${flow._id}`)}
               className="font-medium text-slate-500 hover:text-indigo-600 transition-colors"
             >
               {flow.name}
-            </Link>
+            </button>
             <ChevronRight className="h-4 w-4 text-slate-400" />
             <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Mic className="h-4 w-4 text-indigo-500" />
@@ -289,6 +305,7 @@ export default function STTConfigClient({
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto p-10 pb-32">
+          {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2 text-slate-900 dark:text-slate-100">
               STT Configuration
@@ -297,7 +314,7 @@ export default function STTConfigClient({
               Configure your Speech-to-Text provider options.
             </p>
           </div>
-
+          {/* Form */}
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 space-y-8">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -318,7 +335,6 @@ export default function STTConfigClient({
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <LabelWithInfo
@@ -338,7 +354,6 @@ export default function STTConfigClient({
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Language"
@@ -358,11 +373,10 @@ export default function STTConfigClient({
                   </Select>
                 </div>
               </div>
-
               <div className="h-[1px] bg-slate-200 dark:bg-slate-800 my-6" />
-
+              {/* Conditional Fields (Groq/Deepgram) ... */}
               {provider === "groq" && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <LabelWithInfo
                       label="System Prompt"
@@ -372,14 +386,14 @@ export default function STTConfigClient({
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none dark:text-slate-100"
+                      className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg outline-none resize-none dark:text-slate-100"
                     />
                   </div>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <LabelWithInfo
                         label="Temperature"
-                        info="Controls randomness (0.00 - 1.00)."
+                        info="Controls randomness."
                       />
                       <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">
                         {temperature.toFixed(2)}
@@ -399,35 +413,38 @@ export default function STTConfigClient({
                   </div>
                 </div>
               )}
-
               {provider === "deepgram" && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <LabelWithInfo
-                    label="Keywords"
-                    info="Comma-separated list of priority words."
-                  />
+                <div className="space-y-2">
+                  <LabelWithInfo label="Keywords" info="Priority words." />
                   <input
                     type="text"
                     value={keywords}
                     onChange={(e) => setKeywords(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
+                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg outline-none dark:text-slate-100"
                   />
                 </div>
               )}
             </div>
-
             <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
               <Button
                 onClick={handleSave}
-                disabled={isSaving}
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-base shadow-lg hover:shadow-indigo-500/20 transition-all"
+                disabled={isSaving || !isDirty}
+                className={`w-full h-12 font-semibold text-base transition-all ${
+                  !isDirty
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                }`}
               >
                 {isSaving ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                {isSaving ? "Saving..." : "Save Configuration"}
+                {isSaving
+                  ? "Saving..."
+                  : isDirty
+                  ? "Save Configuration"
+                  : "No Changes to Save"}
               </Button>
             </div>
           </div>
