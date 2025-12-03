@@ -179,7 +179,6 @@ export default function STTConfigClient({
   const [keywords, setKeywords] = useState(initialConfig?.keywords || "");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Modal State
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     status: "success" | "error" | null;
@@ -218,14 +217,14 @@ export default function STTConfigClient({
           isOpen: true,
           status: "success",
           title: "Configuration Saved",
-          message: "Your STT settings have been successfully updated.",
+          message: result.message || "Your settings have been updated.",
         });
       } else {
         setModalState({
           isOpen: true,
           status: "error",
           title: "Save Failed",
-          message: result.message || "Something went wrong.",
+          message: result.message || "An unknown error occurred.",
         });
       }
     } catch (error) {
@@ -233,8 +232,8 @@ export default function STTConfigClient({
       setModalState({
         isOpen: true,
         status: "error",
-        title: "Connection Error",
-        message: "Could not reach the server. Please check your connection.",
+        title: "Network Error",
+        message: "Could not connect to the server.",
       });
     } finally {
       setIsSaving(false);
@@ -321,7 +320,6 @@ export default function STTConfigClient({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                ]{" "}
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Model"
@@ -340,6 +338,7 @@ export default function STTConfigClient({
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Language"

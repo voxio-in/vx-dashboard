@@ -97,7 +97,10 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
             <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-purple-600" />
           </div>
 
-          <div className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-orange-400 dark:hover:border-orange-600 hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer">
+          <div
+            onClick={() => router.push(`/reseller/flow/${flow._id}/agent`)}
+            className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-orange-400 dark:hover:border-orange-600 hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer"
+          >
             <div className="h-14 w-14 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center text-orange-600 dark:text-orange-400 shrink-0 group-hover:scale-110 transition-transform">
               <Bot className="h-7 w-7" />
             </div>
