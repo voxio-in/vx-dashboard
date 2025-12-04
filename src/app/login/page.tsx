@@ -165,7 +165,7 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember"
@@ -188,8 +188,7 @@ export default function LoginPage() {
               >
                 Forgot password?
               </a>
-            </div>
-            ={" "}
+            </div> */}{" "}
             <Button
               type="submit"
               className="w-full h-11 text-base"
@@ -206,12 +205,12 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="text-center text-sm text-muted-foreground">
+          {/* <div className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <span className="text-primary font-medium cursor-not-allowed opacity-70">
               Contact Admin
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

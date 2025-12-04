@@ -28,11 +28,9 @@ import {
 } from "@/components/ui/tooltip";
 import { IFlow } from "@/types";
 import { saveSTTConfiguration } from "@/features/stt/actions";
-// 1. Import Global Context
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 
-// --- COMPONENTS (LabelWithInfo, StatusModal) ---
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -168,7 +166,6 @@ export default function STTConfigClient({
 }) {
   const router = useRouter();
 
-  // 2. Use Global Context
   const { proceedWithAction } = useUnsavedChangesContext();
 
   const [provider, setProvider] = useState<ProviderType>(
@@ -202,7 +199,6 @@ export default function STTConfigClient({
 
   useUnsavedChanges(isDirty);
 
-  // 3. Navigation Helper
   const handleNavigation = (path: string) => {
     proceedWithAction(() => router.push(path));
   };
@@ -269,7 +265,6 @@ export default function STTConfigClient({
 
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
-          {/* 4. Use handleNavigation */}
           <Button
             variant="ghost"
             size="icon"
@@ -280,7 +275,6 @@ export default function STTConfigClient({
           </Button>
 
           <div className="flex items-center gap-2 text-lg">
-            {/* 5. Trap Link clicks */}
             <button
               onClick={() => handleNavigation("/reseller/panel")}
               className="font-medium text-slate-500 hover:text-indigo-600 transition-colors"
@@ -305,7 +299,6 @@ export default function STTConfigClient({
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto p-10 pb-32">
-          {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2 text-slate-900 dark:text-slate-100">
               STT Configuration
@@ -314,7 +307,6 @@ export default function STTConfigClient({
               Configure your Speech-to-Text provider options.
             </p>
           </div>
-          {/* Form */}
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 space-y-8">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -339,7 +331,7 @@ export default function STTConfigClient({
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Model"
-                    info="The specific neural network architecture."
+                    info="The specific model for transcription"
                   />
                   <Select value={model} onValueChange={setModel}>
                     <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
@@ -357,7 +349,7 @@ export default function STTConfigClient({
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Language"
-                    info="Primary audio language."
+                    info="Primary audio language (in case of multi, it will be multilingual, if forced to a single language, different language audio will be automatically transalated to that audio)"
                   />
                   <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
@@ -374,7 +366,6 @@ export default function STTConfigClient({
                 </div>
               </div>
               <div className="h-[1px] bg-slate-200 dark:bg-slate-800 my-6" />
-              {/* Conditional Fields (Groq/Deepgram) ... */}
               {provider === "groq" && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -415,7 +406,10 @@ export default function STTConfigClient({
               )}
               {provider === "deepgram" && (
                 <div className="space-y-2">
-                  <LabelWithInfo label="Keywords" info="Priority words." />
+                  <LabelWithInfo
+                    label="Keywords"
+                    info="Give preference to specific keywords while transcribing, this feature is usefull in industry specific cases, where you mean to say something else but model understands something else, for example ('knights' , 'nights')"
+                  />
                   <input
                     type="text"
                     value={keywords}

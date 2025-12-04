@@ -53,14 +53,14 @@ export default function Sidebar() {
           <span>Flows</span>
         </Button>
 
-        <Button
+        {/* <Button
           variant="ghost"
           onClick={() => handleNavigation("/reseller/settings")}
           className="w-full justify-start gap-3 h-12 text-sm font-semibold text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <Settings className="h-5 w-5" />
           <span>Settings</span>
-        </Button>
+        </Button> */}
       </nav>
 
       <div className="p-4 border-t border-slate-200 dark:border-slate-800">
