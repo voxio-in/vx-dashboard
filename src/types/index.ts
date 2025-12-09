@@ -16,7 +16,7 @@ export interface ISTT {
   language: string;
   prompt?: string;
   temperature?: number;
-  keywords?: string;
+  keyterms?: string;
   createdAt?: string;
   updatedAt?: string;
 }

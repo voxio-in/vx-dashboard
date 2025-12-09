@@ -28,7 +28,7 @@
     "react-dom": "19.2.0",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.4.0",
-    "voxioagent": "link:D:/voicebot/voice-bot-sdk",
+    "voxioagent": "file:../voicebot/voice-bot-sdk",
     "zod": "^4.1.13"
   },
   "devDependencies": {

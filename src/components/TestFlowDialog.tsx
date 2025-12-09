@@ -10,6 +10,9 @@ import {
 import { X, Loader2, Mic } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
+// 1. REMOVED the top-level import to prevent Server-Side crash
+// import { initVoxioAgent } from "voxioagent";
+
 interface TestFlowDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,107 +38,116 @@ export default function TestFlowDialog({
 }: TestFlowDialogProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const sdkModuleRef = useRef<any>(null);
   const voxioInstanceRef = useRef<any>(null);
+  const originalWebSocketRef = useRef<any>(null);
+
   const [isInitializing, setIsInitializing] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Initialize Voxio Agent
   useEffect(() => {
-    if (isOpen && !sdkModuleRef.current) {
+    let isMounted = true;
+
+    if (isOpen) {
+      originalWebSocketRef.current = window.WebSocket;
+      setMessages([]);
       setIsInitializing(true);
 
-      // Set up WebSocket interceptor BEFORE initializing Voxio
-      setupVoxioListeners(null);
+      setupVoxioListeners();
 
-      // @ts-ignore
-      import("@/lib/voxioagent/index.esm")
-        .then(async (module) => {
-          sdkModuleRef.current = module;
-          const { initVoxioAgent } = module;
+      // 2. DYNAMIC IMPORT: Load the library only on the client side
+      import("voxioagent")
+        .then((module) => {
+          const initVoxioAgent = module.initVoxioAgent;
 
-          const instance = await initVoxioAgent({
+          return initVoxioAgent({
             apiKey: apiKey,
             position: {
               bottom: "50px",
               right: "50px",
             },
           });
-
-          voxioInstanceRef.current = instance;
-          setIsInitializing(false);
         })
-        .catch((err) => {
-          setIsInitializing(false);
+        .then((instance: any) => {
+          if (isMounted) {
+            voxioInstanceRef.current = instance;
+            setIsInitializing(false);
+          } else {
+            if (instance && instance.destroy) instance.destroy();
+          }
+        })
+        .catch((err: any) => {
+          console.error("Failed to initialize Voxio Agent:", err);
+          if (isMounted) setIsInitializing(false);
         });
     }
-  }, [isOpen, apiKey, flowName]);
 
-  const setupVoxioListeners = (instance: any) => {
-    // Save original WebSocket constructor
-    const OriginalWebSocket = window.WebSocket;
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, apiKey]);
 
-    // Override WebSocket to intercept all messages
+  const setupVoxioListeners = () => {
+    const OriginalWebSocket = originalWebSocketRef.current;
+
+    // Guard clause: If running on server or no WebSocket, do nothing
+    if (typeof window === "undefined" || !OriginalWebSocket) return;
+
     (window as any).WebSocket = function (
       url: string,
       protocols?: string | string[]
     ) {
       const ws = new OriginalWebSocket(url, protocols);
 
-      // Intercept incoming messages
       ws.addEventListener("message", (event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
 
-          // User input with node_type: 'out'
           if (data.user_input && data.node_type === "out") {
             addMessage("user", data.user_input);
           }
 
-          // Bot speak response
           if (data.speak && data.node_type === "out" && !data.user_input) {
             addMessage("bot", data.speak);
           }
         } catch (e) {
-          // Not JSON or parsing failed
+          // ignore
         }
       });
 
       return ws;
     };
 
-    // Copy static properties
     (window as any).WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
     (window as any).WebSocket.OPEN = OriginalWebSocket.OPEN;
     (window as any).WebSocket.CLOSING = OriginalWebSocket.CLOSING;
     (window as any).WebSocket.CLOSED = OriginalWebSocket.CLOSED;
   };
 
-  const addMessage = (sender: "user" | "bot", text: string) => {
+  const addMessage = (sender: "user" | "bot", rawText: any) => {
+    const text =
+      typeof rawText === "object" ? JSON.stringify(rawText) : String(rawText);
+
     const timestamp = new Date().toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
 
     setMessages((prev) => {
-      // Remove any interim messages from this sender
       const filtered = prev.filter(
         (m) => !(m.isInterim && m.sender === sender)
       );
 
-      // Check if this exact message already exists (ignore timestamps)
       const exists = filtered.some(
         (m) => m.sender === sender && m.text.trim() === text.trim()
       );
 
       if (exists) return prev;
 
-      const newMessage = {
+      const newMessage: Message = {
         id: `${sender}-${Date.now()}-${Math.random()}`,
         sender,
         text,
@@ -143,11 +155,9 @@ export default function TestFlowDialog({
         isInterim: false,
       };
 
-      // Add delay for bot messages to sync with voice
       if (sender === "bot") {
         setTimeout(() => {
           setMessages((current) => {
-            // Double-check for duplicates before adding
             const stillExists = current.some(
               (m) =>
                 m.sender === "bot" &&
@@ -169,34 +179,15 @@ export default function TestFlowDialog({
     });
   };
 
-  const updateInterimMessage = (sender: "user" | "bot", text: string) => {
-    const timestamp = new Date().toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    setMessages((prev) => {
-      const filtered = prev.filter(
-        (m) => !(m.isInterim && m.sender === sender)
-      );
-      return [
-        ...filtered,
-        {
-          id: `${sender}-interim-${Date.now()}`,
-          sender,
-          text,
-          timestamp,
-          isInterim: true,
-        },
-      ];
-    });
-  };
-
-  const handleClose = () => {
-    // Clean up Voxio instance
+  const handleInternalClose = () => {
     if (voxioInstanceRef.current && voxioInstanceRef.current.destroy) {
-      voxioInstanceRef.current.destroy();
+      try {
+        voxioInstanceRef.current.destroy();
+      } catch (e) {
+        console.error("Error destroying instance", e);
+      }
     }
+    // Hard refresh on close
     window.location.reload();
   };
 
@@ -204,7 +195,7 @@ export default function TestFlowDialog({
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) handleClose();
+        if (!open) handleInternalClose();
       }}
       modal={false}
     >
@@ -225,7 +216,6 @@ export default function TestFlowDialog({
         </VisuallyHidden>
 
         <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full flex flex-col overflow-hidden h-[600px] border border-slate-200 dark:border-slate-800">
-          {/* HEADER */}
           <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div
@@ -255,14 +245,13 @@ export default function TestFlowDialog({
             </div>
 
             <button
-              onClick={handleClose}
+              onClick={handleInternalClose}
               className="text-white hover:bg-indigo-600 rounded-full p-2 transition"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* CHAT MESSAGES */}
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-slate-950/50 scrollbar-thin scrollbar-thumb-gray-200">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full">

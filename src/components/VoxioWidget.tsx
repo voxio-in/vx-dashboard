@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 // @ts-ignore - Ignoring type check in case the package lacks type definitions
-import { initVoxioAgent } from "@/lib/voxioagent/index.esm";
+import { initVoxioAgent } from "voxioagent";
 
 export default function VoxioWidget() {
   const initialized = useRef(false);

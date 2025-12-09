@@ -12,7 +12,7 @@ const STTFormSchema = z.object({
   language: z.string().min(1, "Language is required"),
   prompt: z.string().optional(),
   temperature: z.number().min(0).max(1).optional(),
-  keywords: z.string().optional(),
+  keyterms: z.string().optional(),
 });
 
 export async function saveSTTConfiguration(flowId: string, rawData: any) {
@@ -31,7 +31,7 @@ export async function saveSTTConfiguration(flowId: string, rawData: any) {
       language: data.language,
       prompt: data.prompt || "",
       temperature: data.temperature || 0,
-      keywords: data.keywords || "",
+      keyterms: data.keyterms || "",
       channels: 1,
       sample_rate: 16000,
       sample_width: 2,

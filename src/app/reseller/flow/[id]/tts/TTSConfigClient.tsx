@@ -53,6 +53,7 @@ const ELEVENLABS_MODELS = [
   "flash",
 ];
 
+/* 
 const DEEPGRAM_MODELS = [
   // Aura-2 English
   { value: "aura-2-thalia-en", label: "Thalia (US Female) - Aura 2" },
@@ -121,6 +122,7 @@ const DEEPGRAM_MODELS = [
   { value: "aura-helios-en", label: "Helios (British Male) - Aura 1" },
   { value: "aura-zeus-en", label: "Zeus (US Male) - Aura 1" },
 ];
+*/
 
 const RIME_MODELS = ["mist", "mistv2", "arcana"];
 const RIME_VOICES: Record<string, Record<string, string[]>> = {
@@ -715,7 +717,7 @@ function StatusModal({
   );
 }
 
-type ProviderType = "elevenlabs" | "rime" | "deepgram";
+type ProviderType = "elevenlabs" | "rime"; // | "deepgram";
 
 export default function TTSConfigClient({
   flow,
@@ -754,7 +756,7 @@ export default function TTSConfigClient({
 
   // --- VALIDATION: Is the current state valid? ---
   const isValid = useMemo(() => {
-    if (provider === "deepgram") return true; // Deepgram doesn't need voiceId
+    // if (provider === "deepgram") return true; // Deepgram logic commented out
     // ElevenLabs and Rime need voiceId
     return voiceId && voiceId.trim().length > 0;
   }, [provider, voiceId]);
@@ -791,13 +793,15 @@ export default function TTSConfigClient({
     if (p === "elevenlabs") {
       setModel(ELEVENLABS_MODELS[0]);
       setVoiceId("");
-    } else if (p === "deepgram") {
-      setModel(DEEPGRAM_MODELS[0].value);
-      setVoiceId("");
     } else if (p === "rime") {
       setModel(RIME_MODELS[0]);
       setVoiceId("");
     }
+    // Deepgram logic commented out
+    // else if (p === "deepgram") {
+    //   setModel(DEEPGRAM_MODELS[0].value);
+    //   setVoiceId("");
+    // }
   };
 
   const handleModelChange = (newModel: string) => {
@@ -943,7 +947,8 @@ export default function TTSConfigClient({
                       <SelectContent>
                         <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
                         <SelectItem value="rime">Rime</SelectItem>
-                        <SelectItem value="deepgram">Deepgram</SelectItem>
+                        {/* Deepgram option commented out */}
+                        {/* <SelectItem value="deepgram">Deepgram</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -976,64 +981,65 @@ export default function TTSConfigClient({
                             </SelectItem>
                           ))}
 
-                        {provider === "deepgram" &&
+                        {/* Deepgram models commented out */}
+                        {/* {provider === "deepgram" &&
                           DEEPGRAM_MODELS.map((m) => (
                             <SelectItem key={m.value} value={m.value}>
                               {m.label}
                             </SelectItem>
-                          ))}
+                          ))} */}
                       </SelectContent>
                     </Select>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 ml-1">
-                    {provider === "deepgram" &&
-                      "For Deepgram, the Model selection determines the Voice."}
+                    {/* Deepgram note commented out */}
+                    {/* {provider === "deepgram" &&
+                      "For Deepgram, the Model selection determines the Voice."} */}
                   </p>
                 </div>
 
-                {/* 3. VOICE ID (Conditional) */}
-                {provider !== "deepgram" && (
-                  <div className="space-y-2">
-                    <LabelWithInfo
-                      label="Voice"
-                      info={
-                        provider === "elevenlabs"
-                          ? "Enter your ElevenLabs Voice ID string."
-                          : "Select a specific voice for the chosen Rime model."
-                      }
-                    />
+                {/* 3. VOICE ID (Always Visible for ElevenLabs & Rime) */}
+                {/* Deepgram conditional check removed since it is commented out */}
+                <div className="space-y-2">
+                  <LabelWithInfo
+                    label="Voice"
+                    info={
+                      provider === "elevenlabs"
+                        ? "Enter your ElevenLabs Voice ID string."
+                        : "Select a specific voice for the chosen Rime model."
+                    }
+                  />
 
-                    {provider === "elevenlabs" && (
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={voiceId}
-                          onChange={(e) => setVoiceId(e.target.value)}
-                          placeholder="e.g. 21m00Tcm4TlvDq8ikWAM"
-                          className="w-full px-4 h-12 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
-                        />
-                      </div>
-                    )}
+                  {provider === "elevenlabs" && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={voiceId}
+                        onChange={(e) => setVoiceId(e.target.value)}
+                        placeholder="e.g. 21m00Tcm4TlvDq8ikWAM"
+                        className="w-full px-4 h-12 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
+                      />
+                    </div>
+                  )}
 
-                    {provider === "rime" && (
-                      <div className="relative">
-                        <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-                        <Select value={voiceId} onValueChange={setVoiceId}>
-                          <SelectTrigger className="w-full h-12 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
-                            <SelectValue placeholder="Select a Rime voice" />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[300px]">
-                            {availableRimeVoices.map((v) => (
-                              <SelectItem key={v.key} value={v.value}>
-                                {v.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  {provider === "rime" && (
+                    <div className="relative">
+                      <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+                      <Select value={voiceId} onValueChange={setVoiceId}>
+                        <SelectTrigger className="w-full h-12 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
+                          <SelectValue placeholder="Select a Rime voice" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px]">
+                          {availableRimeVoices.map((v) => (
+                            <SelectItem key={v.key} value={v.value}>
+                              {v.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -181,7 +181,7 @@ export default function STTConfigClient({
   const [temperature, setTemperature] = useState(
     initialConfig?.temperature || 0
   );
-  const [keywords, setKeywords] = useState(initialConfig?.keywords || "");
+  const [keyterms, setkeyterms] = useState(initialConfig?.keyterms || "");
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -199,7 +199,7 @@ export default function STTConfigClient({
     language !== (initialConfig?.language || "en") ||
     prompt !== (initialConfig?.prompt || "") ||
     temperature !== (initialConfig?.temperature || 0) ||
-    keywords !== (initialConfig?.keywords || "");
+    keyterms !== (initialConfig?.keyterms || "");
 
   useUnsavedChanges(isDirty);
 
@@ -222,7 +222,7 @@ export default function STTConfigClient({
       language,
       prompt,
       temperature,
-      keywords,
+      keyterms,
     };
     try {
       const result = await saveSTTConfiguration(flow._id, formData);
@@ -430,13 +430,13 @@ export default function STTConfigClient({
               {provider === "deepgram" && (
                 <div className="space-y-2">
                   <LabelWithInfo
-                    label="Keywords"
-                    info="Give preference to specific keywords while transcribing, this feature is usefull in industry specific cases, where you mean to say something else but model understands something else, for example ('knights' , 'nights')"
+                    label="Keyterms"
+                    info="Give preference to specific keyterms while transcribing, this feature is usefull in industry specific cases, where you mean to say something else but model understands something else, for example ('knights' , 'nights')"
                   />
                   <input
                     type="text"
-                    value={keywords}
-                    onChange={(e) => setKeywords(e.target.value)}
+                    value={keyterms}
+                    onChange={(e) => setkeyterms(e.target.value)}
                     className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg outline-none dark:text-slate-100"
                   />
                 </div>

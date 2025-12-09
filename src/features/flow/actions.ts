@@ -10,19 +10,16 @@ import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { randomBytes } from "crypto";
 
-// --- Helper: Generate Secure API Key ---
 function generateApiKey(): string {
   const prefix = "vk_";
   const length = 64;
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  // Use crypto for secure random values
   const bytes = randomBytes(length);
   let result = "";
 
   for (let i = 0; i < length; i++) {
-    // Map random byte to our character set
     result += chars[bytes[i] % chars.length];
   }
 
@@ -43,8 +40,6 @@ export async function createFlow(flowName: string) {
       return { success: false, message: "User not found" };
     }
 
-    // 🔍 Changed: Check for duplicate names within the User's specific flows
-    // (Since we are generating a unique API key, we can't search by api_key anymore)
     const existingFlow = await Flow.findOne({
       _id: { $in: dbUser.flows },
       name: flowName.trim(),
@@ -57,27 +52,24 @@ export async function createFlow(flowName: string) {
       };
     }
 
-    // 1. Create Default STT
     const newSTT = await STT.create({
       service: "deepgram",
       "model-name": "nova-2",
       language: "multi",
       prompt: "",
       temperature: 0,
-      keywords: "",
+      keyterms: "",
       channels: 1,
       sample_rate: 16000,
       sample_width: 2,
     });
 
-    // 2. Create Default TTS
     const newTTS = await TTS.create({
-      service: "deepgram",
-      "model-name": "aura-2-thalia-en",
-      voice_id: "",
+      service: "rime",
+      "model-name": "mist",
+      voice_id: "allison",
     });
 
-    // 3. Create Default Agent (Exact JSON Structure)
     const newAgent = await Agent.create({
       workflow: {
         variables: {
@@ -89,7 +81,6 @@ export async function createFlow(flowName: string) {
         },
         start_node: "greeting",
         nodes: [
-          // Index 0: Greeting
           {
             name: "greeting",
             type: "out",
@@ -100,14 +91,12 @@ export async function createFlow(flowName: string) {
             },
             next: "ask_for_input",
           },
-          // Index 1: Interrupt
           {
             name: "ask_for_input",
             type: "interrupt",
             parameters: {},
             next: "transcription",
           },
-          // Index 2: Transcription
           {
             name: "transcription",
             type: "out",
@@ -116,7 +105,6 @@ export async function createFlow(flowName: string) {
             },
             next: "llm",
           },
-          // Index 3: LLM
           {
             name: "llm",
             type: "llm",
@@ -142,7 +130,6 @@ export async function createFlow(flowName: string) {
             },
             next: "response",
           },
-          // Index 4: Response
           {
             name: "response",
             type: "out",
@@ -155,12 +142,11 @@ export async function createFlow(flowName: string) {
       },
     });
 
-    // 4. Create Flow with NEW Unique API Key
     const uniqueApiKey = generateApiKey();
 
     const newFlow = await Flow.create({
       name: flowName.trim(),
-      api_key: uniqueApiKey, // 🔑 Using the generated key
+      api_key: uniqueApiKey,
       stt_id: newSTT._id,
       tts_id: newTTS._id,
       agent_id: newAgent._id,
@@ -191,7 +177,6 @@ export async function createFlow(flowName: string) {
   }
 }
 
-// Keep deleteFlow as is
 export async function deleteFlow(flowId: string) {
   try {
     const user = await getCurrentUser();

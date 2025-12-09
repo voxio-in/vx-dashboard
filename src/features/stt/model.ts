@@ -6,7 +6,7 @@ export interface ISTT {
   language: string;
   prompt?: string;
   temperature?: number;
-  keywords?: string;
+  keyterms?: string;
   channels: number;
   sample_rate: number;
   sample_width: number;
@@ -34,7 +34,7 @@ const STTSchema = new Schema<STTDocument>(
     },
     prompt: { type: String, default: "" },
     temperature: { type: Number, default: 0 },
-    keywords: { type: String, default: "" },
+    keyterms: { type: String, default: "" },
     // Technical defaults
     channels: { type: Number, default: 1 },
     sample_rate: { type: Number, default: 16000 },
