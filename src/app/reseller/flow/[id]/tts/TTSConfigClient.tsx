@@ -1055,7 +1055,6 @@ export default function TTSConfigClient({
 
               <Button
                 onClick={handleSave}
-                // 🚨 Disable if saving OR no changes OR invalid state
                 disabled={isSaving || !isDirty || !isValid}
                 className={`w-full h-12 font-semibold text-base transition-all ${
                   !isDirty || !isValid

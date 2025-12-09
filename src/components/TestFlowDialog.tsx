@@ -10,9 +10,6 @@ import {
 import { X, Loader2, Mic } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-// 1. REMOVED the top-level import to prevent Server-Side crash
-// import { initVoxioAgent } from "voxioagent";
-
 interface TestFlowDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,7 +55,6 @@ export default function TestFlowDialog({
 
       setupVoxioListeners();
 
-      // 2. DYNAMIC IMPORT: Load the library only on the client side
       import("voxioagent")
         .then((module) => {
           const initVoxioAgent = module.initVoxioAgent;
@@ -93,7 +89,6 @@ export default function TestFlowDialog({
   const setupVoxioListeners = () => {
     const OriginalWebSocket = originalWebSocketRef.current;
 
-    // Guard clause: If running on server or no WebSocket, do nothing
     if (typeof window === "undefined" || !OriginalWebSocket) return;
 
     (window as any).WebSocket = function (

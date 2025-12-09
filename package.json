@@ -22,13 +22,12 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
     "mongoose": "^9.0.0",
-    "next": "^16.0.8",
+    "next": "16.0.6",
     "react": "19.2.0",
     "react-data-table-component": "^7.7.0",
     "react-dom": "19.2.0",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.4.0",
-    "voxioagent": "file:../voicebot/voice-bot-sdk",
     "zod": "^4.1.13"
   },
   "devDependencies": {

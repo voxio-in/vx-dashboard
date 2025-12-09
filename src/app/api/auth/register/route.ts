@@ -7,7 +7,6 @@ import STT from "@/features/stt/model";
 import TTS from "@/features/tts/model";
 import Agent from "@/features/agent/model";
 
-// --- Helper: Generate Secure API Key ---
 function generateApiKey(): string {
   const prefix = "vk_";
   const length = 64;
@@ -28,13 +27,11 @@ export async function POST(req: Request) {
   console.log("🔵 [Register API] Request received");
 
   try {
-    // 1. Parse Input
     const body = await req.json();
     const { username, email, password, name, role } = body;
 
     console.log(`🔵 [Register API] Processing registration for: ${email}`);
 
-    // 2. Validate
     if (!email || !password) {
       console.log(
         "🔴 [Register API] Validation failed: Missing email or password"
@@ -45,12 +42,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Connect to DB
     console.log("🔵 [Register API] Connecting to database...");
     await connectDB();
     console.log("✅ [Register API] Database connected");
 
-    // 4. Check Duplicate
     console.log("🔵 [Register API] Checking for existing user...");
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -61,18 +56,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Password Hashing - REMOVED
-    // We are passing the plain password to User.create.
-    // Your User Model's pre('save') hook will handle the hashing.
-    // This prevents "Double Hashing" which causes login failures.
     console.log(
       "🔵 [Register API] Proceeding with plain password (model will hash it)..."
     );
 
-    // --- CREATE DEFAULT COMPONENTS ---
     console.log("🔵 [Register API] Creating default components...");
 
-    // A. Create Default STT
     console.log("🔵 [Register API] Creating STT...");
     const newSTT = await STT.create({
       service: "deepgram",
@@ -87,7 +76,6 @@ export async function POST(req: Request) {
     });
     console.log(`✅ [Register API] STT Created: ${newSTT._id}`);
 
-    // B. Create Default TTS
     console.log("🔵 [Register API] Creating TTS...");
     const newTTS = await TTS.create({
       service: "rime",
@@ -96,7 +84,6 @@ export async function POST(req: Request) {
     });
     console.log(`✅ [Register API] TTS Created: ${newTTS._id}`);
 
-    // C. Create Default Agent
     console.log("🔵 [Register API] Creating Agent...");
     const newAgent = await Agent.create({
       workflow: {
@@ -158,7 +145,6 @@ export async function POST(req: Request) {
     });
     console.log(`✅ [Register API] Agent Created: ${newAgent._id}`);
 
-    // D. Create Flow (With Auto-Generated API Key)
     console.log("🔵 [Register API] Generating API key...");
     const generatedApiKey = generateApiKey();
 
@@ -173,21 +159,19 @@ export async function POST(req: Request) {
     });
     console.log(`✅ [Register API] Flow Created: ${newFlow._id}`);
 
-    // 6. Create User
     console.log("🔵 [Register API] Creating user...");
 
     const newUser = await User.create({
       username: username || name || email.split("@")[0],
       name: name || username || email.split("@")[0],
       email,
-      password: password, // Sending PLAIN password, Model will hash it
+      password: password,
       role: role || "user",
       flows: [newFlow._id],
     });
 
     console.log(`✅ [Register API] User Created: ${newUser._id}`);
 
-    // Return success response
     return NextResponse.json(
       {
         message: "User registered successfully",
