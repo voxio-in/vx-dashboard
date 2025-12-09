@@ -54,7 +54,7 @@ export async function createFlow(flowName: string) {
 
     const newSTT = await STT.create({
       service: "deepgram",
-      "model-name": "nova-2",
+      "model-name": "nova-3",
       language: "multi",
       prompt: "",
       temperature: 0,

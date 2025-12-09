@@ -121,7 +121,7 @@ const STT_CONFIG = {
     ],
     deepgram: [
       { value: "nova-3", label: "Nova 3" },
-      { value: "nova-2", label: "Nova 2" },
+      // { value: "nova-2", label: "Nova 2" },
     ],
   },
   languages: {
