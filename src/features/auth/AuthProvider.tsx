@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Define the User shape for the frontend
 interface AuthUser {
   id: string;
   email: string;
@@ -26,7 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // On mount, check if user is logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -66,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Custom hook for easy usage
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

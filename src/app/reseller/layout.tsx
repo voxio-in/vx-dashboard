@@ -1,5 +1,5 @@
 import Sidebar from "@/components/layout/Sidebar";
-import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext"; // Import
+import { UnsavedChangesProvider } from "@/context/UnsavedChangesContext";
 
 export default function ResellerLayout({
   children,
@@ -7,7 +7,6 @@ export default function ResellerLayout({
   children: React.ReactNode;
 }) {
   return (
-    // 1. Wrap everything here
     <UnsavedChangesProvider>
       <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-100 dark:selection:bg-indigo-900">
         <Sidebar />

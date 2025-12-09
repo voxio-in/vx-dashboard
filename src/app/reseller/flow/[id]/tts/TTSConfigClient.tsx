@@ -15,6 +15,7 @@ import {
   XCircle,
   Globe,
   Layers,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ import { IFlow } from "@/types";
 import { saveTTSConfiguration } from "@/features/tts/actions";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import TestFlowDialog from "@/components/TestFlowDialog";
 
 // --- DATA CONSTANTS ---
 
@@ -734,6 +736,8 @@ export default function TTSConfigClient({
   const [voiceId, setVoiceId] = useState<string>(initialConfig?.voiceId || "");
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     status: "success" | "error" | null;
@@ -852,6 +856,15 @@ export default function TTSConfigClient({
         message={modalState.message}
       />
 
+      {/* Test Flow Dialog Integration */}
+      <TestFlowDialog
+        isOpen={isTestDialogOpen}
+        onClose={() => setIsTestDialogOpen(false)}
+        flowId={flow._id}
+        apiKey={flow.api_key}
+        flowName={flow.name}
+      />
+
       {/* HEADER */}
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
@@ -885,6 +898,16 @@ export default function TTSConfigClient({
             </span>
           </div>
         </div>
+
+        {/* Test Flow Button */}
+        <Button
+          onClick={() => setIsTestDialogOpen(true)}
+          size="sm"
+          className="h-9 gap-2 bg-slate-900 text-white hover:bg-indigo-600 shadow-sm transition-colors font-medium"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Test Flow
+        </Button>
       </header>
 
       {/* MAIN CONTENT */}

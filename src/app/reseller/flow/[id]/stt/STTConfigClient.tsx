@@ -11,6 +11,7 @@ import {
   Info,
   CheckCircle2,
   XCircle,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,7 @@ import { IFlow } from "@/types";
 import { saveSTTConfiguration } from "@/features/stt/actions";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import TestFlowDialog from "@/components/TestFlowDialog";
 
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
@@ -182,6 +184,8 @@ export default function STTConfigClient({
   const [keywords, setKeywords] = useState(initialConfig?.keywords || "");
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     status: any;
@@ -263,6 +267,15 @@ export default function STTConfigClient({
         message={modalState.message}
       />
 
+      {/* Test Flow Dialog Integration */}
+      <TestFlowDialog
+        isOpen={isTestDialogOpen}
+        onClose={() => setIsTestDialogOpen(false)}
+        flowId={flow._id}
+        apiKey={flow.api_key}
+        flowName={flow.name}
+      />
+
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
           <Button
@@ -295,6 +308,16 @@ export default function STTConfigClient({
             </span>
           </div>
         </div>
+
+        {/* Test Flow Button */}
+        <Button
+          onClick={() => setIsTestDialogOpen(true)}
+          size="sm"
+          className="h-9 gap-2 bg-slate-900 text-white hover:bg-indigo-600 shadow-sm transition-colors font-medium"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Test Flow
+        </Button>
       </header>
 
       <main className="flex-1 overflow-y-auto">

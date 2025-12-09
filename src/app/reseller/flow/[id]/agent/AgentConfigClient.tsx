@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Box,
   Cpu,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ import { IFlow } from "@/types";
 import { saveAgentConfiguration } from "@/features/agent/actions";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import TestFlowDialog from "@/components/TestFlowDialog";
 
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
@@ -122,6 +124,9 @@ const AGENT_CONFIG = {
   },
 };
 
+// 1. Define the default prompt string exactly as it appears in DB/Placeholder
+const DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
+
 export default function AgentConfigClient({
   flow,
   initialConfig,
@@ -130,12 +135,20 @@ export default function AgentConfigClient({
   initialConfig?: any;
 }) {
   const router = useRouter();
-
   const { proceedWithAction } = useUnsavedChangesContext();
 
+  // 2. Normalization Helper:
+  // If the DB value matches the default string, return empty string so the placeholder shows.
+  const getNormalizedPrompt = (prompt: string | undefined) => {
+    if (prompt === DEFAULT_SYSTEM_PROMPT) return "";
+    return prompt || "";
+  };
+
+  // 3. Initialize State using the helper
   const [systemPrompt, setSystemPrompt] = useState(
-    initialConfig?.systemPrompt || ""
+    getNormalizedPrompt(initialConfig?.systemPrompt)
   );
+
   const [provider, setProvider] = useState<string>(
     initialConfig?.provider || "groq"
   );
@@ -144,6 +157,7 @@ export default function AgentConfigClient({
   );
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -152,8 +166,14 @@ export default function AgentConfigClient({
     message: string;
   }>({ isOpen: false, status: null, title: "", message: "" });
 
+  // 4. Calculate Normalized Initial State for comparison
+  const initialNormalizedPrompt = getNormalizedPrompt(
+    initialConfig?.systemPrompt
+  );
+
+  // 5. Update isDirty logic to compare against normalized initial state
   const isDirty =
-    systemPrompt !== (initialConfig?.systemPrompt || "") ||
+    systemPrompt !== initialNormalizedPrompt ||
     provider !== (initialConfig?.provider || "groq") ||
     model !== (initialConfig?.model || "llama-3.1-8b-instant");
 
@@ -219,6 +239,15 @@ export default function AgentConfigClient({
         message={modalState.message}
       />
 
+      {/* Test Flow Dialog Integration */}
+      <TestFlowDialog
+        isOpen={isTestDialogOpen}
+        onClose={() => setIsTestDialogOpen(false)}
+        flowId={flow._id}
+        apiKey={flow.api_key}
+        flowName={flow.name}
+      />
+
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between z-10 sticky top-0">
         <div className="flex items-center gap-3">
           <Button
@@ -251,6 +280,16 @@ export default function AgentConfigClient({
             </span>
           </div>
         </div>
+
+        {/* Test Flow Button */}
+        <Button
+          onClick={() => setIsTestDialogOpen(true)}
+          size="sm"
+          className="h-9 gap-2 bg-slate-900 text-white hover:bg-indigo-600 shadow-sm transition-colors font-medium"
+        >
+          <Play className="h-3.5 w-3.5" />
+          Test Flow
+        </Button>
       </header>
 
       <main className="flex-1 overflow-y-auto">
@@ -277,7 +316,8 @@ export default function AgentConfigClient({
                     value={systemPrompt}
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     rows={6}
-                    placeholder="You are a helpful assistant..."
+                    // Updated Placeholder matches the DEFAULT_SYSTEM_PROMPT
+                    placeholder="You are a helpful assistant."
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none dark:text-slate-100"
                   />
                 </div>

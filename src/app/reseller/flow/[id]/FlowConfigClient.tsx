@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ArrowLeft,
   Play,
@@ -12,14 +13,25 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IFlow } from "@/types";
+import TestFlowDialog from "@/components/TestFlowDialog";
 
 export default function FlowConfigClient({ flow }: { flow: IFlow }) {
   const router = useRouter();
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
 
   if (!flow) return null;
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
+      {/* Test Flow Dialog Integration */}
+      <TestFlowDialog
+        isOpen={isTestDialogOpen}
+        onClose={() => setIsTestDialogOpen(false)}
+        flowId={flow._id}
+        apiKey={flow.api_key}
+        flowName={flow.name}
+      />
+
       {/* HEADER */}
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
@@ -45,7 +57,10 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
             </span>
           </div>
         </div>
-        <Button className="gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-sm">
+        <Button
+          onClick={() => setIsTestDialogOpen(true)}
+          className="gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-sm"
+        >
           <Play className="h-4 w-4" />
           Test Flow
         </Button>
@@ -74,7 +89,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
               <Mic className="h-7 w-7" />
             </div>
             <div className="flex-1">
-              {/* REMOVED CONFIGURED/NOT CONFIGURED BADGES */}
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                   STT (Speech To Text)
@@ -96,7 +110,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
               <Bot className="h-7 w-7" />
             </div>
             <div className="flex-1">
-              {/* REMOVED CONFIGURED/NOT CONFIGURED BADGES */}
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                   Agent
@@ -118,7 +131,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
               <AudioLines className="h-7 w-7" />
             </div>
             <div className="flex-1">
-              {/* REMOVED CONFIGURED/NOT CONFIGURED BADGES */}
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                   TTS (Text To Speech)

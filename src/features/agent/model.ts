@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IAgent {
   workflow: {
-    nodes: any[]; // We use any[] because the structure is complex/mixed
+    nodes: any[];
     variables?: any;
     start_node?: string;
   };
@@ -23,7 +23,7 @@ const AgentSchema = new Schema<AgentDocument>(
   },
   {
     timestamps: true,
-    collection: "agents", // 🚨 Matches your specific collection name
+    collection: "agents",
   }
 );
 

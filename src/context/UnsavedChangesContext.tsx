@@ -6,9 +6,7 @@ import { UnsavedChangesModal } from "@/components/modals/UnsavedChangesModal";
 interface UnsavedChangesContextType {
   isDirty: boolean;
   setIsDirty: (value: boolean) => void;
-  /**
-   * Checks if dirty. If yes, shows modal. If no, runs the action immediately.
-   */
+
   proceedWithAction: (action: () => void) => void;
 }
 
@@ -39,7 +37,7 @@ export function UnsavedChangesProvider({
 
   const handleContinue = () => {
     setShowModal(false);
-    setIsDirty(false); // Reset dirty state
+    setIsDirty(false); 
     if (pendingAction) {
       pendingAction();
       setPendingAction(null);
@@ -56,7 +54,6 @@ export function UnsavedChangesProvider({
       value={{ isDirty, setIsDirty, proceedWithAction }}
     >
       {children}
-      {/* The Modal is now Global - it covers the Sidebar too */}
       <UnsavedChangesModal
         isOpen={showModal}
         onContinue={handleContinue}
