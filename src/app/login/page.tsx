@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,63 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const searchParams = useSearchParams();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isTokenLogin, setIsTokenLogin] = useState(false);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+
+  const handleTokenLogin = async (token: string) => {
+    setIsTokenLogin(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/token-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Token login failed");
+      }
+      if (data.success && data.user) {
+        login(data.user);
+        // Clean up URL
+        window.history.replaceState({}, "", "/login");
+        // Redirect based on role
+        switch (data.user.role) {
+          case "admin":
+            router.push("/admin/dashboard");
+            break;
+          case "reseller":
+            router.push("/reseller/panel");
+            break;
+          case "user":
+          default:
+            router.push("/dashboard");
+            break;
+        }
+      }
+    } catch (err: any) {
+      console.error("Token login error:", err);
+      setError(err.message || "Automatic login failed");
+      setIsTokenLogin(false);
+      router.replace("/login");
+    }
+  };
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (token) {
+      handleTokenLogin(token);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +114,25 @@ export default function LoginPage() {
     }
   };
 
+  // Show loading state during token login
+  if (isTokenLogin) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+          <div className="space-y-2">
+            <p className="text-lg font-medium">
+              Authenticating your account...
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Please wait while we log you in
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen w-full">
       <div className="hidden lg:flex lg:w-1/2 bg-slate-50 dark:bg-slate-900 items-center justify-center p-12 border-r border-slate-200 dark:border-slate-800">
@@ -100,7 +168,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
+            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -109,7 +177,7 @@ export default function LoginPage() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-4 w-4"
+                className="h-4 w-4 flex-shrink-0"
               >
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" x2="12" y1="8" y2="12" />
@@ -188,7 +256,7 @@ export default function LoginPage() {
               >
                 Forgot password?
               </a>
-            </div> */}{" "}
+            </div> */}
             <Button
               type="submit"
               className="w-full h-11 text-base"

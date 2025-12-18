@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/me",
+  "/api/auth/token-login",
 ];
 
 export async function proxy(request: NextRequest) {
