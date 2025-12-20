@@ -41,6 +41,7 @@ export default function TestFlowDialog({
   const [isInitializing, setIsInitializing] = useState(false);
   const [isListening, setIsListening] = useState(false);
 
+  // Auto-scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -49,16 +50,20 @@ export default function TestFlowDialog({
     let isMounted = true;
 
     if (isOpen) {
-      originalWebSocketRef.current = window.WebSocket;
+      // 1. Store the original WebSocket immediately
+      if (!originalWebSocketRef.current) {
+        originalWebSocketRef.current = window.WebSocket;
+      }
+
       setMessages([]);
       setIsInitializing(true);
 
+      // 2. Setup the listener BEFORE initializing the agent
       setupVoxioListeners();
 
       import("voxioagent")
         .then((module) => {
           const initVoxioAgent = module.initVoxioAgent;
-
           return initVoxioAgent({
             apiKey: apiKey,
             position: {
@@ -83,14 +88,16 @@ export default function TestFlowDialog({
 
     return () => {
       isMounted = false;
+      // Optional: Restore WebSocket on cleanup if desired,
+      // but usually safe to leave patched or handle via reload.
     };
   }, [isOpen, apiKey]);
 
   const setupVoxioListeners = () => {
     const OriginalWebSocket = originalWebSocketRef.current;
-
     if (typeof window === "undefined" || !OriginalWebSocket) return;
 
+    // Monkey-patch WebSocket to intercept messages
     (window as any).WebSocket = function (
       url: string,
       protocols?: string | string[]
@@ -99,23 +106,43 @@ export default function TestFlowDialog({
 
       ws.addEventListener("message", (event: MessageEvent) => {
         try {
-          const data = JSON.parse(event.data);
+          const rawData = event.data;
+          // Ensure we are parsing a JSON string
+          if (
+            typeof rawData === "string" &&
+            (rawData.startsWith("{") || rawData.startsWith("["))
+          ) {
+            const data = JSON.parse(rawData);
 
-          if (data.user_input && data.node_type === "out") {
-            addMessage("user", data.user_input);
-          }
+            // LOGGING: See exactly what hits the listener
+            console.log("[TestFlowDialog] WS Data Intercepted:", data);
 
-          if (data.speak && data.node_type === "out" && !data.user_input) {
-            addMessage("bot", data.speak);
+            // CHANGED: Removed 'node_type === "out"' check.
+            // Now checks strictly for existence of keys.
+            if (data.user_input) {
+              console.log("-> Processing User Input:", data.user_input);
+              addMessage("user", data.user_input);
+            }
+
+            // Check for 'speak'
+            if (data.speak) {
+              // Sometimes 'speak' might come with user_input as an echo, prevent double logging if needed.
+              // But usually bot speaks separately.
+              if (!data.user_input) {
+                console.log("-> Processing Bot Speak:", data.speak);
+                addMessage("bot", data.speak);
+              }
+            }
           }
         } catch (e) {
-          // ignore
+          // Silent catch for non-JSON messages
         }
       });
 
       return ws;
     };
 
+    // Restore static properties to ensure library doesn't crash on checks
     (window as any).WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
     (window as any).WebSocket.OPEN = OriginalWebSocket.OPEN;
     (window as any).WebSocket.CLOSING = OriginalWebSocket.CLOSING;
@@ -125,6 +152,8 @@ export default function TestFlowDialog({
   const addMessage = (sender: "user" | "bot", rawText: any) => {
     const text =
       typeof rawText === "object" ? JSON.stringify(rawText) : String(rawText);
+
+    if (!text || text.trim() === "") return;
 
     const timestamp = new Date().toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -136,11 +165,10 @@ export default function TestFlowDialog({
         (m) => !(m.isInterim && m.sender === sender)
       );
 
-      const exists = filtered.some(
-        (m) => m.sender === sender && m.text.trim() === text.trim()
-      );
-
-      if (exists) return prev;
+      const lastMsg = filtered[filtered.length - 1];
+      if (lastMsg && lastMsg.sender === sender && lastMsg.text === text) {
+        return prev;
+      }
 
       const newMessage: Message = {
         id: `${sender}-${Date.now()}-${Math.random()}`,
@@ -149,26 +177,6 @@ export default function TestFlowDialog({
         timestamp,
         isInterim: false,
       };
-
-      if (sender === "bot") {
-        setTimeout(() => {
-          setMessages((current) => {
-            const stillExists = current.some(
-              (m) =>
-                m.sender === "bot" &&
-                m.text.trim() === text.trim() &&
-                !m.isInterim
-            );
-            if (stillExists) return current;
-
-            return [
-              ...current.filter((m) => !(m.isInterim && m.sender === "bot")),
-              newMessage,
-            ];
-          });
-        }, 1500);
-        return prev;
-      }
 
       return [...filtered, newMessage];
     });
@@ -182,7 +190,6 @@ export default function TestFlowDialog({
         console.error("Error destroying instance", e);
       }
     }
-    // Hard refresh on close
     window.location.reload();
   };
 
@@ -229,10 +236,6 @@ export default function TestFlowDialog({
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Connecting Voice...
                   </div>
-                ) : isListening ? (
-                  <p className="text-xs text-red-200 animate-pulse">
-                    Listening...
-                  </p>
                 ) : (
                   <p className="text-xs text-indigo-200">Voice Agent Active</p>
                 )}
@@ -283,12 +286,6 @@ export default function TestFlowDialog({
                       }`}
                     >
                       <p className="text-sm leading-relaxed">{msg.text}</p>
-                      {msg.isInterim && (
-                        <span className="text-xs opacity-70 italic">
-                          {" "}
-                          (speaking...)
-                        </span>
-                      )}
                     </div>
                     <span
                       className={`text-[10px] text-gray-400 mt-1 block ${

@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IAgent {
   workflow: {
-    nodes: any[];
+    nodes: any;
     variables?: any;
     start_node?: string;
   };
@@ -16,7 +16,7 @@ export interface AgentDocument extends IAgent, Document {
 const AgentSchema = new Schema<AgentDocument>(
   {
     workflow: {
-      nodes: { type: [Schema.Types.Mixed], default: [] },
+      nodes: { type: Schema.Types.Mixed, default: {} },
       variables: { type: Schema.Types.Mixed, default: {} },
       start_node: { type: String, default: "greeting" },
     },

@@ -5,40 +5,35 @@ import Agent from "@/features/agent/model";
 import Flow from "@/features/flow/model";
 import { revalidatePath } from "next/cache";
 
-// Helper: The default structure in case we ever need to recreate a missing agent
 const getDefaultAgentStructure = () => ({
   workflow: {
     variables: {
       user_input: { type: "str" },
       llm_response: { type: "str" },
-      conversation_history: { type: "list" },
+      conversation_history: { type: "list", default: [] },
       speak: { type: "str" },
       node_type: { type: "str" },
     },
     start_node: "greeting",
-    nodes: [
-      {
-        name: "greeting",
+    nodes: {
+      greeting: {
         type: "out",
         parameters: {
           out_dict: { speak: "Hello! How can I assist you today?" },
         },
         next: "ask_for_input",
       },
-      {
-        name: "ask_for_input",
-        type: "interrupt",
-        parameters: {},
+      ask_for_input: {
+        type: "input",
+        parameters: { input_variables: { user_input: "str" } },
         next: "transcription",
       },
-      {
-        name: "transcription",
+      transcription: {
         type: "out",
         parameters: { variables: ["user_input"] },
         next: "llm",
       },
-      {
-        name: "llm",
+      llm: {
         type: "llm",
         parameters: {
           input_variables: {
@@ -48,9 +43,9 @@ const getDefaultAgentStructure = () => ({
             },
           },
           prompt_template: "base_llm",
-          system_prompt: "You are a helpful assistant.",
+          system_prompt: "You are a guddu agent",
           service: "groq",
-          model: "llama-3.1-8b-instant",
+          model: "llama-3.3-70b-versatile",
           history_key: "conversation_history",
           llm_return_type: {
             speak: {
@@ -62,79 +57,72 @@ const getDefaultAgentStructure = () => ({
         },
         next: "response",
       },
-      {
-        name: "response",
+      response: {
         type: "out",
         parameters: { variables: ["speak"] },
         next: "ask_for_input",
       },
-    ],
+    },
   },
 });
 
 export async function saveAgentConfiguration(flowId: string, rawData: any) {
+  console.log("🟢 [Server] Received save request:", { flowId, rawData });
+
   try {
     await connectDB();
-    console.log(`[Agent Action] Processing Flow ID: ${flowId}`);
-
     const flow = await Flow.findById(flowId);
     if (!flow) return { success: false, message: "Flow not found" };
 
     let agent;
+    if (flow.agent_id) agent = await Agent.findById(flow.agent_id);
 
-    if (flow.agent_id) {
-      agent = await Agent.findById(flow.agent_id);
-    }
-
-    // Fallback: Create agent if missing
     if (!agent) {
-      console.log(`[Agent Action] Agent not found. Creating new structure...`);
       agent = await Agent.create(getDefaultAgentStructure());
       flow.agent_id = agent._id;
       await flow.save();
     }
 
-    // Safety: Ensure workflow.nodes exists
-    if (!agent.workflow || !agent.workflow.nodes) {
-      console.warn("[Agent Action] Workflow nodes missing. Resetting.");
-      agent.workflow = getDefaultAgentStructure().workflow;
+    let rawNodes = agent.get("workflow.nodes") || agent.workflow.nodes;
+
+    let nodes = JSON.parse(JSON.stringify(rawNodes));
+
+    console.log("🟢 [Server] Node Keys found:", Object.keys(nodes || {}));
+
+    const llmNode = nodes?.llm;
+
+    if (llmNode && llmNode.type === "llm") {
+      if (!llmNode.parameters) llmNode.parameters = {};
+
+      console.log("🟢 [Server] Updating LLM Node...");
+
+      llmNode.parameters.system_prompt = rawData.systemPrompt;
+      llmNode.parameters.service = rawData.provider;
+      llmNode.parameters.model = rawData.model;
+
+      nodes.llm = llmNode;
+
+      agent.workflow.nodes = nodes;
+
+      agent.markModified("workflow.nodes");
+
+      await agent.save();
+
+      console.log("🟢 [Server] Agent saved successfully");
+    } else {
+      console.log("🔴 [Server] LLM node not found. Structure:", nodes);
+      return {
+        success: false,
+        message: "LLM node not found in agent configuration",
+      };
     }
-
-    // ---------------------------------------------------------
-    // 🎯 TARGETING NODE 3 (The LLM Node)
-    // ---------------------------------------------------------
-    const targetNode = agent.workflow.nodes[3];
-
-    // Safety: Ensure we are actually looking at an LLM node
-    if (!targetNode || targetNode.type !== "llm") {
-      console.warn(
-        "[Agent Action] Node 3 is not an LLM node. Check DB structure."
-      );
-      // You might want to return an error here, or let it slide if you are experimenting
-    }
-
-    if (!targetNode.parameters) targetNode.parameters = {};
-
-    // ✅ UPDATING ONLY SPECIFIC FIELDS
-    // This keeps 'input_variables', 'llm_return_type', etc. intact.
-    targetNode.parameters.system_prompt = rawData.systemPrompt;
-    targetNode.parameters.service = rawData.provider;
-    targetNode.parameters.model = rawData.model;
-
-    // ---------------------------------------------------------
-
-    // Mongoose requires this because 'nodes' is a Mixed type array
-    agent.markModified("workflow.nodes");
-
-    await agent.save();
-    console.log(`[Agent Action] Saved: ${rawData.model} / ${rawData.provider}`);
 
     revalidatePath(`/reseller/flow/${flowId}/agent`);
     revalidatePath(`/reseller/flow/${flowId}`);
 
     return { success: true, message: "Agent configuration saved" };
   } catch (error: any) {
-    console.error("Save Agent Error:", error);
+    console.error("🔴 [Server] Save Agent Error:", error);
     return { success: false, message: "Internal Server Error" };
   }
 }

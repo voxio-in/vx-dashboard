@@ -66,8 +66,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       voxioagent:
-        specifier: link:D:/voicebot/voice-bot-sdk
-        version: link:../../voicebot/voice-bot-sdk
+        specifier: link:..\voicebot\voice-bot-sdk
+        version: link:../voicebot/voice-bot-sdk
       zod:
         specifier: ^4.1.13
         version: 4.1.13

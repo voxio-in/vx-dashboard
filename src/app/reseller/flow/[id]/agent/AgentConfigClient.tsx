@@ -117,7 +117,7 @@ const AGENT_CONFIG = {
   models: {
     groq: [
       { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "llama-3.1-70b-versatile", label: "Llama 3.1 70B Versatile" },
+      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
       { value: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
       { value: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
     ],
@@ -125,7 +125,7 @@ const AGENT_CONFIG = {
 };
 
 // 1. Define the default prompt string exactly as it appears in DB/Placeholder
-const DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
+const DEFAULT_SYSTEM_PROMPT = "You are a guddu agent";
 
 export default function AgentConfigClient({
   flow,
@@ -194,7 +194,18 @@ export default function AgentConfigClient({
 
   const handleSave = async () => {
     setIsSaving(true);
-    const formData = { systemPrompt, provider, model };
+
+    const finalSystemPrompt =
+      systemPrompt.trim() === "" ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
+
+    const formData = {
+      systemPrompt: finalSystemPrompt,
+      provider,
+      model,
+    };
+    console.log("🔵 [Client] Saving with data:", formData);
+    console.log("🔵 [Client] Raw systemPrompt:", systemPrompt);
+    console.log("🔵 [Client] Final systemPrompt:", finalSystemPrompt);
 
     try {
       const result = await saveAgentConfiguration(flow._id, formData);
@@ -215,6 +226,7 @@ export default function AgentConfigClient({
         });
       }
     } catch (error) {
+      console.error("🔴 [Client] Error:", error);
       setModalState({
         isOpen: true,
         status: "error",
@@ -316,7 +328,6 @@ export default function AgentConfigClient({
                     value={systemPrompt}
                     onChange={(e) => setSystemPrompt(e.target.value)}
                     rows={6}
-                    // Updated Placeholder matches the DEFAULT_SYSTEM_PROMPT
                     placeholder="You are a helpful assistant."
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none dark:text-slate-100"
                   />
