@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // Import Suspense
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+// 1. Rename your main logic to something like "LoginContent" or "LoginForm"
+function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
+
+  // You ARE using useSearchParams here, which caused the build error
   const searchParams = useSearchParams();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +23,6 @@ export default function LoginPage() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
 
   const handleTokenLogin = async (token: string) => {
     setIsTokenLogin(true);
@@ -38,9 +39,7 @@ export default function LoginPage() {
       }
       if (data.success && data.user) {
         login(data.user);
-        // Clean up URL
         window.history.replaceState({}, "", "/login");
-        // Redirect based on role
         switch (data.user.role) {
           case "admin":
             router.push("/admin/dashboard");
@@ -114,7 +113,6 @@ export default function LoginPage() {
     }
   };
 
-  // Show loading state during token login
   if (isTokenLogin) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background">
@@ -233,30 +231,6 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            {/* <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) =>
-                    setRememberMe(checked as boolean)
-                  }
-                  disabled={isLoading}
-                />
-                <Label
-                  htmlFor="remember"
-                  className="font-normal cursor-pointer text-sm"
-                >
-                  Remember me
-                </Label>
-              </div>
-              <a
-                href="#"
-                className="text-sm font-medium text-primary hover:underline"
-              >
-                Forgot password?
-              </a>
-            </div> */}
             <Button
               type="submit"
               className="w-full h-11 text-base"
@@ -272,15 +246,23 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          {/* <div className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <span className="text-primary font-medium cursor-not-allowed opacity-70">
-              Contact Admin
-            </span>
-          </div> */}
         </div>
       </div>
     </div>
+  );
+}
+
+// 2. Export a default component that wraps the logic in Suspense
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen w-full items-center justify-center bg-background">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

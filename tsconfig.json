@@ -19,9 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "voxioagent": ["D:/voicebot/voice-bot-sdk/dist/index.esm.js"],
-      "voxioagent/*": ["D:/voicebot/voice-bot-sdk/dist/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [

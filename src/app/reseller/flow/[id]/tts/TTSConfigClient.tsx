@@ -55,75 +55,12 @@ const ELEVENLABS_MODELS = [
 
 /* 
 const DEEPGRAM_MODELS = [
-  // Aura-2 English
-  { value: "aura-2-thalia-en", label: "Thalia (US Female) - Aura 2" },
-  { value: "aura-2-andromeda-en", label: "Andromeda (US Female) - Aura 2" },
-  { value: "aura-2-helena-en", label: "Helena (US Female) - Aura 2" },
-  { value: "aura-2-apollo-en", label: "Apollo (US Male) - Aura 2" },
-  { value: "aura-2-arcas-en", label: "Arcas (US Male) - Aura 2" },
-  { value: "aura-2-aries-en", label: "Aries (US Male) - Aura 2" },
-  { value: "aura-2-amalthea-en", label: "Amalthea (Filipino Female) - Aura 2" },
-  { value: "aura-2-asteria-en", label: "Asteria (US Female) - Aura 2" },
-  { value: "aura-2-athena-en", label: "Athena (US Female) - Aura 2" },
-  { value: "aura-2-atlas-en", label: "Atlas (US Male) - Aura 2" },
-  { value: "aura-2-aurora-en", label: "Aurora (US Female) - Aura 2" },
-  { value: "aura-2-callista-en", label: "Callista (US Female) - Aura 2" },
-  { value: "aura-2-cora-en", label: "Cora (US Female) - Aura 2" },
-  { value: "aura-2-cordelia-en", label: "Cordelia (US Female) - Aura 2" },
-  { value: "aura-2-delia-en", label: "Delia (US Female) - Aura 2" },
-  { value: "aura-2-draco-en", label: "Draco (British Male) - Aura 2" },
-  { value: "aura-2-electra-en", label: "Electra (US Female) - Aura 2" },
-  { value: "aura-2-harmonia-en", label: "Harmonia (US Female) - Aura 2" },
-  { value: "aura-2-hera-en", label: "Hera (US Female) - Aura 2" },
-  { value: "aura-2-hermes-en", label: "Hermes (US Male) - Aura 2" },
-  { value: "aura-2-hyperion-en", label: "Hyperion (Australian Male) - Aura 2" },
-  { value: "aura-2-iris-en", label: "Iris (US Female) - Aura 2" },
-  { value: "aura-2-janus-en", label: "Janus (US Female) - Aura 2" },
-  { value: "aura-2-juno-en", label: "Juno (US Female) - Aura 2" },
-  { value: "aura-2-jupiter-en", label: "Jupiter (US Male) - Aura 2" },
-  { value: "aura-2-luna-en", label: "Luna (US Female) - Aura 2" },
-  { value: "aura-2-mars-en", label: "Mars (US Male) - Aura 2" },
-  { value: "aura-2-minerva-en", label: "Minerva (US Female) - Aura 2" },
-  { value: "aura-2-neptune-en", label: "Neptune (US Male) - Aura 2" },
-  { value: "aura-2-odysseus-en", label: "Odysseus (US Male) - Aura 2" },
-  { value: "aura-2-ophelia-en", label: "Ophelia (US Female) - Aura 2" },
-  { value: "aura-2-orion-en", label: "Orion (US Male) - Aura 2" },
-  { value: "aura-2-orpheus-en", label: "Orpheus (US Male) - Aura 2" },
-  { value: "aura-2-pandora-en", label: "Pandora (British Female) - Aura 2" },
-  { value: "aura-2-phoebe-en", label: "Phoebe (US Female) - Aura 2" },
-  { value: "aura-2-pluto-en", label: "Pluto (US Male) - Aura 2" },
-  { value: "aura-2-saturn-en", label: "Saturn (US Male) - Aura 2" },
-  { value: "aura-2-selene-en", label: "Selene (US Female) - Aura 2" },
-  { value: "aura-2-theia-en", label: "Theia (Australian Female) - Aura 2" },
-  { value: "aura-2-vesta-en", label: "Vesta (US Female) - Aura 2" },
-  { value: "aura-2-zeus-en", label: "Zeus (US Male) - Aura 2" },
-  // Aura-2 Spanish
-  { value: "aura-2-celeste-es", label: "Celeste (Colombian Female) - Aura 2" },
-  { value: "aura-2-estrella-es", label: "Estrella (Mexican Female) - Aura 2" },
-  { value: "aura-2-nestor-es", label: "Nestor (Peninsular Male) - Aura 2" },
-  { value: "aura-2-sirio-es", label: "Sirio (Mexican Male) - Aura 2" },
-  { value: "aura-2-carina-es", label: "Carina (Peninsular Female) - Aura 2" },
-  { value: "aura-2-alvaro-es", label: "Alvaro (Peninsular Male) - Aura 2" },
-  { value: "aura-2-diana-es", label: "Diana (Peninsular Female) - Aura 2" },
-  { value: "aura-2-aquila-es", label: "Aquila (LatAm Male) - Aura 2" },
-  { value: "aura-2-selena-es", label: "Selena (LatAm Female) - Aura 2" },
-  { value: "aura-2-javier-es", label: "Javier (Mexican Male) - Aura 2" },
-  // Aura 1 (Legacy)
-  { value: "aura-asteria-en", label: "Asteria (US Female) - Aura 1" },
-  { value: "aura-luna-en", label: "Luna (US Female) - Aura 1" },
-  { value: "aura-stella-en", label: "Stella (US Female) - Aura 1" },
-  { value: "aura-athena-en", label: "Athena (British Female) - Aura 1" },
-  { value: "aura-hera-en", label: "Hera (US Female) - Aura 1" },
-  { value: "aura-orion-en", label: "Orion (US Male) - Aura 1" },
-  { value: "aura-arcas-en", label: "Arcas (US Male) - Aura 1" },
-  { value: "aura-perseus-en", label: "Perseus (US Male) - Aura 1" },
-  { value: "aura-angus-en", label: "Angus (Irish Male) - Aura 1" },
-  { value: "aura-orpheus-en", label: "Orpheus (US Male) - Aura 1" },
-  { value: "aura-helios-en", label: "Helios (British Male) - Aura 1" },
-  { value: "aura-zeus-en", label: "Zeus (US Male) - Aura 1" },
+  // ... (Deepgram models previously commented out) ...
 ];
 */
 
+/* 
+// --- RIME DATA COMMENTED OUT ---
 const RIME_MODELS = ["mist", "mistv2", "arcana"];
 const RIME_VOICES: Record<string, Record<string, string[]>> = {
   mist: {
@@ -639,6 +576,7 @@ const RIME_VOICES: Record<string, Record<string, string[]>> = {
     hin: ["aarohi", "avni", "taru", "vyom"],
   },
 };
+*/
 
 // --- COMPONENTS ---
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
@@ -717,7 +655,7 @@ function StatusModal({
   );
 }
 
-type ProviderType = "elevenlabs" | "rime"; // | "deepgram";
+type ProviderType = "elevenlabs"; // | "rime" | "deepgram";
 
 export default function TTSConfigClient({
   flow,
@@ -761,6 +699,7 @@ export default function TTSConfigClient({
     return voiceId && voiceId.trim().length > 0;
   }, [provider, voiceId]);
 
+  /*
   const availableRimeVoices = useMemo(() => {
     if (provider !== "rime") return [];
     const modelVoices = RIME_VOICES[model];
@@ -779,6 +718,7 @@ export default function TTSConfigClient({
     });
     return options;
   }, [provider, model]);
+  */
 
   const handleNavigation = (path: string) => {
     proceedWithAction(() => {
@@ -793,10 +733,13 @@ export default function TTSConfigClient({
     if (p === "elevenlabs") {
       setModel(ELEVENLABS_MODELS[0]);
       setVoiceId("");
-    } else if (p === "rime") {
+    }
+    /* 
+    else if (p === "rime") {
       setModel(RIME_MODELS[0]);
       setVoiceId("");
     }
+    */
     // Deepgram logic commented out
     // else if (p === "deepgram") {
     //   setModel(DEEPGRAM_MODELS[0].value);
@@ -806,9 +749,11 @@ export default function TTSConfigClient({
 
   const handleModelChange = (newModel: string) => {
     setModel(newModel);
+    /*
     if (provider === "rime") {
       setVoiceId("");
     }
+    */
   };
 
   const handleSave = async () => {
@@ -946,7 +891,7 @@ export default function TTSConfigClient({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="elevenlabs">ElevenLabs</SelectItem>
-                        <SelectItem value="rime">Rime</SelectItem>
+                        {/* <SelectItem value="rime">Rime</SelectItem> */}
                         {/* Deepgram option commented out */}
                         {/* <SelectItem value="deepgram">Deepgram</SelectItem> */}
                       </SelectContent>
@@ -974,12 +919,14 @@ export default function TTSConfigClient({
                             </SelectItem>
                           ))}
 
+                        {/* 
                         {provider === "rime" &&
                           RIME_MODELS.map((m) => (
                             <SelectItem key={m} value={m}>
                               {m}
                             </SelectItem>
                           ))}
+                        */}
 
                         {/* Deepgram models commented out */}
                         {/* {provider === "deepgram" &&
@@ -1004,9 +951,9 @@ export default function TTSConfigClient({
                   <LabelWithInfo
                     label="Voice"
                     info={
-                      provider === "elevenlabs"
-                        ? "Enter your ElevenLabs Voice ID string."
-                        : "Select a specific voice for the chosen Rime model."
+                      // provider === "elevenlabs"
+                      /* ? */ "Enter your ElevenLabs Voice ID string."
+                      /* : "Select a specific voice for the chosen Rime model." */
                     }
                   />
 
@@ -1022,6 +969,7 @@ export default function TTSConfigClient({
                     </div>
                   )}
 
+                  {/*
                   {provider === "rime" && (
                     <div className="relative">
                       <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
@@ -1039,6 +987,7 @@ export default function TTSConfigClient({
                       </Select>
                     </div>
                   )}
+                  */}
                 </div>
               </div>
             </div>

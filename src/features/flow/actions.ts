@@ -65,9 +65,9 @@ export async function createFlow(flowName: string) {
     });
 
     const newTTS = await TTS.create({
-      service: "rime",
-      "model-name": "mist",
-      voice_id: "allison",
+      service: "elevenlabs",
+      "model-name": "eleven_multilingual_v3",
+      voice_id: "1FcaCa84nUabCNNwbzBa",
     });
 
     const newAgent = await Agent.create({
@@ -75,38 +75,30 @@ export async function createFlow(flowName: string) {
         variables: {
           user_input: { type: "str" },
           llm_response: { type: "str" },
-          conversation_history: { type: "list" },
+          conversation_history: { type: "list", default: [] },
           speak: { type: "str" },
           node_type: { type: "str" },
         },
         start_node: "greeting",
-        nodes: [
-          {
-            name: "greeting",
+        nodes: {
+          greeting: {
             type: "out",
             parameters: {
-              out_dict: {
-                speak: "Hello! How can I assist you today?",
-              },
+              out_dict: { speak: "Hello! How can I assist you today?" },
             },
             next: "ask_for_input",
           },
-          {
-            name: "ask_for_input",
-            type: "interrupt",
-            parameters: {},
+          ask_for_input: {
+            type: "input",
+            parameters: { input_variables: { user_input: "str" } },
             next: "transcription",
           },
-          {
-            name: "transcription",
+          transcription: {
             type: "out",
-            parameters: {
-              variables: ["user_input"],
-            },
+            parameters: { variables: ["user_input"] },
             next: "llm",
           },
-          {
-            name: "llm",
+          llm: {
             type: "llm",
             parameters: {
               input_variables: {
@@ -116,9 +108,9 @@ export async function createFlow(flowName: string) {
                 },
               },
               prompt_template: "base_llm",
-              system_prompt: "You are a helpful assistant.",
+              system_prompt: "You are a guddu agent",
               service: "groq",
-              model: "llama-3.1-8b-instant",
+              model: "llama-3.3-70b-versatile",
               history_key: "conversation_history",
               llm_return_type: {
                 speak: {
@@ -130,15 +122,12 @@ export async function createFlow(flowName: string) {
             },
             next: "response",
           },
-          {
-            name: "response",
+          response: {
             type: "out",
-            parameters: {
-              variables: ["speak"],
-            },
+            parameters: { variables: ["speak"] },
             next: "ask_for_input",
           },
-        ],
+        },
       },
     });
 
