@@ -22,13 +22,13 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
     "mongoose": "^9.0.0",
-    "next": "^16.0.7",
-    "react": "^18.3.1",
+    "next": "16.0.7",
+    "react": "^19.2.3",
     "react-data-table-component": "^7.7.0",
     "react-dom": "^18.3.1",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.4.0",
-    "voxioagent": "^1.2.1",
+    "voxioagent": "1.2.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {

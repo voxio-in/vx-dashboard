@@ -78,9 +78,16 @@ export async function POST(req: Request) {
 
     console.log("🔵 [Register API] Creating TTS...");
     const newTTS = await TTS.create({
-      service: "rime",
-      "model-name": "mist",
-      voice_id: "allison",
+      // --- RIME CONFIGURATION (COMMENTED OUT) ---
+      // service: "rime",
+      // "model-name": "mist",
+      // voice_id: "allison",
+
+      // --- DEFAULTING TO ELEVENLABS ---
+      // We must provide a valid default so registration doesn't break
+      service: "elevenlabs",
+      "model-name": "eleven_multilingual_v3",
+      voice_id: "1FcaCa84nUabCNNwbzBa", // Default voice (Rachel)
     });
     console.log(`✅ [Register API] TTS Created: ${newTTS._id}`);
 

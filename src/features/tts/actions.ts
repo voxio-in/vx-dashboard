@@ -8,14 +8,17 @@ import { z } from "zod";
 
 const TTSFormSchema = z
   .object({
-    provider: z.enum(["elevenlabs", "rime", "deepgram"]),
+    // Commented out "rime" from allowed providers
+    provider: z.enum(["elevenlabs", /* "rime", */ "deepgram"]),
     model: z.string().min(1, "Model is required"),
     voiceId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    // 🚨 Validation: If Rime or ElevenLabs, voiceId MUST be present
     if (
-      (data.provider === "elevenlabs" || data.provider === "rime") &&
+      (data.provider === "elevenlabs" ||
+        // @ts-ignore - "rime" is not in the enum anymore, but keeping logic commented or clean
+        // data.provider === "rime" ||
+        data.provider === "eleven_multilingual_v3s") &&
       (!data.voiceId || data.voiceId.trim() === "")
     ) {
       ctx.addIssue({

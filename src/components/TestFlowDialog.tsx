@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -61,9 +61,10 @@ export default function TestFlowDialog({
       // 2. Setup the listener BEFORE initializing the agent
       setupVoxioListeners();
 
+      // 3. Dynamically import voxioagent (client-side only)
       import("voxioagent")
         .then((module) => {
-          const initVoxioAgent = module.initVoxioAgent;
+          const { initVoxioAgent } = module;
           return initVoxioAgent({
             apiKey: apiKey,
             position: {
@@ -117,8 +118,7 @@ export default function TestFlowDialog({
             // LOGGING: See exactly what hits the listener
             console.log("[TestFlowDialog] WS Data Intercepted:", data);
 
-            // CHANGED: Removed 'node_type === "out"' check.
-            // Now checks strictly for existence of keys.
+            // Check for user_input
             if (data.user_input) {
               console.log("-> Processing User Input:", data.user_input);
               addMessage("user", data.user_input);
