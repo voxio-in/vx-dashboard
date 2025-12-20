@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {}, // Empty config to silence warnings
+  // Disable Turbopack to avoid Windows symlink privilege issues
+  // turbopack: {}, // Commented out
 };
 
 export default nextConfig;

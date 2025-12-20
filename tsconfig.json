@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,9 +23,15 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "voxioagent": ["D:/voicebot/voice-bot-sdk/dist/index.esm.js"],
-      "voxioagent/*": ["D:/voicebot/voice-bot-sdk/dist/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "voxioagent": [
+        "D:/voicebot/voice-bot-sdk/dist/index.esm.js"
+      ],
+      "voxioagent/*": [
+        "D:/voicebot/voice-bot-sdk/dist/*"
+      ]
     }
   },
   "include": [
@@ -30,7 +40,10 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "next.config.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }
