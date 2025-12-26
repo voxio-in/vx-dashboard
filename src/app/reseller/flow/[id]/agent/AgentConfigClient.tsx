@@ -15,6 +15,10 @@ import {
   Box,
   Cpu,
   Play,
+  Megaphone,
+  User,
+  FileText,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +39,39 @@ import { saveAgentConfiguration } from "@/features/agent/actions";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import TestFlowDialog from "@/components/TestFlowDialog";
+import { Input } from "@/components/ui/input";
+
+// --- DEFAULTS ---
+const STANDARD_DEFAULTS = {
+  greeting: "Hello! How can I assist you today?",
+  systemPrompt: "You are a helpful agent",
+};
+
+const ROLEPLAY_DEFAULTS = {
+  greeting:
+    "Are you the new guard? Finally. Someone parked in my spot. Again! What's the point of paying so much for security if you all just walk around? Are you going to do something or just stand there ?",
+  traineeName: "Ayush",
+  systemPrompt:
+    "User the scenario only as defined, use only small 'yes' or 'no' for end_diagnosis",
+  feedbackPrompt:
+    "# EVALUATION CRITERIA You MUST evaluate the trainee on the following four criteria: 1.  **Communication Skills:** Did they speak clearly? Were they polite but firm? Did they listen actively? 2.  **Problem-Solving:** Did they correctly identify the problem? Did they offer valid solutions? Did they follow procedure? 3.  **Emotional Control:** Did they remain calm and professional? Did they de-escalate the situation, or did they get flustered or argumentative? 4.  **Professionalism:** Did they maintain a professional demeanor? Did they avoid breaking character or getting sidetracked? ",
+  summaryPrompt:
+    "Provide summary of the session as **What Went Well:** * [Provide 2-3 specific, positive points, referencing the transcript] **Areas for Improvement:** * [Provide 2-3 specific, constructive points. Explain WHAT they could have done differently and WHY] ",
+};
+
+const AGENT_CONFIG = {
+  providers: [{ value: "groq", label: "Groq" }] as const,
+  models: {
+    groq: [
+      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
+      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
+      { value: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
+      { value: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
+    ],
+  },
+};
+
+// --- REUSABLE COMPONENTS ---
 
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
@@ -56,6 +93,101 @@ const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   </div>
 );
 
+const PromptBox = ({
+  label,
+  info,
+  value,
+  onChange,
+  rows = 4,
+  icon: Icon,
+  placeholder,
+}: {
+  label: string;
+  info: string;
+  value: string;
+  onChange: (val: string) => void;
+  rows?: number;
+  icon: any;
+  placeholder?: string;
+}) => (
+  <div className="space-y-2">
+    <LabelWithInfo label={label} info={info} />
+    <div className="relative">
+      <Icon className="absolute top-3 left-3 h-5 w-5 text-slate-400 pointer-events-none" />
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none dark:text-slate-100 placeholder:text-slate-400"
+      />
+    </div>
+  </div>
+);
+
+const ProviderModelSelector = ({
+  provider,
+  setProvider,
+  model,
+  setModel,
+}: {
+  provider: string;
+  setProvider: (val: string) => void;
+  model: string;
+  setModel: (val: string) => void;
+}) => {
+  const handleProviderChange = (value: string) => {
+    setProvider(value);
+    if (value === "groq") {
+      setModel(AGENT_CONFIG.models.groq[0].value);
+    }
+  };
+
+  const currentModels =
+    AGENT_CONFIG.models[provider as keyof typeof AGENT_CONFIG.models] || [];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-100 dark:border-slate-800">
+      <div className="space-y-2">
+        <LabelWithInfo label="Provider" info="Model provider" />
+        <div className="relative">
+          <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+          <Select value={provider} onValueChange={handleProviderChange}>
+            <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {AGENT_CONFIG.providers.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <LabelWithInfo label="Model" info="Specific AI model" />
+        <div className="relative">
+          <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {currentModels.map((item) => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function StatusModal({
   isOpen,
   onClose,
@@ -70,7 +202,6 @@ function StatusModal({
   message: string;
 }) {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 transform transition-all scale-100 animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-800">
@@ -112,21 +243,6 @@ function StatusModal({
   );
 }
 
-const AGENT_CONFIG = {
-  providers: [{ value: "groq", label: "Groq" }] as const,
-  models: {
-    groq: [
-      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
-      { value: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
-      { value: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
-    ],
-  },
-};
-
-// 1. Define the default prompt string exactly as it appears in DB/Placeholder
-const DEFAULT_SYSTEM_PROMPT = "You are a guddu agent";
-
 export default function AgentConfigClient({
   flow,
   initialConfig,
@@ -137,18 +253,36 @@ export default function AgentConfigClient({
   const router = useRouter();
   const { proceedWithAction } = useUnsavedChangesContext();
 
-  // 2. Normalization Helper:
-  // If the DB value matches the default string, return empty string so the placeholder shows.
-  const getNormalizedPrompt = (prompt: string | undefined) => {
-    if (prompt === DEFAULT_SYSTEM_PROMPT) return "";
-    return prompt || "";
-  };
+  const isRolePlay = initialConfig?.isRolePlay || false;
+  const currentDefaults = isRolePlay ? ROLEPLAY_DEFAULTS : STANDARD_DEFAULTS;
 
-  // 3. Initialize State using the helper
-  const [systemPrompt, setSystemPrompt] = useState(
-    getNormalizedPrompt(initialConfig?.systemPrompt)
+  // --- STATE INITIALIZATION ---
+  // If DB has value, use it. If not, use Default.
+
+  const [greeting, setGreeting] = useState(
+    initialConfig?.greeting || currentDefaults.greeting
   );
 
+  const [traineeName, setTraineeName] = useState(
+    initialConfig?.traineeName ||
+      (isRolePlay ? (currentDefaults as any).traineeName : "")
+  );
+
+  const [systemPrompt, setSystemPrompt] = useState(
+    initialConfig?.systemPrompt || currentDefaults.systemPrompt
+  );
+
+  const [feedbackPrompt, setFeedbackPrompt] = useState(
+    initialConfig?.feedbackPrompt ||
+      (isRolePlay ? (currentDefaults as any).feedbackPrompt : "")
+  );
+
+  const [summaryPrompt, setSummaryPrompt] = useState(
+    initialConfig?.summaryPrompt ||
+      (isRolePlay ? (currentDefaults as any).summaryPrompt : "")
+  );
+
+  // --- SELECT STATES ---
   const [provider, setProvider] = useState<string>(
     initialConfig?.provider || "groq"
   );
@@ -156,9 +290,22 @@ export default function AgentConfigClient({
     initialConfig?.model || "llama-3.1-8b-instant"
   );
 
+  const [feedbackProvider, setFeedbackProvider] = useState<string>(
+    initialConfig?.feedbackProvider || "groq"
+  );
+  const [feedbackModel, setFeedbackModel] = useState<string>(
+    initialConfig?.feedbackModel || "llama-3.3-70b-versatile"
+  );
+
+  const [summaryProvider, setSummaryProvider] = useState<string>(
+    initialConfig?.summaryProvider || "groq"
+  );
+  const [summaryModel, setSummaryModel] = useState<string>(
+    initialConfig?.summaryModel || "llama-3.3-70b-versatile"
+  );
+
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
-
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     status: "success" | "error" | null;
@@ -166,16 +313,28 @@ export default function AgentConfigClient({
     message: string;
   }>({ isOpen: false, status: null, title: "", message: "" });
 
-  // 4. Calculate Normalized Initial State for comparison
-  const initialNormalizedPrompt = getNormalizedPrompt(
-    initialConfig?.systemPrompt
-  );
-
-  // 5. Update isDirty logic to compare against normalized initial state
+  // --- DIRTY CHECK ---
   const isDirty =
-    systemPrompt !== initialNormalizedPrompt ||
+    greeting !== (initialConfig?.greeting || currentDefaults.greeting) ||
+    systemPrompt !==
+      (initialConfig?.systemPrompt || currentDefaults.systemPrompt) ||
     provider !== (initialConfig?.provider || "groq") ||
-    model !== (initialConfig?.model || "llama-3.1-8b-instant");
+    model !== (initialConfig?.model || "llama-3.1-8b-instant") ||
+    (isRolePlay &&
+      (traineeName !==
+        (initialConfig?.traineeName || (currentDefaults as any).traineeName) ||
+        feedbackPrompt !==
+          (initialConfig?.feedbackPrompt ||
+            (currentDefaults as any).feedbackPrompt) ||
+        feedbackProvider !== (initialConfig?.feedbackProvider || "groq") ||
+        feedbackModel !==
+          (initialConfig?.feedbackModel || "llama-3.3-70b-versatile") ||
+        summaryPrompt !==
+          (initialConfig?.summaryPrompt ||
+            (currentDefaults as any).summaryPrompt) ||
+        summaryProvider !== (initialConfig?.summaryProvider || "groq") ||
+        summaryModel !==
+          (initialConfig?.summaryModel || "llama-3.3-70b-versatile")));
 
   useUnsavedChanges(isDirty);
 
@@ -185,27 +344,37 @@ export default function AgentConfigClient({
     });
   };
 
-  const handleProviderChange = (value: string) => {
-    setProvider(value);
-    if (value === "groq") {
-      setModel(AGENT_CONFIG.models.groq[0].value);
-    }
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
 
-    const finalSystemPrompt =
-      systemPrompt.trim() === "" ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
+    // If a field is empty, fallback to default for saving
+    const finalGreeting = greeting || currentDefaults.greeting;
+    const finalSystemPrompt = systemPrompt || currentDefaults.systemPrompt;
+
+    // Roleplay specific fallbacks
+    const finalTraineeName = isRolePlay
+      ? traineeName || (currentDefaults as any).traineeName
+      : undefined;
+    const finalFeedbackPrompt = isRolePlay
+      ? feedbackPrompt || (currentDefaults as any).feedbackPrompt
+      : undefined;
+    const finalSummaryPrompt = isRolePlay
+      ? summaryPrompt || (currentDefaults as any).summaryPrompt
+      : undefined;
 
     const formData = {
+      greeting: finalGreeting,
       systemPrompt: finalSystemPrompt,
       provider,
       model,
+      traineeName: finalTraineeName,
+      feedbackPrompt: finalFeedbackPrompt,
+      feedbackProvider,
+      feedbackModel,
+      summaryPrompt: finalSummaryPrompt,
+      summaryProvider,
+      summaryModel,
     };
-    console.log("🔵 [Client] Saving with data:", formData);
-    console.log("🔵 [Client] Raw systemPrompt:", systemPrompt);
-    console.log("🔵 [Client] Final systemPrompt:", finalSystemPrompt);
 
     try {
       const result = await saveAgentConfiguration(flow._id, formData);
@@ -214,8 +383,21 @@ export default function AgentConfigClient({
           isOpen: true,
           status: "success",
           title: "Agent Updated",
-          message: "Agent LLM settings have been saved successfully.",
+          message: "Configuration saved successfully.",
         });
+
+        // Update local state to match what we sent to backend (if user cleared a box)
+        if (!greeting) setGreeting(currentDefaults.greeting);
+        if (!systemPrompt) setSystemPrompt(currentDefaults.systemPrompt);
+        if (isRolePlay) {
+          if (!traineeName)
+            setTraineeName((currentDefaults as any).traineeName);
+          if (!feedbackPrompt)
+            setFeedbackPrompt((currentDefaults as any).feedbackPrompt);
+          if (!summaryPrompt)
+            setSummaryPrompt((currentDefaults as any).summaryPrompt);
+        }
+
         router.refresh();
       } else {
         setModalState({
@@ -238,9 +420,6 @@ export default function AgentConfigClient({
     }
   };
 
-  const currentModels =
-    AGENT_CONFIG.models[provider as keyof typeof AGENT_CONFIG.models] || [];
-
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
       <StatusModal
@@ -251,7 +430,6 @@ export default function AgentConfigClient({
         message={modalState.message}
       />
 
-      {/* Test Flow Dialog Integration */}
       <TestFlowDialog
         isOpen={isTestDialogOpen}
         onClose={() => setIsTestDialogOpen(false)}
@@ -293,7 +471,6 @@ export default function AgentConfigClient({
           </div>
         </div>
 
-        {/* Test Flow Button */}
         <Button
           onClick={() => setIsTestDialogOpen(true)}
           size="sm"
@@ -308,74 +485,128 @@ export default function AgentConfigClient({
         <div className="max-w-3xl mx-auto p-10 pb-32">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2 text-slate-900 dark:text-slate-100">
-              Agent Settings
+              Agent Configuration
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
-              Configure the AI Persona, Provider, and Model.
+              {isRolePlay
+                ? "Configure the Role Play scenario, Feedback, and Summary logic."
+                : "Configure the AI Persona and Model settings."}
             </p>
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <LabelWithInfo
-                  label="System Prompt"
-                  info="System prompt for the llm, use this to make llm behave how you want it to"
-                />
-                <div className="relative">
-                  <MessageSquare className="absolute top-3 left-3 h-5 w-5 text-slate-400 pointer-events-none" />
-                  <textarea
-                    value={systemPrompt}
-                    onChange={(e) => setSystemPrompt(e.target.value)}
-                    rows={6}
-                    placeholder="You are a helpful assistant."
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none dark:text-slate-100"
+            <div className="space-y-8">
+              {/* 1. TRAINEE NAME */}
+              {isRolePlay && (
+                <div className="space-y-2">
+                  <LabelWithInfo
+                    label="Trainee Name"
+                    info="The default name of the person being trained."
                   />
-                </div>
-              </div>
-              <div className="h-[1px] bg-slate-200 dark:bg-slate-800 my-6" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <LabelWithInfo label="Provider" info="Model provider" />
                   <div className="relative">
-                    <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-                    <Select
-                      value={provider}
-                      onValueChange={handleProviderChange}
-                    >
-                      <SelectTrigger className="w-full h-12 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {AGENT_CONFIG.providers.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <User className="absolute top-3 left-3 h-5 w-5 text-slate-400 pointer-events-none" />
+                    <Input
+                      value={traineeName}
+                      onChange={(e) => setTraineeName(e.target.value)}
+                      placeholder="Enter trainee name"
+                      className="pl-10 h-11 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 placeholder:text-slate-400"
+                    />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <LabelWithInfo label="Model" info="Specific AI model" />
-                  <div className="relative">
-                    <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-                    <Select value={model} onValueChange={setModel}>
-                      <SelectTrigger className="w-full h-12 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {currentModels.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              )}
+
+              {/* 2. GREETING */}
+              <PromptBox
+                label="Greeting Message"
+                info="The first message the agent speaks when the call starts."
+                value={greeting}
+                onChange={setGreeting}
+                rows={2}
+                icon={Megaphone}
+                placeholder="Enter greeting message"
+              />
+
+              <div className="h-[1px] bg-slate-200 dark:bg-slate-800" />
+
+              {/* 3. MAIN AGENT LOGIC */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-indigo-500" />
+                  Main Agent Logic
+                </h3>
+
+                <PromptBox
+                  label="System Prompt"
+                  info="Instructions for the main conversational agent."
+                  value={systemPrompt}
+                  onChange={setSystemPrompt}
+                  rows={6}
+                  icon={MessageSquare}
+                  placeholder="Enter system prompt"
+                />
+
+                <ProviderModelSelector
+                  provider={provider}
+                  setProvider={setProvider}
+                  model={model}
+                  setModel={setModel}
+                />
               </div>
+
+              {/* 4. FEEDBACK & SUMMARY */}
+              {isRolePlay && (
+                <>
+                  <div className="h-[1px] bg-slate-200 dark:bg-slate-800" />
+
+                  <div className="grid grid-cols-1 gap-12">
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5 text-purple-500" />
+                        Feedback Logic
+                      </h3>
+                      <PromptBox
+                        label="Feedback System Prompt"
+                        info="Instructions for generating the post-call evaluation."
+                        value={feedbackPrompt}
+                        onChange={setFeedbackPrompt}
+                        rows={6}
+                        icon={MessageSquare}
+                        placeholder="Enter feedback prompt"
+                      />
+                      <ProviderModelSelector
+                        provider={feedbackProvider}
+                        setProvider={setFeedbackProvider}
+                        model={feedbackModel}
+                        setModel={setFeedbackModel}
+                      />
+                    </div>
+
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-orange-500" />
+                        Summary Logic
+                      </h3>
+                      <PromptBox
+                        label="Summary System Prompt"
+                        info="Instructions for generating the session summary."
+                        value={summaryPrompt}
+                        onChange={setSummaryPrompt}
+                        rows={6}
+                        icon={MessageSquare}
+                        placeholder="Enter summary prompt"
+                      />
+                      <ProviderModelSelector
+                        provider={summaryProvider}
+                        setProvider={setSummaryProvider}
+                        model={summaryModel}
+                        setModel={setSummaryModel}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
+
             <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
               <Button
                 onClick={handleSave}

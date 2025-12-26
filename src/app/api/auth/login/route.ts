@@ -8,11 +8,20 @@ export async function POST(req: Request) {
   try {
     const { username, password } = await req.json();
 
+    console.log('Attempting login for username:', username);
+
     await connectDB();
 
     const user = await User.findOne({ username }).select("+password");
 
-    if (!user || !(await user.comparePassword(password))) {
+    console.log('User found:', !!user);
+    if (user) console.log('Password hash exists:', !!user.password);
+
+    console.log('Comparing password...');
+    const passwordMatch = await user.comparePassword(password);
+    console.log('Password match result:', passwordMatch);
+
+    if (!user || !passwordMatch) {
       return NextResponse.json(
         { error: "Invalid username or password" },
         { status: 401 }

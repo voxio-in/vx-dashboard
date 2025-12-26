@@ -15,7 +15,7 @@ import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { IFlow } from "@/types";
 import { createFlow, deleteFlow } from "@/features/flow/actions";
-import TestFlowDialog from "@/components/TestFlowDialog"; // Import the Dialog
+import TestFlowDialog from "@/components/TestFlowDialog";
 
 import {
   Dialog,
@@ -40,6 +40,9 @@ export default function DashboardClient({
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newFlowName, setNewFlowName] = useState("");
+  // NEW: Checkbox state
+  const [isRolePlaying, setIsRolePlaying] = useState(false);
+
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -73,11 +76,10 @@ export default function DashboardClient({
     router.push(`/reseller/flow/${flowId}`);
   };
 
-  // --- LOGIC: EXTRACT API KEY FROM FLOW ---
   const handleTestFlow = (flow: IFlow) => {
     setTestFlowData({
       id: flow._id,
-      apiKey: flow.api_key, // Getting key from MongoDB object
+      apiKey: flow.api_key,
       name: flow.name,
     });
   };
@@ -90,11 +92,13 @@ export default function DashboardClient({
     setError("");
 
     startTransition(async () => {
-      const result = await createFlow(newFlowName);
+      // Pass isRolePlaying flag
+      const result = await createFlow(newFlowName, isRolePlaying);
 
       if (result.success && result.flowId) {
         setIsCreateDialogOpen(false);
         setNewFlowName("");
+        setIsRolePlaying(false);
 
         if (redirect) {
           router.push(`/reseller/flow/${result.flowId}`);
@@ -121,12 +125,11 @@ export default function DashboardClient({
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
-      {/* --- RENDER TEST DIALOG WITH API KEY --- */}
       <TestFlowDialog
         isOpen={!!testFlowData}
         onClose={() => setTestFlowData(null)}
         flowId={testFlowData?.id || ""}
-        apiKey={testFlowData?.apiKey || ""} // Passing the extracted key
+        apiKey={testFlowData?.apiKey || ""}
         flowName={testFlowData?.name || ""}
       />
 
@@ -153,6 +156,7 @@ export default function DashboardClient({
             setIsCreateDialogOpen(open);
             if (!open) {
               setNewFlowName("");
+              setIsRolePlaying(false);
               setError("");
             }
           }}
@@ -193,6 +197,25 @@ export default function DashboardClient({
                       {error}
                     </p>
                   )}
+                </div>
+              </div>
+
+              {/* ROLE PLAY CHECKBOX */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-start-2 col-span-3 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="roleplay"
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                    checked={isRolePlaying}
+                    onChange={(e) => setIsRolePlaying(e.target.checked)}
+                  />
+                  <Label
+                    htmlFor="roleplay"
+                    className="text-sm font-normal text-slate-500 cursor-pointer select-none hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
+                  >
+                    Enable Role Playing Agent (Optional)
+                  </Label>
                 </div>
               </div>
             </div>
@@ -317,7 +340,6 @@ export default function DashboardClient({
         </div>
       </main>
 
-      {/* Delete Dialog Logic */}
       <Dialog
         open={!!deleteFlowData}
         onOpenChange={(open) => !open && setDeleteFlowData(null)}
@@ -338,8 +360,8 @@ export default function DashboardClient({
               ?
               <br />
               <span className="block mt-2 text-red-600/80 dark:text-red-400">
-                This action cannot be undone. All configurations (STT, TTS,
-                Agent) associated with this flow will be permanently removed.
+                This action cannot be undone. All configurations will be
+                permanently removed.
               </span>
             </DialogDescription>
           </DialogHeader>

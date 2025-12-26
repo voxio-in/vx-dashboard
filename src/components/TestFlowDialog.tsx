@@ -118,21 +118,36 @@ export default function TestFlowDialog({
             // LOGGING: See exactly what hits the listener
             console.log("[TestFlowDialog] WS Data Intercepted:", data);
 
-            // Check for user_input
-            if (data.user_input) {
-              console.log("-> Processing User Input:", data.user_input);
-              addMessage("user", data.user_input);
-            }
+            // Process all keys in order they appear (FIFO)
+            Object.keys(data).forEach((key) => {
+              const value = data[key];
 
-            // Check for 'speak'
-            if (data.speak) {
-              // Sometimes 'speak' might come with user_input as an echo, prevent double logging if needed.
-              // But usually bot speaks separately.
-              if (!data.user_input) {
-                console.log("-> Processing Bot Speak:", data.speak);
-                addMessage("bot", data.speak);
+              if (!value) return; // Skip empty values
+
+              // Determine sender based on key
+              if (key === "user_input") {
+                // User input: show as plain text
+                const displayText =
+                  typeof value === "string" ? value : JSON.stringify(value);
+                console.log("-> Processing User Input:", displayText);
+                addMessage("user", displayText);
+              } else {
+                // Bot messages: show raw JSON for all except 'speak'
+                let displayText: string;
+
+                if (key === "speak") {
+                  // For 'speak', only show the text content
+                  displayText =
+                    typeof value === "string" ? value : JSON.stringify(value);
+                } else {
+                  // For all other parameters, show as raw JSON with key
+                  displayText = `${key}: ${JSON.stringify(value, null, 2)}`;
+                }
+
+                console.log(`-> Processing Bot ${key}:`, displayText);
+                addMessage("bot", displayText);
               }
-            }
+            });
           }
         } catch (e) {
           // Silent catch for non-JSON messages
@@ -285,7 +300,9 @@ export default function TestFlowDialog({
                           : "bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 rounded-bl-none border border-gray-100 dark:border-slate-700"
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{msg.text}</p>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {msg.text}
+                      </p>
                     </div>
                     <span
                       className={`text-[10px] text-gray-400 mt-1 block ${
