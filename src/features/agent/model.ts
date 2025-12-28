@@ -24,6 +24,7 @@ const AgentSchema = new Schema<AgentDocument>(
   {
     timestamps: true,
     collection: "agents",
+    minimize: false,
   }
 );
 
