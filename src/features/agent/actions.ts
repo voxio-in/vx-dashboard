@@ -45,6 +45,8 @@ const getDefaultAgentStructure = () => ({
           service: "groq",
           model: "llama-3.3-70b-versatile",
           history_key: "conversation_history",
+          emotion: false,
+          emotion_tts: "elevenlabs-multilingual-v3",
           llm_return_type: {
             speak: { type: "str" },
           },
@@ -94,6 +96,10 @@ export async function saveAgentConfiguration(flowId: string, rawData: any) {
       }
       nodes.llm.parameters.service = rawData.provider;
       nodes.llm.parameters.model = rawData.model;
+
+      // Update Emotion
+      nodes.llm.parameters.emotion = rawData.emotion;
+      nodes.llm.parameters.emotion_tts = rawData.emotionModel;
     }
 
     // 2. UPDATE COMMON: Greeting
@@ -119,6 +125,10 @@ export async function saveAgentConfiguration(flowId: string, rawData: any) {
         }
         nodes.feedback.parameters.service = rawData.feedbackProvider;
         nodes.feedback.parameters.model = rawData.feedbackModel;
+
+        // Update Feedback Emotion
+        nodes.feedback.parameters.emotion = rawData.feedbackEmotion;
+        nodes.feedback.parameters.emotion_tts = rawData.feedbackEmotionModel;
       }
 
       // Update Summary Node
@@ -129,6 +139,10 @@ export async function saveAgentConfiguration(flowId: string, rawData: any) {
         }
         nodes.summary.parameters.service = rawData.summaryProvider;
         nodes.summary.parameters.model = rawData.summaryModel;
+
+        // Update Summary Emotion
+        nodes.summary.parameters.emotion = rawData.summaryEmotion;
+        nodes.summary.parameters.emotion_tts = rawData.summaryEmotionModel;
       }
     }
 

@@ -69,6 +69,8 @@ const STANDARD_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "conversation_history",
+        emotion: false,
+        emotion_tts: "elevenlabs-multilingual-v3",
         llm_return_type: {
           speak: {
             type: "str",
@@ -145,6 +147,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "conversation_history",
+        emotion: false,
+        emotion_tts: "elevenlabs-multilingual-v3",
         llm_return_type: {
           speak: {
             type: "str",
@@ -192,6 +196,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "feedback_conversation_history",
+        emotion: false,
+        emotion_tts: "elevenlabs-multilingual-v3",
         llm_return_type: {
           llm_response: {
             type: "str",
@@ -217,6 +223,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "feedback_conversation_history",
+        emotion: false,
+        emotion_tts: "elevenlabs-multilingual-v3",
         llm_return_type: {
           summary: {
             type: "str",
