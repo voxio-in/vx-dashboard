@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -41,6 +41,13 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import TestFlowDialog from "@/components/TestFlowDialog";
 import { Input } from "@/components/ui/input";
 
+// --- TYPES ---
+type ModelOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
+
 // --- DEFAULTS ---
 const STANDARD_DEFAULTS = {
   greeting: "Hello! How can I assist you today?",
@@ -60,14 +67,33 @@ const ROLEPLAY_DEFAULTS = {
 };
 
 const AGENT_CONFIG = {
-  providers: [{ value: "groq", label: "Groq" }] as const,
+  providers: [
+    { value: "groq", label: "Groq" },
+    { value: "openrouter", label: "OpenRouter" },
+  ] as const,
   models: {
     groq: [
-      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
-      { value: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
-      { value: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
-    ],
+      {
+        value: "llama-3.1-8b-instant",
+        label: "Llama 3.1 8B Instant",
+        description: "Fast and efficient Llama model",
+      },
+      {
+        value: "llama-3.3-70b-versatile",
+        label: "Llama 3.3 70B Versatile",
+        description: "High performance Llama model",
+      },
+      {
+        value: "openai/gpt-oss-120b",
+        label: "GPT OSS 120B",
+        description: "Large scale open source GPT",
+      },
+      {
+        value: "openai/gpt-oss-20b",
+        label: "GPT OSS 20B",
+        description: "Smaller scale open source GPT",
+      },
+    ] as ModelOption[],
   },
 };
 
@@ -130,21 +156,33 @@ const ProviderModelSelector = ({
   setProvider,
   model,
   setModel,
+  openRouterModels,
 }: {
   provider: string;
   setProvider: (val: string) => void;
   model: string;
   setModel: (val: string) => void;
+  openRouterModels: ModelOption[];
 }) => {
   const handleProviderChange = (value: string) => {
     setProvider(value);
+
+    // Reset to the first model of the new provider
     if (value === "groq") {
       setModel(AGENT_CONFIG.models.groq[0].value);
+    } else if (value === "openrouter" && openRouterModels.length > 0) {
+      setModel(openRouterModels[0].value);
     }
   };
 
   const currentModels =
-    AGENT_CONFIG.models[provider as keyof typeof AGENT_CONFIG.models] || [];
+    provider === "openrouter"
+      ? openRouterModels
+      : AGENT_CONFIG.models.groq || [];
+
+  // Find currently selected model to show its description in the tooltip
+  const selectedModelData = currentModels.find((m) => m.value === model);
+  const infoText = selectedModelData?.description || "Specific AI model";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-100 dark:border-slate-800">
@@ -167,19 +205,25 @@ const ProviderModelSelector = ({
         </div>
       </div>
       <div className="space-y-2">
-        <LabelWithInfo label="Model" info="Specific AI model" />
+        <LabelWithInfo label="Model" info={infoText} />
         <div className="relative">
           <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
           <Select value={model} onValueChange={setModel}>
             <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              {currentModels.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
+            <SelectContent className="max-h-[300px]">
+              {currentModels.length > 0 ? (
+                currentModels.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-2 text-sm text-slate-500 text-center">
+                  {provider === "openrouter" ? "Loading..." : "No models found"}
+                </div>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -303,6 +347,38 @@ export default function AgentConfigClient({
   const [summaryModel, setSummaryModel] = useState<string>(
     initialConfig?.summaryModel || "llama-3.3-70b-versatile"
   );
+
+  // --- OPENROUTER STATE & EFFECT ---
+  const [openRouterModels, setOpenRouterModels] = useState<ModelOption[]>([]);
+
+  useEffect(() => {
+    // Only fetch if not already loaded to save bandwidth,
+    // or you can leave it to run once on mount.
+    const fetchModels = async () => {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/models");
+        const data = await res.json();
+        if (data?.data) {
+          const mapped = data.data.map((m: any) => ({
+            value: m.id,
+            label: m.name,
+            description: m.description || "No description available",
+          }));
+
+          // Optional: Sort alphabetically for easier finding
+          mapped.sort((a: ModelOption, b: ModelOption) =>
+            a.label.localeCompare(b.label)
+          );
+
+          setOpenRouterModels(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch openrouter models", err);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -550,6 +626,7 @@ export default function AgentConfigClient({
                   setProvider={setProvider}
                   model={model}
                   setModel={setModel}
+                  openRouterModels={openRouterModels}
                 />
               </div>
 
@@ -578,6 +655,7 @@ export default function AgentConfigClient({
                         setProvider={setFeedbackProvider}
                         model={feedbackModel}
                         setModel={setFeedbackModel}
+                        openRouterModels={openRouterModels}
                       />
                     </div>
 
@@ -600,6 +678,7 @@ export default function AgentConfigClient({
                         setProvider={setSummaryProvider}
                         model={summaryModel}
                         setModel={setSummaryModel}
+                        openRouterModels={openRouterModels}
                       />
                     </div>
                   </div>
