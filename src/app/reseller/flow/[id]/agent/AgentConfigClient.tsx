@@ -108,7 +108,7 @@ const AGENT_CONFIG = {
 };
 
 const EMOTION_TTS_OPTIONS = [
-  { value: "elevenlabs-multilingual-v3", label: "ElevenLabs Multilingual v3" },
+  { value: "eleven_v3", label: "ElevenLabs Multilingual v3" },
 ];
 
 // --- REUSABLE COMPONENTS ---
@@ -468,7 +468,7 @@ export default function AgentConfigClient({
     initialConfig?.emotion || false
   );
   const [emotionModel, setEmotionModel] = useState<string>(
-    initialConfig?.emotionModel || "elevenlabs-multilingual-v3"
+    initialConfig?.emotionModel || "eleven_v3"
   );
 
   // --- FEEDBACK STATES ---
@@ -486,7 +486,7 @@ export default function AgentConfigClient({
     initialConfig?.feedbackEmotion || false
   );
   const [feedbackEmotionModel, setFeedbackEmotionModel] = useState<string>(
-    initialConfig?.feedbackEmotionModel || "elevenlabs-multilingual-v3"
+    initialConfig?.feedbackEmotionModel || "eleven_v3"
   );
 
   // --- SUMMARY STATES ---
@@ -504,7 +504,7 @@ export default function AgentConfigClient({
     initialConfig?.summaryEmotion || false
   );
   const [summaryEmotionModel, setSummaryEmotionModel] = useState<string>(
-    initialConfig?.summaryEmotionModel || "elevenlabs-multilingual-v3"
+    initialConfig?.summaryEmotionModel || "eleven_v3"
   );
 
   // --- OPENROUTER STATE & EFFECT ---
@@ -552,7 +552,7 @@ export default function AgentConfigClient({
     model !== (initialConfig?.model || "llama-3.1-8b-instant") ||
     emotion !== (initialConfig?.emotion || false) ||
     emotionModel !==
-      (initialConfig?.emotionModel || "elevenlabs-multilingual-v3") ||
+      (initialConfig?.emotionModel || "eleven_v3") ||
     (isRolePlay &&
       (traineeName !==
         (initialConfig?.traineeName || (currentDefaults as any).traineeName) ||
@@ -565,7 +565,7 @@ export default function AgentConfigClient({
         feedbackEmotion !== (initialConfig?.feedbackEmotion || false) ||
         feedbackEmotionModel !==
           (initialConfig?.feedbackEmotionModel ||
-            "elevenlabs-multilingual-v3") ||
+            "eleven_v3") ||
         summaryPrompt !==
           (initialConfig?.summaryPrompt ||
             (currentDefaults as any).summaryPrompt) ||
@@ -575,7 +575,7 @@ export default function AgentConfigClient({
         summaryEmotion !== (initialConfig?.summaryEmotion || false) ||
         summaryEmotionModel !==
           (initialConfig?.summaryEmotionModel ||
-            "elevenlabs-multilingual-v3")));
+            "eleven_v3")));
 
   useUnsavedChanges(isDirty);
 

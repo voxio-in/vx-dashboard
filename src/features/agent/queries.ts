@@ -47,14 +47,14 @@ export async function getAgentByFlowId(agentId?: string) {
     let feedbackProvider = "groq";
     let feedbackModel = "llama-3.3-70b-versatile";
     let feedbackEmotion = false;
-    let feedbackEmotionModel = "elevenlabs-multilingual-v3";
+    let feedbackEmotionModel = "eleven_v3";
 
     // Summary defaults
     let summaryPrompt = "";
     let summaryProvider = "groq";
     let summaryModel = "llama-3.3-70b-versatile";
     let summaryEmotion = false;
-    let summaryEmotionModel = "elevenlabs-multilingual-v3";
+    let summaryEmotionModel = "eleven_v3";
 
     if (isRolePlay) {
       traineeName = variables?.trainee_name?.default || "";
@@ -66,7 +66,7 @@ export async function getAgentByFlowId(agentId?: string) {
       feedbackModel = fbParams.model || "llama-3.3-70b-versatile";
       feedbackEmotion = fbParams.emotion || false;
       feedbackEmotionModel =
-        fbParams.emotion_tts || "elevenlabs-multilingual-v3";
+        fbParams.emotion_tts || "eleven_v3";
 
       // Summary
       const sumParams = nodes.summary?.parameters || {};
@@ -75,7 +75,7 @@ export async function getAgentByFlowId(agentId?: string) {
       summaryModel = sumParams.model || "llama-3.3-70b-versatile";
       summaryEmotion = sumParams.emotion || false;
       summaryEmotionModel =
-        sumParams.emotion_tts || "elevenlabs-multilingual-v3";
+        sumParams.emotion_tts || "eleven_v3";
     }
 
     return {
@@ -86,7 +86,7 @@ export async function getAgentByFlowId(agentId?: string) {
       provider: mainParams.service || "groq",
       model: mainParams.model || "llama-3.3-70b-versatile",
       emotion: mainParams.emotion || false,
-      emotionModel: mainParams.emotion_tts || "elevenlabs-multilingual-v3",
+      emotionModel: mainParams.emotion_tts || "eleven_v3",
       // Role Play Configs
       traineeName,
       feedbackPrompt,

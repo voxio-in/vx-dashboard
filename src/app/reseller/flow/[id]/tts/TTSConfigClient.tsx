@@ -48,7 +48,7 @@ const LANG_MAP: Record<string, string> = {
 };
 
 const ELEVENLABS_MODELS = [
-  "eleven_multilingual_v3",
+  "eleven_v3",
   "eleven_multilingual_v2",
   "flash",
 ];
@@ -671,7 +671,7 @@ export default function TTSConfigClient({
     (initialConfig?.provider as ProviderType) || "elevenlabs"
   );
   const [model, setModel] = useState<string>(
-    initialConfig?.model || "eleven_multilingual_v3"
+    initialConfig?.model || "eleven_v3"
   );
   const [voiceId, setVoiceId] = useState<string>(initialConfig?.voiceId || "");
 
@@ -687,7 +687,7 @@ export default function TTSConfigClient({
 
   const isDirty =
     provider !== (initialConfig?.provider || "elevenlabs") ||
-    model !== (initialConfig?.model || "eleven_multilingual_v3") ||
+    model !== (initialConfig?.model || "eleven_v3") ||
     voiceId !== (initialConfig?.voiceId || "");
 
   useUnsavedChanges(isDirty);

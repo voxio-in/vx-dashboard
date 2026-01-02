@@ -46,7 +46,7 @@ const getDefaultAgentStructure = () => ({
           model: "llama-3.3-70b-versatile",
           history_key: "conversation_history",
           emotion: false,
-          emotion_tts: "elevenlabs-multilingual-v3",
+          emotion_tts: "eleven_v3",
           llm_return_type: {
             speak: { type: "str" },
           },
