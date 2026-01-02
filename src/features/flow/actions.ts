@@ -69,6 +69,8 @@ const STANDARD_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "conversation_history",
+        emotion: false,
+        emotion_tts: "eleven_v3",
         llm_return_type: {
           speak: {
             type: "str",
@@ -145,6 +147,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "conversation_history",
+        emotion: false,
+        emotion_tts: "eleven_v3",
         llm_return_type: {
           speak: {
             type: "str",
@@ -192,6 +196,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "feedback_conversation_history",
+        emotion: false,
+        emotion_tts: "eleven_v3",
         llm_return_type: {
           llm_response: {
             type: "str",
@@ -217,6 +223,8 @@ const ROLEPLAY_WORKFLOW = {
         service: "groq",
         model: "llama-3.3-70b-versatile",
         history_key: "feedback_conversation_history",
+        emotion: false,
+        emotion_tts: "eleven_v3",
         llm_return_type: {
           summary: {
             type: "str",
@@ -286,7 +294,7 @@ export async function createFlow(
 
     const newTTS = await TTS.create({
       service: "elevenlabs",
-      "model-name": "eleven_multilingual_v3",
+      "model-name": "eleven_v3",
       voice_id: "1FcaCa84nUabCNNwbzBa",
     });
 

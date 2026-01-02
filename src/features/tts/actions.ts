@@ -18,7 +18,7 @@ const TTSFormSchema = z
       (data.provider === "elevenlabs" ||
         // @ts-ignore - "rime" is not in the enum anymore, but keeping logic commented or clean
         // data.provider === "rime" ||
-        data.provider === "eleven_multilingual_v3s") &&
+        data.provider === "eleven_v3") &&
       (!data.voiceId || data.voiceId.trim() === "")
     ) {
       ctx.addIssue({

@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       // --- DEFAULTING TO ELEVENLABS ---
       // We must provide a valid default so registration doesn't break
       service: "elevenlabs",
-      "model-name": "eleven_multilingual_v3",
+      "model-name": "eleven_v3",
       voice_id: "1FcaCa84nUabCNNwbzBa", // Default voice (Rachel)
     });
     console.log(`✅ [Register API] TTS Created: ${newTTS._id}`);

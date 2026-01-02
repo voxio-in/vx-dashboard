@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   ChevronRight,
@@ -19,6 +20,10 @@ import {
   User,
   FileText,
   ClipboardList,
+  Sparkles,
+  Mic,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,17 +34,29 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 import { IFlow } from "@/types";
 import { saveAgentConfiguration } from "@/features/agent/actions";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import TestFlowDialog from "@/components/TestFlowDialog";
-import { Input } from "@/components/ui/input";
+
+// --- TYPES ---
+type ModelOption = {
+  value: string;
+  label: string;
+  description?: string;
+};
 
 // --- DEFAULTS ---
 const STANDARD_DEFAULTS = {
@@ -60,16 +77,39 @@ const ROLEPLAY_DEFAULTS = {
 };
 
 const AGENT_CONFIG = {
-  providers: [{ value: "groq", label: "Groq" }] as const,
+  providers: [
+    { value: "groq", label: "Groq" },
+    { value: "openrouter", label: "OpenRouter" },
+  ] as const,
   models: {
     groq: [
-      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
-      { value: "openai/gpt-oss-120b", label: "GPT OSS 120B" },
-      { value: "openai/gpt-oss-20b", label: "GPT OSS 20B" },
-    ],
+      {
+        value: "llama-3.1-8b-instant",
+        label: "Llama 3.1 8B Instant",
+        description: "Fast and efficient Llama model",
+      },
+      {
+        value: "llama-3.3-70b-versatile",
+        label: "Llama 3.3 70B Versatile",
+        description: "High performance Llama model",
+      },
+      {
+        value: "openai/gpt-oss-120b",
+        label: "GPT OSS 120B",
+        description: "Large scale open source GPT",
+      },
+      {
+        value: "openai/gpt-oss-20b",
+        label: "GPT OSS 20B",
+        description: "Smaller scale open source GPT",
+      },
+    ] as ModelOption[],
   },
 };
+
+const EMOTION_TTS_OPTIONS = [
+  { value: "eleven_v3", label: "ElevenLabs Multilingual v3" },
+];
 
 // --- REUSABLE COMPONENTS ---
 
@@ -130,58 +170,205 @@ const ProviderModelSelector = ({
   setProvider,
   model,
   setModel,
+  openRouterModels,
+  emotionEnabled,
+  setEmotionEnabled,
+  emotionModel,
+  setEmotionModel,
 }: {
   provider: string;
   setProvider: (val: string) => void;
   model: string;
   setModel: (val: string) => void;
+  openRouterModels: ModelOption[];
+  emotionEnabled: boolean;
+  setEmotionEnabled: (val: boolean) => void;
+  emotionModel: string;
+  setEmotionModel: (val: string) => void;
 }) => {
+  // Model Search State
+  const [modelOpen, setModelOpen] = useState(false);
+  const [modelSearchTerm, setModelSearchTerm] = useState("");
+
   const handleProviderChange = (value: string) => {
     setProvider(value);
+
+    // Reset to the first model of the new provider
     if (value === "groq") {
       setModel(AGENT_CONFIG.models.groq[0].value);
+    } else if (value === "openrouter" && openRouterModels.length > 0) {
+      setModel(openRouterModels[0].value);
     }
+    // Reset search when provider changes
+    setModelSearchTerm("");
   };
 
   const currentModels =
-    AGENT_CONFIG.models[provider as keyof typeof AGENT_CONFIG.models] || [];
+    provider === "openrouter"
+      ? openRouterModels
+      : AGENT_CONFIG.models.groq || [];
+
+  // Find currently selected model to show its description in the tooltip and label on button
+  const selectedModelData = currentModels.find((m) => m.value === model);
+  const infoText = selectedModelData?.description || "Specific AI model";
+
+  // Filter models based on search term
+  const filteredModels = currentModels.filter((m) =>
+    m.label.toLowerCase().includes(modelSearchTerm.toLowerCase())
+  );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-100 dark:border-slate-800">
-      <div className="space-y-2">
-        <LabelWithInfo label="Provider" info="Model provider" />
-        <div className="relative">
-          <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-          <Select value={provider} onValueChange={handleProviderChange}>
-            <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {AGENT_CONFIG.providers.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="p-4 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-100 dark:border-slate-800 space-y-6">
+      {/* Provider & Model Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* PROVIDER - STANDARD SELECT (No Search) */}
+        <div className="space-y-2">
+          <LabelWithInfo label="Provider" info="Model provider" />
+          <div className="relative">
+            <Box className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+            <Select value={provider} onValueChange={handleProviderChange}>
+              {/* Added pl-12 to align symmetrically with Model selector */}
+              <SelectTrigger className="w-full h-11 pl-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AGENT_CONFIG.providers.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* MODEL - CUSTOM SEARCHABLE DROPDOWN */}
+        <div className="space-y-2">
+          <LabelWithInfo label="Model" info={infoText} />
+          <div className="relative">
+            {/* Icon is placed absolute. */}
+            <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+
+            <Popover open={modelOpen} onOpenChange={setModelOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost" // Use ghost to strip default variant borders
+                  role="combobox"
+                  aria-expanded={modelOpen}
+                  disabled={
+                    provider === "openrouter" && currentModels.length === 0
+                  }
+                  // Manually applied border classes to match Provider box exactly
+                  // Added !pl-12 to strictly prevent icon overlap
+                  className="w-full h-11 !pl-12 justify-between bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-normal text-sm hover:bg-white hover:text-slate-900 text-left rounded-md shadow-sm"
+                >
+                  <span className="truncate flex-1 text-left">
+                    {provider === "openrouter" && currentModels.length === 0
+                      ? "Loading..."
+                      : selectedModelData?.label || "Select model..."}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[--radix-popover-trigger-width] p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl"
+                align="start"
+              >
+                {/* Search Input */}
+                <div className="mb-2">
+                  <Input
+                    placeholder="Search model..."
+                    value={modelSearchTerm}
+                    onChange={(e) => setModelSearchTerm(e.target.value)}
+                    className="h-9 bg-slate-50 dark:bg-slate-950"
+                  />
+                </div>
+
+                {/* List Items */}
+                <div className="max-h-[300px] overflow-y-auto space-y-1">
+                  {filteredModels.length === 0 ? (
+                    <div className="py-6 text-center text-sm text-slate-500">
+                      {currentModels.length === 0
+                        ? "No models available"
+                        : "No matching models"}
+                    </div>
+                  ) : (
+                    filteredModels.map((item) => (
+                      <div
+                        key={item.value}
+                        onClick={() => {
+                          setModel(item.value);
+                          setModelOpen(false);
+                          setModelSearchTerm("");
+                        }}
+                        className={cn(
+                          "flex items-center justify-between px-2 py-2 text-sm rounded-md cursor-pointer transition-colors",
+                          "hover:bg-slate-100 dark:hover:bg-slate-800",
+                          model === item.value
+                            ? "bg-slate-100 dark:bg-slate-800 font-medium"
+                            : ""
+                        )}
+                      >
+                        <span className="truncate flex-1">{item.label}</span>
+                        <Check
+                          className={cn(
+                            "ml-2 h-4 w-4 shrink-0",
+                            model === item.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
-      <div className="space-y-2">
-        <LabelWithInfo label="Model" info="Specific AI model" />
-        <div className="relative">
-          <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-          <Select value={model} onValueChange={setModel}>
-            <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {currentModels.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+      {/* Emotion Checkbox & Dropdown */}
+      <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="emotion-checkbox"
+              checked={emotionEnabled}
+              onChange={(e) => setEmotionEnabled(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <label
+              htmlFor="emotion-checkbox"
+              className="text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              Enable Emotion
+            </label>
+          </div>
+
+          {emotionEnabled && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+              <LabelWithInfo
+                label="Emotion TTS Model"
+                info="Select the Text-to-Speech model capable of emotional output."
+              />
+              <div className="relative">
+                <Mic className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+                <Select value={emotionModel} onValueChange={setEmotionModel}>
+                  <SelectTrigger className="w-full h-11 pl-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMOTION_TTS_OPTIONS.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -257,7 +444,6 @@ export default function AgentConfigClient({
   const currentDefaults = isRolePlay ? ROLEPLAY_DEFAULTS : STANDARD_DEFAULTS;
 
   // --- STATE INITIALIZATION ---
-  // If DB has value, use it. If not, use Default.
 
   const [greeting, setGreeting] = useState(
     initialConfig?.greeting || currentDefaults.greeting
@@ -268,41 +454,85 @@ export default function AgentConfigClient({
       (isRolePlay ? (currentDefaults as any).traineeName : "")
   );
 
+  // --- MAIN LLM STATES ---
   const [systemPrompt, setSystemPrompt] = useState(
     initialConfig?.systemPrompt || currentDefaults.systemPrompt
   );
-
-  const [feedbackPrompt, setFeedbackPrompt] = useState(
-    initialConfig?.feedbackPrompt ||
-      (isRolePlay ? (currentDefaults as any).feedbackPrompt : "")
-  );
-
-  const [summaryPrompt, setSummaryPrompt] = useState(
-    initialConfig?.summaryPrompt ||
-      (isRolePlay ? (currentDefaults as any).summaryPrompt : "")
-  );
-
-  // --- SELECT STATES ---
   const [provider, setProvider] = useState<string>(
     initialConfig?.provider || "groq"
   );
   const [model, setModel] = useState<string>(
     initialConfig?.model || "llama-3.1-8b-instant"
   );
+  const [emotion, setEmotion] = useState<boolean>(
+    initialConfig?.emotion || false
+  );
+  const [emotionModel, setEmotionModel] = useState<string>(
+    initialConfig?.emotionModel || "eleven_v3"
+  );
 
+  // --- FEEDBACK STATES ---
+  const [feedbackPrompt, setFeedbackPrompt] = useState(
+    initialConfig?.feedbackPrompt ||
+      (isRolePlay ? (currentDefaults as any).feedbackPrompt : "")
+  );
   const [feedbackProvider, setFeedbackProvider] = useState<string>(
     initialConfig?.feedbackProvider || "groq"
   );
   const [feedbackModel, setFeedbackModel] = useState<string>(
     initialConfig?.feedbackModel || "llama-3.3-70b-versatile"
   );
+  const [feedbackEmotion, setFeedbackEmotion] = useState<boolean>(
+    initialConfig?.feedbackEmotion || false
+  );
+  const [feedbackEmotionModel, setFeedbackEmotionModel] = useState<string>(
+    initialConfig?.feedbackEmotionModel || "eleven_v3"
+  );
 
+  // --- SUMMARY STATES ---
+  const [summaryPrompt, setSummaryPrompt] = useState(
+    initialConfig?.summaryPrompt ||
+      (isRolePlay ? (currentDefaults as any).summaryPrompt : "")
+  );
   const [summaryProvider, setSummaryProvider] = useState<string>(
     initialConfig?.summaryProvider || "groq"
   );
   const [summaryModel, setSummaryModel] = useState<string>(
     initialConfig?.summaryModel || "llama-3.3-70b-versatile"
   );
+  const [summaryEmotion, setSummaryEmotion] = useState<boolean>(
+    initialConfig?.summaryEmotion || false
+  );
+  const [summaryEmotionModel, setSummaryEmotionModel] = useState<string>(
+    initialConfig?.summaryEmotionModel || "eleven_v3"
+  );
+
+  // --- OPENROUTER STATE & EFFECT ---
+  const [openRouterModels, setOpenRouterModels] = useState<ModelOption[]>([]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/models");
+        const data = await res.json();
+        if (data?.data) {
+          const mapped = data.data.map((m: any) => ({
+            value: m.id,
+            label: m.name,
+            description: m.description || "No description available",
+          }));
+          mapped.sort((a: ModelOption, b: ModelOption) =>
+            a.label.localeCompare(b.label)
+          );
+          setOpenRouterModels(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to fetch openrouter models", err);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -320,6 +550,9 @@ export default function AgentConfigClient({
       (initialConfig?.systemPrompt || currentDefaults.systemPrompt) ||
     provider !== (initialConfig?.provider || "groq") ||
     model !== (initialConfig?.model || "llama-3.1-8b-instant") ||
+    emotion !== (initialConfig?.emotion || false) ||
+    emotionModel !==
+      (initialConfig?.emotionModel || "eleven_v3") ||
     (isRolePlay &&
       (traineeName !==
         (initialConfig?.traineeName || (currentDefaults as any).traineeName) ||
@@ -329,12 +562,20 @@ export default function AgentConfigClient({
         feedbackProvider !== (initialConfig?.feedbackProvider || "groq") ||
         feedbackModel !==
           (initialConfig?.feedbackModel || "llama-3.3-70b-versatile") ||
+        feedbackEmotion !== (initialConfig?.feedbackEmotion || false) ||
+        feedbackEmotionModel !==
+          (initialConfig?.feedbackEmotionModel ||
+            "eleven_v3") ||
         summaryPrompt !==
           (initialConfig?.summaryPrompt ||
             (currentDefaults as any).summaryPrompt) ||
         summaryProvider !== (initialConfig?.summaryProvider || "groq") ||
         summaryModel !==
-          (initialConfig?.summaryModel || "llama-3.3-70b-versatile")));
+          (initialConfig?.summaryModel || "llama-3.3-70b-versatile") ||
+        summaryEmotion !== (initialConfig?.summaryEmotion || false) ||
+        summaryEmotionModel !==
+          (initialConfig?.summaryEmotionModel ||
+            "eleven_v3")));
 
   useUnsavedChanges(isDirty);
 
@@ -347,11 +588,9 @@ export default function AgentConfigClient({
   const handleSave = async () => {
     setIsSaving(true);
 
-    // If a field is empty, fallback to default for saving
     const finalGreeting = greeting || currentDefaults.greeting;
     const finalSystemPrompt = systemPrompt || currentDefaults.systemPrompt;
 
-    // Roleplay specific fallbacks
     const finalTraineeName = isRolePlay
       ? traineeName || (currentDefaults as any).traineeName
       : undefined;
@@ -367,13 +606,19 @@ export default function AgentConfigClient({
       systemPrompt: finalSystemPrompt,
       provider,
       model,
+      emotion,
+      emotionModel,
       traineeName: finalTraineeName,
       feedbackPrompt: finalFeedbackPrompt,
       feedbackProvider,
       feedbackModel,
+      feedbackEmotion,
+      feedbackEmotionModel,
       summaryPrompt: finalSummaryPrompt,
       summaryProvider,
       summaryModel,
+      summaryEmotion,
+      summaryEmotionModel,
     };
 
     try {
@@ -386,7 +631,6 @@ export default function AgentConfigClient({
           message: "Configuration saved successfully.",
         });
 
-        // Update local state to match what we sent to backend (if user cleared a box)
         if (!greeting) setGreeting(currentDefaults.greeting);
         if (!systemPrompt) setSystemPrompt(currentDefaults.systemPrompt);
         if (isRolePlay) {
@@ -550,6 +794,11 @@ export default function AgentConfigClient({
                   setProvider={setProvider}
                   model={model}
                   setModel={setModel}
+                  openRouterModels={openRouterModels}
+                  emotionEnabled={emotion}
+                  setEmotionEnabled={setEmotion}
+                  emotionModel={emotionModel}
+                  setEmotionModel={setEmotionModel}
                 />
               </div>
 
@@ -578,6 +827,11 @@ export default function AgentConfigClient({
                         setProvider={setFeedbackProvider}
                         model={feedbackModel}
                         setModel={setFeedbackModel}
+                        openRouterModels={openRouterModels}
+                        emotionEnabled={feedbackEmotion}
+                        setEmotionEnabled={setFeedbackEmotion}
+                        emotionModel={feedbackEmotionModel}
+                        setEmotionModel={setFeedbackEmotionModel}
                       />
                     </div>
 
@@ -600,6 +854,11 @@ export default function AgentConfigClient({
                         setProvider={setSummaryProvider}
                         model={summaryModel}
                         setModel={setSummaryModel}
+                        openRouterModels={openRouterModels}
+                        emotionEnabled={summaryEmotion}
+                        setEmotionEnabled={setSummaryEmotion}
+                        emotionModel={summaryEmotionModel}
+                        setEmotionModel={setSummaryEmotionModel}
                       />
                     </div>
                   </div>
