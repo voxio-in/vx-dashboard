@@ -551,8 +551,7 @@ export default function AgentConfigClient({
     provider !== (initialConfig?.provider || "groq") ||
     model !== (initialConfig?.model || "llama-3.1-8b-instant") ||
     emotion !== (initialConfig?.emotion || false) ||
-    emotionModel !==
-      (initialConfig?.emotionModel || "eleven_v3") ||
+    emotionModel !== (initialConfig?.emotionModel || "eleven_v3") ||
     (isRolePlay &&
       (traineeName !==
         (initialConfig?.traineeName || (currentDefaults as any).traineeName) ||
@@ -564,8 +563,7 @@ export default function AgentConfigClient({
           (initialConfig?.feedbackModel || "llama-3.3-70b-versatile") ||
         feedbackEmotion !== (initialConfig?.feedbackEmotion || false) ||
         feedbackEmotionModel !==
-          (initialConfig?.feedbackEmotionModel ||
-            "eleven_v3") ||
+          (initialConfig?.feedbackEmotionModel || "eleven_v3") ||
         summaryPrompt !==
           (initialConfig?.summaryPrompt ||
             (currentDefaults as any).summaryPrompt) ||
@@ -574,8 +572,7 @@ export default function AgentConfigClient({
           (initialConfig?.summaryModel || "llama-3.3-70b-versatile") ||
         summaryEmotion !== (initialConfig?.summaryEmotion || false) ||
         summaryEmotionModel !==
-          (initialConfig?.summaryEmotionModel ||
-            "eleven_v3")));
+          (initialConfig?.summaryEmotionModel || "eleven_v3")));
 
   useUnsavedChanges(isDirty);
 

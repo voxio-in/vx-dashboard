@@ -47,11 +47,7 @@ const LANG_MAP: Record<string, string> = {
   hin: "Hindi",
 };
 
-const ELEVENLABS_MODELS = [
-  "eleven_v3",
-  "eleven_multilingual_v2",
-  "flash",
-];
+const ELEVENLABS_MODELS = ["eleven_v3", "eleven_multilingual_v2", "flash"];
 
 /* 
 const DEEPGRAM_MODELS = [
@@ -578,6 +574,240 @@ const RIME_VOICES: Record<string, Record<string, string[]>> = {
 };
 */
 
+const ELEVENLABS_V3_VOICES = [
+  {
+    name: "Ellen",
+    voice_id: "BIvP0GN1cAtSRTxNHnWS",
+    tagline: "Serious, Direct and Confident",
+    description: "Calm female voice with a serious and direct tone.",
+  },
+  {
+    name: "Juniper",
+    voice_id: "aMSt68OGf4xUZAnLpTU8",
+    tagline: "Grounded and Professional",
+    description: "A grounded female professional voice.",
+  },
+  {
+    name: "Jane",
+    voice_id: "RILOU7YmBhvwJGDGjNmP",
+    tagline: "Professional Audiobook Reader",
+    description: "Professional Audiobook Reader with a polished tone.",
+  },
+  {
+    name: "James",
+    voice_id: "EkK5I93UQWFDigLMpZcX",
+    tagline: "Husky, Engaging and Bold",
+    description: "Husky & Engaging - A slightly deep male voice.",
+  },
+  {
+    name: "Arabella",
+    voice_id: "Z3R5wn05IrDiVCyEkUrK",
+    tagline: "Mysterious and Emotive",
+    description: "A young, mature female narrator with a mysterious edge.",
+  },
+  {
+    name: "Hope",
+    voice_id: "tnSpp4vdxKPjI9w0GnoV",
+    tagline: "Upbeat and Clear",
+    description: "A pleasant, upbeat and clear female voice.",
+  },
+  {
+    name: "Bradford",
+    voice_id: "NNl6r8mD7vthiJatiJt1",
+    tagline: "Expressive and Articulate",
+    description: "An adult British Male Storyteller.",
+  },
+  {
+    name: "Xavier",
+    voice_id: "YOq2y2Up4RgXP2HyXjE5",
+    tagline: "Dominating, Metalic Announcer",
+    description: "Gaming – Unreal Tonemanagement 2003 style announcer.",
+  },
+  {
+    name: "Austin",
+    voice_id: "Bj9UqZbhQsanLzgalpEG",
+    tagline: "Deep, Raspy and Authentic",
+    description: "Good ol' Texas boy - Good ol' authentic rasp.",
+  },
+  {
+    name: "Jarnathan",
+    voice_id: "c6SfcYrb2t09NHXiT80T",
+    tagline: "Confident and Versatile",
+    description: "Warm, confident, versatile male voice.",
+  },
+  {
+    name: "Kuon",
+    voice_id: "B8gJV1IhpuegLxdpXFOE",
+    tagline: "Cheerful, Clear and Steady",
+    description: "Acute female & fantastic voice.",
+  },
+  {
+    name: "Blondie",
+    voice_id: "exsUS4vynmxd379XN4yO",
+    tagline: "Conversational",
+    description: "A British woman with a warm, natural tone.",
+  },
+  {
+    name: "Priyanka",
+    voice_id: "BpjGufoPiobT79j2vtj4",
+    tagline: "Calm, Neutral and Relaxed",
+    description: "Late Night Radio host style voice.",
+  },
+  {
+    name: "Monika Sogam",
+    voice_id: "2zRM7PkgwBPiau2jvVXc",
+    tagline: "Deep and Natural",
+    description: "Indian English accent, deep and natural.",
+  },
+  {
+    name: "Mark",
+    voice_id: "1SM7GgM6IMuvQlz2BwM3",
+    tagline: "Casual, Relaxed and Light",
+    description: "Casual conversational AI voice.",
+  },
+  {
+    name: "Grimblewood Thornwhisker",
+    voice_id: "ouL9IsyrSnUkCmfnD02u",
+    tagline: "Snarky Gnome",
+    description: "Professional British character voice - high pitch.",
+  },
+  {
+    name: "Adeline",
+    voice_id: "5l5f8iK3YPeGga21rQIX",
+    tagline: "Feminine and Conversational",
+    description: "A conversational, feminine voice.",
+  },
+  {
+    name: "Sam",
+    voice_id: "scOwDtmlUjD3prqpp97I",
+    tagline: "Support Agent",
+    description: "Support Agent & Audiobooks style.",
+  },
+  {
+    name: "Spuds Oxley",
+    voice_id: "NOpBlnGInO9m6vDvFkFC",
+    tagline: "Wise and Approachable",
+    description: "Grandpa Spuds Oxley - A friendly grandpa voice.",
+  },
+  {
+    name: "Eve",
+    voice_id: "BZgkqPqms7Kj9ulSkVzn",
+    tagline: "Authentic, Energetic and Happy",
+    description: "Great for V3, conversation, and energetic reads.",
+  },
+  {
+    name: "Northern Terry",
+    voice_id: "wo6udizrrtpIxWGp2qJk",
+    tagline: "Eccentric & Husky",
+    description: "Eccentric & husky character from the North.",
+  },
+  {
+    name: "Dr. Von",
+    voice_id: "yjJ45q8TVCrtMhEKurxY",
+    tagline: "Quirky, Mad Scientist",
+    description: "Quirky Mad Scientist character voice.",
+  },
+  {
+    name: "British Football Announcer",
+    voice_id: "gU0LNdkMOQCOrPrwtbee",
+    tagline: "Energetic and Fast-Paced",
+    description: "Energetic, fast-paced, crisp British accent.",
+  },
+  {
+    name: "Brock",
+    voice_id: "DGzg6RaUqxGRTHSBjfgF",
+    tagline: "Commanding and Loud Sergeant",
+    description: "Drill Sergeant - Harsh, barking tone.",
+  },
+  {
+    name: "Célian",
+    voice_id: "DGTOOUoGpoP6UZ9uSWfA",
+    tagline: "Documentary Narrator",
+    description: "A warm, clear, and engaging narrator.",
+  },
+  {
+    name: "Nathan",
+    voice_id: "x70vRnQBMBu4FAYhjJbO",
+    tagline: "Virtual Radio Host",
+    description: "A dynamic and seasoned v3 ready voice.",
+  },
+  {
+    name: "Anika",
+    voice_id: "Sm1seazb4gs7RSlUVw7c",
+    tagline: "Animated, Friendly and Engaging",
+    description: "Animated and Friendly - Anika is engaging.",
+  },
+  {
+    name: "Viraj",
+    voice_id: "P1bg08DkjqiVEzOn76yG",
+    tagline: "Rich and Soft",
+    description: "Suspenseful and Engaging Narrator.",
+  },
+  {
+    name: "Taksh",
+    voice_id: "qDuRKMlYmrm8trt5QyBn",
+    tagline: "Calm, Serious and Smooth",
+    description: "Powerful & Commanding Voice.",
+  },
+  {
+    name: "Guadeloupe Merryweather",
+    voice_id: "kUUTqKQ05NMGulF08DDf",
+    tagline: "Emotional",
+    description: "A Pirate's emotional and distinct voice.",
+  },
+  {
+    name: "Horatius",
+    voice_id: "qXpMhyvQqiRxWQs4qSSB",
+    tagline: "Energetic Character Voice",
+    description: "Over the Top, Precocious character.",
+  },
+  {
+    name: "Liam",
+    voice_id: "TX3LPaxmHKxFdv7VOQHJ",
+    tagline: "Energetic, Social Media Creator",
+    description: "A young adult with energy and warmth.",
+  },
+  {
+    name: "Chris",
+    voice_id: "iP95p4xoKVk53GoZ742B",
+    tagline: "Charming, Down-to-Earth",
+    description:
+      "Natural and real, this down-to-earth voice is perfect for conversational content.",
+  },
+  {
+    name: "Harry",
+    voice_id: "SOYHLrjzK2X1ezoPC6cr",
+    tagline: "Fierce Warrior",
+    description: "An animated warrior ready to charge.",
+  },
+  {
+    name: "Callum",
+    voice_id: "N2lVS1w4EtoT3dr4eOWO",
+    tagline: "Husky Trickster",
+    description: "Deceptively gravelly, yet unsettling edge.",
+  },
+  {
+    name: "Laura",
+    voice_id: "FGY2WhTYpPnrIDTdsKH5",
+    tagline: "Enthusiast, Quirky Attitude",
+    description:
+      "This young adult female voice delivers an upbeat performance.",
+  },
+  {
+    name: "Charlotte",
+    voice_id: "XB0fDUnXU5powFXDhCwa",
+    tagline: "Seductive and Raspy",
+    description: "Sensual and raspy, she's ready to voice your content.",
+  },
+  {
+    name: "Jessica",
+    voice_id: "cgSgspJ2msm6clMCkdW9",
+    tagline: "Playful, Bright, Warm",
+    description:
+      "Young and popular, this playful American voice is great for narration.",
+  },
+];
+
 // --- COMPONENTS ---
 const LabelWithInfo = ({ label, info }: { label: string; info: string }) => (
   <div className="flex items-center gap-2 mb-2">
@@ -667,13 +897,37 @@ export default function TTSConfigClient({
   const router = useRouter();
   const { proceedWithAction } = useUnsavedChangesContext();
 
+  const savedModel = initialConfig?.model;
+  const isModelValid = savedModel && ELEVENLABS_MODELS.includes(savedModel);
+  const defaultModel = isModelValid ? savedModel : ELEVENLABS_MODELS[0];
+  const FALLBACK_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
+
+  // Calculate the correct starting Voice ID
+  const getInitialVoice = () => {
+    const rawVoice = initialConfig?.voiceId;
+
+    // 1. If nothing is saved, use fallback
+    if (!rawVoice) return FALLBACK_VOICE_ID;
+
+    // 2. If the model is 'eleven_v3', ensuring the saved voice actually exists in our list
+    if (defaultModel === "eleven_v3") {
+      const isValidV3 = ELEVENLABS_V3_VOICES.some(
+        (v) => v.voice_id === rawVoice
+      );
+      return isValidV3 ? rawVoice : FALLBACK_VOICE_ID;
+    }
+
+    // 3. For other models (or Input fields), return whatever was saved
+    return rawVoice;
+  };
+
+  const defaultVoice = getInitialVoice();
+
   const [provider, setProvider] = useState<ProviderType>(
     (initialConfig?.provider as ProviderType) || "elevenlabs"
   );
-  const [model, setModel] = useState<string>(
-    initialConfig?.model || "eleven_v3"
-  );
-  const [voiceId, setVoiceId] = useState<string>(initialConfig?.voiceId || "");
+  const [model, setModel] = useState<string>(defaultModel);
+  const [voiceId, setVoiceId] = useState<string>(defaultVoice);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -732,7 +986,7 @@ export default function TTSConfigClient({
 
     if (p === "elevenlabs") {
       setModel(ELEVENLABS_MODELS[0]);
-      setVoiceId("");
+      setVoiceId("TX3LPaxmHKxFdv7VOQHJ");
     }
     /* 
     else if (p === "rime") {
@@ -951,13 +1205,45 @@ export default function TTSConfigClient({
                   <LabelWithInfo
                     label="Voice"
                     info={
-                      // provider === "elevenlabs"
-                      /* ? */ "Enter your ElevenLabs Voice ID string."
-                      /* : "Select a specific voice for the chosen Rime model." */
+                      provider === "elevenlabs" && model === "eleven_v3"
+                        ? "Select a curated V3 voice."
+                        : "Enter your ElevenLabs Voice ID string."
                     }
                   />
 
-                  {provider === "elevenlabs" && (
+                  {provider === "elevenlabs" && model === "eleven_v3" && (
+                    <div className="relative">
+                      <Mic className="absolute left-3 top-4 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+
+                      <Select value={voiceId} onValueChange={setVoiceId}>
+                        <SelectTrigger className="w-full h-auto min-h-[3rem] py-2 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-left">
+                          <SelectValue placeholder="Select a V3 voice..." />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[400px]">
+                          {ELEVENLABS_V3_VOICES.map((voice) => (
+                            <SelectItem
+                              key={voice.voice_id}
+                              value={voice.voice_id}
+                              className="py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer"
+                            >
+                              <div className="flex flex-col gap-1 text-left">
+                                <span className="font-semibold text-slate-900 dark:text-slate-100 text-base">
+                                  {voice.name} - {voice.tagline}
+                                </span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                                  {voice.description}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* SCENARIO B: ElevenLabs + ANY OTHER Model (or just provider check default) -> Show TEXT INPUT */}
+                  {/* This preserves the original behavior for V2, Flash, etc. */}
+                  {provider === "elevenlabs" && model !== "eleven_v3" && (
                     <div className="relative">
                       <input
                         type="text"
