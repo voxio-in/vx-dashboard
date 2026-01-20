@@ -5,6 +5,8 @@ export interface IFlow {
   stt_id?: string;
   tts_id?: string;
   agent_id?: string;
+  "max-silence-counter": number;
+
   createdAt?: string;
   updatedAt?: string;
 }

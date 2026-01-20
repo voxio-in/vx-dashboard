@@ -253,7 +253,7 @@ const ROLEPLAY_WORKFLOW = {
 
 export async function createFlow(
   flowName: string,
-  isRolePlaying: boolean = false
+  isRolePlaying: boolean = false,
 ) {
   try {
     const user = await getCurrentUser();
@@ -281,9 +281,9 @@ export async function createFlow(
     }
 
     const newSTT = await STT.create({
-      service: "deepgram",
-      "model-name": "nova-3",
-      language: "multi",
+      service: "assemblyai",
+      "model-name": "universal",
+      language: "",
       prompt: "",
       temperature: 0,
       keyterms: "",
@@ -315,6 +315,8 @@ export async function createFlow(
       stt_id: newSTT._id,
       tts_id: newTTS._id,
       agent_id: newAgent._id,
+      "max-silence-counter": 20,
+
       faces: [],
     });
 
@@ -323,7 +325,7 @@ export async function createFlow(
     });
 
     console.log(
-      `[Flow Created] ID: ${newFlow._id} | RolePlay: ${isRolePlaying}`
+      `[Flow Created] ID: ${newFlow._id} | RolePlay: ${isRolePlaying}`,
     );
 
     revalidatePath("/reseller/panel");
@@ -379,5 +381,37 @@ export async function deleteFlow(flowId: string) {
   } catch (error: any) {
     console.error("Delete Flow Error:", error);
     return { success: false, message: "Internal Server Error" };
+  }
+}
+export async function updateFlowSilence(flowId: string, counterValue: number) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return { success: false, message: "Unauthorized" };
+
+    await connectDB();
+
+    const dbUser = await User.findById(user._id);
+
+    if (!dbUser) {
+      return { success: false, message: "User not found" };
+    }
+
+    const userFlows = dbUser.flows || [];
+
+    const isOwner = userFlows.some((id: any) => id.toString() === flowId);
+
+    if (!isOwner) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    await Flow.findByIdAndUpdate(flowId, {
+      "max-silence-counter": counterValue,
+    });
+
+    revalidatePath("/reseller/panel");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Update Silence Error:", error);
+    return { success: false, message: "Failed to update" };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   Play,
@@ -8,16 +8,37 @@ import {
   Mic,
   Bot,
   AudioLines,
+  Plus,
+  Minus,
+  Hash,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IFlow } from "@/types";
 import TestFlowDialog from "@/components/TestFlowDialog";
+import { updateFlowSilence } from "@/features/flow/actions";
 
 export default function FlowConfigClient({ flow }: { flow: IFlow }) {
   const router = useRouter();
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+  const [tickerValue, setTickerValue] = useState(
+    (flow["max-silence-counter"] || 20) * 32,
+  );
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      const backendValue = Math.floor(tickerValue / 32);
+      await updateFlowSilence(flow._id, backendValue);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [tickerValue, flow._id]);
 
   if (!flow) return null;
 
@@ -141,6 +162,53 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
               </p>
             </div>
             <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-orange-600" />
+          </div>
+          <div className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-pink-400 dark:hover:border-pink-600 hover:shadow-xl transition-all">
+            <div className="h-14 w-14 bg-pink-50 dark:bg-pink-900/20 rounded-full flex items-center justify-center text-pink-600 dark:text-pink-400 shrink-0 group-hover:scale-110 transition-transform">
+              <Hash className="h-7 w-7" />
+            </div>
+
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                  Release Time
+                </h3>
+              </div>
+              <p className="text-slate-500 dark:text-slate-400">
+                Defines the duration (in milliseconds) the system waits after
+                detecting that the user has stopped speaking to ensure the user
+                has completed their statement. This prevents the system from
+                prematurely processing incomplete input, which could result in
+                multiple bot responses to a single user utterance.
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setTickerValue((prev) => Math.max(0, prev - 32))}
+                className="h-10 w-10 rounded-md border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:text-red-500 transition-colors"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+
+              <div className="w-20 text-center font-mono text-xl font-bold text-slate-900 dark:text-slate-100">
+                {tickerValue}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() =>
+                  setTickerValue((prev) => Math.min(32000, prev + 32))
+                }
+                className="h-10 w-10 rounded-md border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-800 hover:text-green-500 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </main>
