@@ -113,12 +113,15 @@ const STT_CONFIG = {
   providers: [
     { value: "groq", label: "Groq" },
     { value: "deepgram", label: "Deepgram" },
+    { value: "assemblyai", label: "AssemblyAI" },
   ] as const,
   models: {
     groq: [
       { value: "whisper-large-v3", label: "Whisper Large V3" },
       { value: "whisper-large-v3-turbo", label: "Whisper Large V3 Turbo" },
     ],
+    assemblyai: [{ value: "universal", label: "Universal" }],
+
     deepgram: [
       { value: "nova-3", label: "Nova 3" },
       // { value: "nova-2", label: "Nova 2" },
@@ -154,10 +157,11 @@ const STT_CONFIG = {
       { value: "hu", label: "Hungarian" },
     ],
     deepgram: [{ value: "multi", label: "Multi-language" }],
+    assemblyai: [{ value: "en", label: "English" }],
   },
 };
 
-type ProviderType = "groq" | "deepgram";
+type ProviderType = "groq" | "deepgram" | "assemblyai";
 
 export default function STTConfigClient({
   flow,
@@ -171,15 +175,15 @@ export default function STTConfigClient({
   const { proceedWithAction } = useUnsavedChangesContext();
 
   const [provider, setProvider] = useState<ProviderType>(
-    (initialConfig?.service as ProviderType) || "groq"
+    (initialConfig?.service as ProviderType) || "assemblyai",
   );
   const [model, setModel] = useState(
-    initialConfig?.["model-name"] || "whisper-large-v3"
+    initialConfig?.["model-name"] || "universal",
   );
   const [language, setLanguage] = useState(initialConfig?.language || "en");
   const [prompt, setPrompt] = useState(initialConfig?.prompt || "");
   const [temperature, setTemperature] = useState(
-    initialConfig?.temperature || 0
+    initialConfig?.temperature || 0,
   );
   const [keyterms, setkeyterms] = useState(initialConfig?.keyterms || "");
 
@@ -219,10 +223,10 @@ export default function STTConfigClient({
     const formData = {
       provider,
       model,
-      language,
-      prompt,
-      temperature,
-      keyterms,
+      language: provider === "assemblyai" ? "" : language,
+      prompt: provider === "groq" ? prompt : "",
+      temperature: provider === "groq" ? temperature : 0,
+      keyterms: provider === "deepgram" ? keyterms : "",
     };
     try {
       const result = await saveSTTConfiguration(flow._id, formData);
@@ -350,7 +354,13 @@ export default function STTConfigClient({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
+                className={
+                  provider === "assemblyai"
+                    ? "space-y-6" // If AssemblyAI: Single column
+                    : "grid grid-cols-1 md:grid-cols-2 gap-6" // Others: Two columns
+                }
+              >
                 <div className="space-y-2">
                   <LabelWithInfo
                     label="Model"
@@ -369,24 +379,28 @@ export default function STTConfigClient({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <LabelWithInfo
-                    label="Language"
-                    info="Primary audio language (in case of multi, it will be multilingual, if forced to a single language, different language audio will be automatically transalated to that audio)"
-                  />
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {currentLanguages.map((l) => (
-                        <SelectItem key={l.value} value={l.value}>
-                          {l.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+
+                {/* Only show Language if provider is NOT AssemblyAI */}
+                {provider !== "assemblyai" && (
+                  <div className="space-y-2">
+                    <LabelWithInfo
+                      label="Language"
+                      info="Primary audio language (in case of multi, it will be multilingual, if forced to a single language, different language audio will be automatically transalated to that audio)"
+                    />
+                    <Select value={language} onValueChange={setLanguage}>
+                      <SelectTrigger className="w-full h-12 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[200px]">
+                        {currentLanguages.map((l) => (
+                          <SelectItem key={l.value} value={l.value}>
+                            {l.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
               <div className="h-[1px] bg-slate-200 dark:bg-slate-800 my-6" />
               {provider === "groq" && (
@@ -460,8 +474,8 @@ export default function STTConfigClient({
                 {isSaving
                   ? "Saving..."
                   : isDirty
-                  ? "Save Configuration"
-                  : "No Changes to Save"}
+                    ? "Save Configuration"
+                    : "No Changes to Save"}
               </Button>
             </div>
           </div>

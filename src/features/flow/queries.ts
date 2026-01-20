@@ -11,6 +11,8 @@ function serializeFlow(flow: any): IFlow {
     stt_id: flow.stt_id?.toString() || undefined,
     tts_id: flow.tts_id?.toString() || undefined,
     agent_id: flow.agent_id?.toString() || undefined,
+    "max-silence-counter": flow["max-silence-counter"] ?? 20,
+
     createdAt: flow.createdAt?.toISOString(), // Convert Date to String
   };
 }

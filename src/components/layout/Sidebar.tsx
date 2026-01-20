@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useUnsavedChangesContext } from "@/context/UnsavedChangesContext";
+import Image from "next/image";
+import logo from "../../../public/logo.png"; // Add this import
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -25,6 +27,16 @@ export default function Sidebar() {
   return (
     <aside className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shadow-sm z-30 h-screen">
       <div className="p-8 pb-6">
+        <div className="mb-8 flex justify-start">
+          <Image
+            src={logo}
+            alt="TM Capabara"
+            width={120}
+            height={40}
+            className="h-auto w-auto object-contain"
+            priority
+          />
+        </div>
         <div className="flex items-center gap-3 mb-6">
           <div className="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-md">
             <BarChart3 className="h-5 w-5" />
@@ -46,7 +58,7 @@ export default function Sidebar() {
             "w-full justify-start gap-3 h-12 text-sm font-semibold mb-2 transition-all cursor-pointer",
             isActive("/reseller")
               ? "bg-indigo-50 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-200"
-              : "text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              : "text-slate-700 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
           )}
         >
           <Workflow className="h-5 w-5" />

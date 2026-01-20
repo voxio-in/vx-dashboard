@@ -7,12 +7,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const STTFormSchema = z.object({
-  provider: z.enum(["groq", "deepgram"]),
+  provider: z.enum(["groq", "deepgram", "assemblyai"]),
   model: z.string().min(1, "Model is required"),
-  language: z.string().min(1, "Language is required"),
-  prompt: z.string().optional(),
+  language: z.string().optional().nullable().or(z.literal("")),
+  prompt: z.string().optional().or(z.literal("")),
   temperature: z.number().min(0).max(1).optional(),
-  keyterms: z.string().optional(),
+  keyterms: z.string().optional().or(z.literal("")),
 });
 
 export async function saveSTTConfiguration(flowId: string, rawData: any) {
@@ -25,7 +25,7 @@ export async function saveSTTConfiguration(flowId: string, rawData: any) {
 
     await connectDB();
 
-    const sttPayload = {
+    const sttPayload: any = {
       service: data.provider,
       "model-name": data.model,
       language: data.language,
@@ -55,7 +55,7 @@ export async function saveSTTConfiguration(flowId: string, rawData: any) {
         console.log(`[Action] Update SUCCESS.`);
       } else {
         console.warn(
-          `[Action] STT ID ${flow.stt_id} not found in DB. creating new one.`
+          `[Action] STT ID ${flow.stt_id} not found in DB. creating new one.`,
         );
 
         const newSTT = await STT.create(sttPayload);

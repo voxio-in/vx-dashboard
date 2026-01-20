@@ -7,6 +7,8 @@ export interface IFlow {
   tts_id?: mongoose.Types.ObjectId;
   agent_id?: mongoose.Types.ObjectId;
   faces: any[];
+  "max-silence-counter": number;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,8 +41,13 @@ const FlowSchema = new Schema<FlowDocument>(
       ref: "Agent",
       required: false,
     },
+    "max-silence-counter": {
+      type: Number,
+      default: 20,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Flow: Model<FlowDocument> =

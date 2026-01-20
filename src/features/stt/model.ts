@@ -1,12 +1,12 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ISTT {
-  service: "groq" | "deepgram";
+  service: "groq" | "deepgram" | "assemblyai";
   "model-name": string;
-  language: string;
-  prompt?: string;
-  temperature?: number;
-  keyterms?: string;
+  language?: string | null;
+  prompt?: string | null;
+  temperature?: number | null | 0;
+  keyterms?: string | null;
   channels: number;
   sample_rate: number;
   sample_width: number;
@@ -22,7 +22,7 @@ const STTSchema = new Schema<STTDocument>(
     service: {
       type: String,
       required: true,
-      enum: ["groq", "deepgram"],
+      enum: ["groq", "deepgram", "assemblyai"],
     },
     "model-name": {
       type: String,
@@ -30,7 +30,7 @@ const STTSchema = new Schema<STTDocument>(
     },
     language: {
       type: String,
-      required: true,
+      required: false,
     },
     prompt: { type: String, default: "" },
     temperature: { type: Number, default: 0 },
@@ -43,7 +43,7 @@ const STTSchema = new Schema<STTDocument>(
   {
     timestamps: true,
     collection: "stt",
-  }
+  },
 );
 
 const STT: Model<STTDocument> =
