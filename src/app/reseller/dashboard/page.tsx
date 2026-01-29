@@ -1,0 +1,951 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import {
+  format,
+  subDays,
+  subMonths,
+  addDays,
+  differenceInDays,
+} from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import { Toaster, toast } from "sonner";
+import {
+  Clock,
+  Smile,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Mic,
+  MessageCircle,
+  Phone,
+  ArrowUpDown,
+  Moon,
+  Sun,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Filter,
+  ChevronDown,
+  X,
+} from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// Mock Data Generator
+const getDashboardData = async (startDate: string, endDate: string) => {
+  await new Promise((res) => setTimeout(res, 1000));
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const daysDiff = differenceInDays(end, start) + 1;
+
+  const chartData = Array.from({ length: daysDiff }).map((_, i) => {
+    const date = addDays(start, i);
+    return {
+      date: format(date, "yyyy-MM-dd"),
+      label: format(date, "MMM dd"),
+      value: Math.floor(Math.random() * 50) + 10,
+      sessions: Math.floor(Math.random() * 30) + 5,
+    };
+  });
+
+  const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
+  const avgSession = Math.floor(
+    chartData.reduce((acc, curr) => acc + curr.sessions, 0) / chartData.length,
+  );
+
+  const interactions = Array.from({ length: 45 }).map((_, i) => ({
+    id: `id-${i}`,
+    type: i % 3 === 0 ? "Voice" : i % 3 === 1 ? "Chat" : "Call",
+    flowName: i % 2 === 0 ? "Customer Support" : "Sales Bot",
+    date: format(subDays(end, i % 10), "MMM dd, HH:mm"),
+    timestamp: subDays(end, i % 10).getTime(),
+    duration: `0${Math.floor(Math.random() * 9)}:${Math.floor(Math.random() * 59)}`,
+    summary:
+      i % 2 === 0
+        ? "Refund request and account status"
+        : "Pricing inquiry for enterprise",
+    status: i % 4 === 0 ? "Failed" : "Success",
+  }));
+
+  return {
+    metrics: {
+      total,
+      avgDuration: "04:12",
+      score: 8.4,
+      activeUsers: avgSession,
+      successRate: 92,
+      avgResponse: "1.2s",
+    },
+    chartData,
+    interactions,
+  };
+};
+
+type FilterType = "7d" | "30d" | "3m" | "custom";
+type Interaction = {
+  id: string;
+  type: string;
+  flowName: string;
+  date: string;
+  timestamp: number;
+  duration: string;
+  summary: string;
+  status: string;
+};
+
+// ============================================================================
+// REUSABLE UI COMPONENTS
+// ============================================================================
+
+interface CardProps {
+  className?: string;
+  children: React.ReactNode;
+  gradient?: boolean;
+}
+
+const Card = ({ className, children, gradient = false }: CardProps) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+    className={cn(
+      "rounded-2xl border bg-white dark:bg-gray-900 shadow-sm transition-all",
+      gradient
+        ? "border-transparent bg-gradient-to-br from-teal-500 to-emerald-500 text-white"
+        : "border-gray-200/60 dark:border-gray-800",
+      className,
+    )}
+  >
+    {children}
+  </motion.div>
+);
+
+interface ButtonProps {
+  className?: string;
+  variant?: "primary" | "outline" | "ghost" | "secondary";
+  size?: "sm" | "md";
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+const Button = ({
+  className,
+  variant = "primary",
+  size = "md",
+  children,
+  onClick,
+  disabled,
+}: ButtonProps) => {
+  const variants = {
+    primary:
+      "bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105",
+    outline:
+      "border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+    ghost:
+      "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400",
+    secondary:
+      "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700",
+  };
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/30 disabled:opacity-50",
+        variants[variant],
+        size === "sm" ? "px-3 py-2 text-xs" : "px-6 py-3 text-sm",
+        className,
+      )}
+    >
+      {children}
+    </motion.button>
+  );
+};
+
+const Badge = ({
+  children,
+  variant,
+  className,
+}: {
+  children: React.ReactNode;
+  variant: string;
+  className?: string;
+}) => {
+  const styles: any = {
+    teal: "bg-teal-500/10 text-teal-600 dark:text-teal-400 ring-1 ring-teal-500/20",
+    blue: "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20",
+    orange:
+      "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/20",
+    red: "bg-red-500/10 text-red-600 dark:text-red-400 ring-1 ring-red-500/20",
+    green:
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20",
+    gray: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium",
+        styles[variant] || styles.gray,
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+};
+
+const Skeleton = ({ className }: { className?: string }) => (
+  <div
+    className={cn(
+      "animate-pulse rounded-xl bg-gray-200/50 dark:bg-gray-800/50",
+      className,
+    )}
+  />
+);
+
+// ============================================================================
+// METRIC CARD WITH SPARKLINE
+// ============================================================================
+
+const MetricCard = ({
+  title,
+  value,
+  change,
+  trend,
+  icon: Icon,
+  sparklineData,
+  loading,
+}: any) => {
+  return (
+    <Card className="p-6 hover:shadow-lg transition-all group cursor-pointer overflow-hidden relative">
+      {/* Background Glow */}
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-all" />
+
+      <div className="relative">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+              {title}
+            </p>
+            <div className="flex items-baseline gap-2">
+              {loading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                <>
+                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {value}
+                  </h3>
+                  {change && (
+                    <span
+                      className={cn(
+                        "text-xs font-semibold flex items-center gap-1",
+                        trend === "up"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-red-600 dark:text-red-400",
+                      )}
+                    >
+                      {trend === "up" ? (
+                        <TrendingUp className="w-3 h-3" />
+                      ) : (
+                        <TrendingDown className="w-3 h-3" />
+                      )}
+                      {change}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 group-hover:from-teal-500/20 group-hover:to-emerald-500/20 transition-all">
+            <Icon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+          </div>
+        </div>
+
+        {/* Mini Sparkline */}
+        {sparklineData && !loading && (
+          <div className="h-12 -mx-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={sparklineData}>
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#14b8a6"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
+
+// ============================================================================
+// HERO CHART COMPONENT
+// ============================================================================
+
+const HeroChart = ({ data, loading }: any) => {
+  if (loading) return <Skeleton className="h-full w-full" />;
+
+  return (
+    <Card className="p-8 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            Interaction Volume
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Real-time activity across all channels
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Badge variant="green" className="gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Live
+          </Badge>
+        </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data.chartData}>
+            <defs>
+              <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="#e5e7eb"
+              className="dark:stroke-gray-800"
+            />
+            <XAxis
+              dataKey="label"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#9ca3af", fontSize: 12 }}
+              dy={10}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: "#9ca3af", fontSize: 12 }}
+              width={40}
+            />
+            <Tooltip
+              contentStyle={{
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                padding: "12px",
+              }}
+              cursor={{
+                stroke: "#14b8a6",
+                strokeWidth: 2,
+                strokeDasharray: "4 4",
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#14b8a6"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#heroGradient)"
+              animationDuration={1500}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Chart Legend */}
+      <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-teal-500" />
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            Total Sessions
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-emerald-500" />
+          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            Active Now
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+// ============================================================================
+// INTERACTIVE TABLE
+// ============================================================================
+
+const InteractionsTable = ({ data, loading }: any) => {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState("All");
+
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof Interaction;
+    direction: "asc" | "desc";
+  } | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  const pageSize = 6;
+
+  const processedData = useMemo(() => {
+    if (!data?.interactions) return [];
+
+    let filtered = data.interactions.filter((item: Interaction) => {
+      // Search logic
+      const matchesSearch =
+        item.flowName.toLowerCase().includes(search.toLowerCase()) ||
+        item.summary.toLowerCase().includes(search.toLowerCase());
+
+      // Type filter logic
+      const matchesType = typeFilter === "All" || item.type === typeFilter;
+
+      return matchesSearch && matchesType;
+    });
+
+    if (sortConfig) {
+      filtered.sort((a: any, b: any) => {
+        if (a[sortConfig.key] < b[sortConfig.key])
+          return sortConfig.direction === "asc" ? -1 : 1;
+        if (a[sortConfig.key] > b[sortConfig.key])
+          return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [data, search, sortConfig, typeFilter]);
+
+  const totalPages = Math.ceil(processedData.length / pageSize);
+  const paginatedData = processedData.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+
+  const handleSort = (key: keyof Interaction) => {
+    let direction: "asc" | "desc" = "asc";
+    if (sortConfig?.key === key && sortConfig.direction === "asc")
+      direction = "desc";
+    setSortConfig({ key, direction });
+  };
+
+  const handleGlobalSort = () => {
+    // Toggles Date sort by default for the "Sort" button
+    handleSort("timestamp");
+    toast.success("Sorted by date");
+  };
+
+  const getTypeIcon = (type: string) => {
+    const config: any = {
+      Voice: { icon: Mic, color: "teal" },
+      Chat: { icon: MessageCircle, color: "blue" },
+      Call: { icon: Phone, color: "orange" },
+    };
+    return config[type] || config.Voice;
+  };
+
+  return (
+    <Card className="overflow-hidden">
+      {/* Header */}
+      <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+              Recent Interactions
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {processedData.length} total results
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search interactions..."
+                className="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 w-64"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+
+            <Button
+              variant={isFilterOpen ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={cn(isFilterOpen && "bg-gray-200 dark:bg-gray-800")}
+            >
+              <Filter className="w-4 h-4" />
+              Filter
+            </Button>
+
+            <Button variant="primary" size="sm" onClick={handleGlobalSort}>
+              <ArrowUpDown className="w-4 h-4" />
+              Sort
+            </Button>
+          </div>
+        </div>
+
+        {/* Filter Bar */}
+        <AnimatePresence>
+          {isFilterOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4 flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  Filter by Type:
+                </span>
+                <div className="flex items-center gap-2">
+                  {["All", "Voice", "Chat", "Call"].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        setTypeFilter(type);
+                        setPage(1);
+                      }}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        typeFilter === type
+                          ? "bg-teal-500 text-white shadow-md shadow-teal-500/20"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700",
+                      )}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                  {typeFilter !== "All" && (
+                    <button
+                      onClick={() => setTypeFilter("All")}
+                      className="ml-2 p-1.5 rounded-full hover:bg-red-50 text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50/50 dark:bg-gray-900/50">
+            <tr>
+              {[
+                { label: "Type", key: "type" },
+                { label: "Flow Name", key: "flowName" },
+                { label: "Timestamp", key: "timestamp" },
+                { label: "Duration", key: "duration" },
+                { label: "Status", key: "status" },
+                { label: "Actions", key: null },
+              ].map((header: any) => (
+                <th
+                  key={header.label}
+                  className={cn(
+                    "px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                    header.key &&
+                      "cursor-pointer hover:text-teal-600 select-none",
+                  )}
+                  onClick={() => header.key && handleSort(header.key)}
+                >
+                  <div className="flex items-center gap-2">
+                    {header.label}
+                    {header.key && (
+                      <ArrowUpDown
+                        className={cn(
+                          "w-3 h-3 transition-opacity",
+                          sortConfig?.key === header.key
+                            ? "opacity-100"
+                            : "opacity-30",
+                        )}
+                      />
+                    )}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={6} className="px-6 py-4">
+                    <Skeleton className="h-12 w-full" />
+                  </td>
+                </tr>
+              ))
+            ) : paginatedData.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center">
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Search className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      No interactions found
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Try adjusting your filters or search query
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((item: Interaction) => {
+                const { icon: Icon, color } = getTypeIcon(item.type);
+                const isExpanded = expandedRow === item.id;
+
+                return (
+                  <React.Fragment key={item.id}>
+                    <motion.tr
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group"
+                    >
+                      <td className="px-6 py-4">
+                        <Badge variant={color}>
+                          <Icon className="w-3 h-3" />
+                          {item.type}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                        {item.flowName}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        {item.date}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400">
+                        {item.duration}
+                      </td>
+                      <td className="px-6 py-4">
+                        {item.status === "Success" ? (
+                          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Success
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-red-500 text-xs font-medium">
+                            <AlertCircle className="w-3.5 h-3.5" />
+                            Failed
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() =>
+                            setExpandedRow(isExpanded ? null : item.id)
+                          }
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        >
+                          <ChevronDown
+                            className={cn(
+                              "w-4 h-4 text-gray-400 transition-transform",
+                              isExpanded && "rotate-180",
+                            )}
+                          />
+                        </button>
+                      </td>
+                    </motion.tr>
+
+                    {/* Expanded Row */}
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.tr
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <td
+                            colSpan={6}
+                            className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30"
+                          >
+                            <div className="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
+                              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                                Summary
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {item.summary}
+                              </p>
+                            </div>
+                          </td>
+                        </motion.tr>
+                      )}
+                    </AnimatePresence>
+                  </React.Fragment>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      {!loading && paginatedData.length > 0 && (
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Showing{" "}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {(page - 1) * pageSize + 1}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {Math.min(page * pageSize, processedData.length)}
+            </span>{" "}
+            of{" "}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {processedData.length}
+            </span>{" "}
+            results
+          </p>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+
+            {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setPage(pageNum)}
+                  className={cn(
+                    "w-10 h-10 rounded-xl text-sm font-medium transition-all",
+                    page === pageNum
+                      ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/30"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400",
+                  )}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+};
+
+// ============================================================================
+// MAIN DASHBOARD LAYOUT (WITHOUT SIDEBAR)
+// ============================================================================
+
+export default function ModernDashboard() {
+  const [filter, setFilter] = useState<FilterType>("7d");
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Fetch data
+  useEffect(() => {
+    const fetch = async () => {
+      setLoading(true);
+      const today = new Date();
+      let from = format(subDays(today, 7), "yyyy-MM-dd");
+
+      if (filter === "30d") from = format(subDays(today, 30), "yyyy-MM-dd");
+      if (filter === "3m") from = format(subMonths(today, 3), "yyyy-MM-dd");
+
+      try {
+        const res = await getDashboardData(from, format(today, "yyyy-MM-dd"));
+        setData(res);
+      } catch (e) {
+        toast.error("Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetch();
+  }, [filter]);
+
+  // Dark mode
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+  }, [darkMode]);
+
+  return (
+    <div className={cn("min-h-screen", darkMode && "dark")}>
+      <Toaster position="top-right" richColors />
+
+      {/* Main Content - Full Width */}
+      <main className="w-full overflow-y-auto bg-gray-50/50 dark:bg-gray-950">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 dark:bg-gray-950/80 border-b border-gray-200 dark:border-gray-800">
+          <div className="px-8 py-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                Analytics
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Last updated: {format(new Date(), "MMM dd, yyyy 'at' HH:mm")}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Filter Pills */}
+              <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
+                {(["7d", "30d", "3m"] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium rounded-lg transition-all relative",
+                      filter === f
+                        ? "text-white"
+                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white",
+                    )}
+                  >
+                    {filter === f && (
+                      <motion.div
+                        layoutId="filter-pill"
+                        className="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg shadow-lg shadow-teal-500/30"
+                        transition={{ type: "spring", duration: 0.6 }}
+                      />
+                    )}
+                    <span className="relative z-10">
+                      {f === "7d"
+                        ? "7 Days"
+                        : f === "30d"
+                          ? "30 Days"
+                          : "3 Months"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
+              >
+                {darkMode ? (
+                  <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-600" />
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Bento Grid Layout */}
+        <div className="p-8">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={filter}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-12 gap-6"
+            >
+              {/* Hero Chart - Large */}
+              <div className="col-span-12 lg:col-span-8">
+                <HeroChart data={data} loading={loading} />
+              </div>
+
+              {/* Metrics Stack - Right Column */}
+              <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                <MetricCard
+                  title="Total Interactions"
+                  value={loading ? "..." : data?.metrics.total}
+                  change="+12.5%"
+                  trend="up"
+                  icon={Activity}
+                  sparklineData={data?.chartData.slice(-7)}
+                  loading={loading}
+                />
+                <MetricCard
+                  title="Avg Duration"
+                  value={loading ? "..." : data?.metrics.avgDuration}
+                  change="-5s"
+                  trend="down"
+                  icon={Clock}
+                  sparklineData={data?.chartData.slice(-7)}
+                  loading={loading}
+                />
+                <MetricCard
+                  title="Satisfaction Score"
+                  value={loading ? "..." : data?.metrics.score}
+                  change="+0.2"
+                  trend="up"
+                  icon={Smile}
+                  sparklineData={data?.chartData.slice(-7)}
+                  loading={loading}
+                />
+              </div>
+
+              {/* Table - Full Width */}
+              <div className="col-span-12">
+                <InteractionsTable data={data} loading={loading} />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
+    </div>
+  );
+}
