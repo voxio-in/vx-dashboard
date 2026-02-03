@@ -340,6 +340,52 @@ export async function createFlow(
   }
 }
 
+export async function renameFlow(flowId: string, newName: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) return { success: false, message: "Unauthorized" };
+
+    if (!newName || newName.trim().length === 0) {
+      return { success: false, message: "Name cannot be empty" };
+    }
+
+    await connectDB();
+
+    const dbUser = await User.findById(user._id);
+    if (!dbUser) return { success: false, message: "User not found" };
+
+    // 1. Verify Ownership
+    const userFlows = dbUser.flows || [];
+    const isOwner = userFlows.some((id: any) => id.toString() === flowId);
+    if (!isOwner)
+      return { success: false, message: "You do not own this flow" };
+
+    // 2. Check for Duplicate Name (excluding the current flow)
+    const duplicate = await Flow.findOne({
+      _id: { $in: dbUser.flows, $ne: flowId },
+      name: newName.trim(),
+    });
+
+    if (duplicate) {
+      return {
+        success: false,
+        message: "A flow with this name already exists.",
+      };
+    }
+
+    // 3. Update and Revalidate
+    await Flow.findByIdAndUpdate(flowId, { name: newName.trim() });
+
+    revalidatePath("/reseller/panel");
+    revalidatePath(`/reseller/flow/${flowId}`);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Rename Flow Error:", error);
+    return { success: false, message: "Failed to rename flow" };
+  }
+}
+
 export async function deleteFlow(flowId: string) {
   try {
     const user = await getCurrentUser();
