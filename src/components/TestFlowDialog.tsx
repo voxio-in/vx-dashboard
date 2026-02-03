@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { X, Loader2, Mic } from "lucide-react";
+import { X, Loader2, Mic, Copy, Check } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface TestFlowDialogProps {
@@ -40,6 +40,7 @@ export default function TestFlowDialog({
 
   const [isInitializing, setIsInitializing] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function TestFlowDialog({
     // Monkey-patch WebSocket to intercept messages
     (window as any).WebSocket = function (
       url: string,
-      protocols?: string | string[]
+      protocols?: string | string[],
     ) {
       const ws = new OriginalWebSocket(url, protocols);
 
@@ -177,7 +178,7 @@ export default function TestFlowDialog({
 
     setMessages((prev) => {
       const filtered = prev.filter(
-        (m) => !(m.isInterim && m.sender === sender)
+        (m) => !(m.isInterim && m.sender === sender),
       );
 
       const lastMsg = filtered[filtered.length - 1];
@@ -206,6 +207,22 @@ export default function TestFlowDialog({
       }
     }
     window.location.reload();
+  };
+
+  const handleCopyChat = async () => {
+    try {
+      const cleanedData = messages.map((message) => ({
+        sender: message.sender,
+        text: message.text,
+        timestamp: message.timestamp,
+      }));
+      const jsonString = JSON.stringify(cleanedData, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy chat:", err);
+    }
   };
 
   return (
@@ -257,12 +274,28 @@ export default function TestFlowDialog({
               </div>
             </div>
 
-            <button
-              onClick={handleInternalClose}
-              className="text-white hover:bg-indigo-600 rounded-full p-2 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* COPY BUTTON */}
+              <button
+                onClick={handleCopyChat}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition flex items-center justify-center"
+                title="Copy Chat as JSON"
+              >
+                {isCopied ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  <Copy className="w-5 h-5" />
+                )}
+              </button>
+
+              {/* CLOSE BUTTON */}
+              <button
+                onClick={handleInternalClose}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-slate-950/50 scrollbar-thin scrollbar-thumb-gray-200">

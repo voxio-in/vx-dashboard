@@ -16,6 +16,8 @@ import {
   Globe,
   Layers,
   Play,
+  Keyboard,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +53,71 @@ const ELEVENLABS_MODELS = ["eleven_v3", "eleven_multilingual_v2", "flash"];
 
 /* 
 const DEEPGRAM_MODELS = [
-  // ... (Deepgram models previously commented out) ...
+  { value: "aura-2-thalia-en", label: "Thalia (US Female) - Aura 2" },
+  { value: "aura-2-andromeda-en", label: "Andromeda (US Female) - Aura 2" },
+  { value: "aura-2-helena-en", label: "Helena (US Female) - Aura 2" },
+  { value: "aura-2-apollo-en", label: "Apollo (US Male) - Aura 2" },
+  { value: "aura-2-arcas-en", label: "Arcas (US Male) - Aura 2" },
+  { value: "aura-2-aries-en", label: "Aries (US Male) - Aura 2" },
+  { value: "aura-2-amalthea-en", label: "Amalthea (Filipino Female) - Aura 2" },
+  { value: "aura-2-asteria-en", label: "Asteria (US Female) - Aura 2" },
+  { value: "aura-2-athena-en", label: "Athena (US Female) - Aura 2" },
+  { value: "aura-2-atlas-en", label: "Atlas (US Male) - Aura 2" },
+  { value: "aura-2-aurora-en", label: "Aurora (US Female) - Aura 2" },
+  { value: "aura-2-callista-en", label: "Callista (US Female) - Aura 2" },
+  { value: "aura-2-cora-en", label: "Cora (US Female) - Aura 2" },
+  { value: "aura-2-cordelia-en", label: "Cordelia (US Female) - Aura 2" },
+  { value: "aura-2-delia-en", label: "Delia (US Female) - Aura 2" },
+  { value: "aura-2-draco-en", label: "Draco (British Male) - Aura 2" },
+  { value: "aura-2-electra-en", label: "Electra (US Female) - Aura 2" },
+  { value: "aura-2-harmonia-en", label: "Harmonia (US Female) - Aura 2" },
+  { value: "aura-2-hera-en", label: "Hera (US Female) - Aura 2" },
+  { value: "aura-2-hermes-en", label: "Hermes (US Male) - Aura 2" },
+  { value: "aura-2-hyperion-en", label: "Hyperion (Australian Male) - Aura 2" },
+  { value: "aura-2-iris-en", label: "Iris (US Female) - Aura 2" },
+  { value: "aura-2-janus-en", label: "Janus (US Female) - Aura 2" },
+  { value: "aura-2-juno-en", label: "Juno (US Female) - Aura 2" },
+  { value: "aura-2-jupiter-en", label: "Jupiter (US Male) - Aura 2" },
+  { value: "aura-2-luna-en", label: "Luna (US Female) - Aura 2" },
+  { value: "aura-2-mars-en", label: "Mars (US Male) - Aura 2" },
+  { value: "aura-2-minerva-en", label: "Minerva (US Female) - Aura 2" },
+  { value: "aura-2-neptune-en", label: "Neptune (US Male) - Aura 2" },
+  { value: "aura-2-odysseus-en", label: "Odysseus (US Male) - Aura 2" },
+  { value: "aura-2-ophelia-en", label: "Ophelia (US Female) - Aura 2" },
+  { value: "aura-2-orion-en", label: "Orion (US Male) - Aura 2" },
+  { value: "aura-2-orpheus-en", label: "Orpheus (US Male) - Aura 2" },
+  { value: "aura-2-pandora-en", label: "Pandora (British Female) - Aura 2" },
+  { value: "aura-2-phoebe-en", label: "Phoebe (US Female) - Aura 2" },
+  { value: "aura-2-pluto-en", label: "Pluto (US Male) - Aura 2" },
+  { value: "aura-2-saturn-en", label: "Saturn (US Male) - Aura 2" },
+  { value: "aura-2-selene-en", label: "Selene (US Female) - Aura 2" },
+  { value: "aura-2-theia-en", label: "Theia (Australian Female) - Aura 2" },
+  { value: "aura-2-vesta-en", label: "Vesta (US Female) - Aura 2" },
+  { value: "aura-2-zeus-en", label: "Zeus (US Male) - Aura 2" },
+  // Aura-2 Spanish
+  { value: "aura-2-celeste-es", label: "Celeste (Colombian Female) - Aura 2" },
+  { value: "aura-2-estrella-es", label: "Estrella (Mexican Female) - Aura 2" },
+  { value: "aura-2-nestor-es", label: "Nestor (Peninsular Male) - Aura 2" },
+  { value: "aura-2-sirio-es", label: "Sirio (Mexican Male) - Aura 2" },
+  { value: "aura-2-carina-es", label: "Carina (Peninsular Female) - Aura 2" },
+  { value: "aura-2-alvaro-es", label: "Alvaro (Peninsular Male) - Aura 2" },
+  { value: "aura-2-diana-es", label: "Diana (Peninsular Female) - Aura 2" },
+  { value: "aura-2-aquila-es", label: "Aquila (LatAm Male) - Aura 2" },
+  { value: "aura-2-selena-es", label: "Selena (LatAm Female) - Aura 2" },
+  { value: "aura-2-javier-es", label: "Javier (Mexican Male) - Aura 2" },
+  // Aura 1 (Legacy)
+  { value: "aura-asteria-en", label: "Asteria (US Female) - Aura 1" },
+  { value: "aura-luna-en", label: "Luna (US Female) - Aura 1" },
+  { value: "aura-stella-en", label: "Stella (US Female) - Aura 1" },
+  { value: "aura-athena-en", label: "Athena (British Female) - Aura 1" },
+  { value: "aura-hera-en", label: "Hera (US Female) - Aura 1" },
+  { value: "aura-orion-en", label: "Orion (US Male) - Aura 1" },
+  { value: "aura-arcas-en", label: "Arcas (US Male) - Aura 1" },
+  { value: "aura-perseus-en", label: "Perseus (US Male) - Aura 1" },
+  { value: "aura-angus-en", label: "Angus (Irish Male) - Aura 1" },
+  { value: "aura-orpheus-en", label: "Orpheus (US Male) - Aura 1" },
+  { value: "aura-helios-en", label: "Helios (British Male) - Aura 1" },
+  { value: "aura-zeus-en", label: "Zeus (US Male) - Aura 1" },
 ];
 */
 
@@ -907,27 +973,38 @@ export default function TTSConfigClient({
     const rawVoice = initialConfig?.voiceId;
 
     // 1. If nothing is saved, use fallback
-    if (!rawVoice) return FALLBACK_VOICE_ID;
 
     // 2. If the model is 'eleven_v3', ensuring the saved voice actually exists in our list
-    if (defaultModel === "eleven_v3") {
-      const isValidV3 = ELEVENLABS_V3_VOICES.some(
-        (v) => v.voice_id === rawVoice
-      );
-      return isValidV3 ? rawVoice : FALLBACK_VOICE_ID;
-    }
+    // if (defaultModel === "eleven_v3") {
+    //   const isValidV3 = ELEVENLABS_V3_VOICES.some(
+    //     (v) => v.voice_id === rawVoice,
+    //   );
+    //   return isValidV3 ? rawVoice : FALLBACK_VOICE_ID;
+    // }
 
     // 3. For other models (or Input fields), return whatever was saved
-    return rawVoice;
+    return rawVoice || "";
   };
 
   const defaultVoice = getInitialVoice();
 
   const [provider, setProvider] = useState<ProviderType>(
-    (initialConfig?.provider as ProviderType) || "elevenlabs"
+    (initialConfig?.provider as ProviderType) || "elevenlabs",
   );
   const [model, setModel] = useState<string>(defaultModel);
   const [voiceId, setVoiceId] = useState<string>(defaultVoice);
+
+  // --- COMBINATION INPUT STATE ---
+  // State to toggle between Select List and Manual Input
+  // Initialize to TRUE if the current ID is NOT found in our curated list
+  const [isManualInput, setIsManualInput] = useState(() => {
+    if (!defaultVoice) return false;
+    // Check if the current ID exists in our curated list
+    const inList = ELEVENLABS_V3_VOICES.some(
+      (v) => v.voice_id === defaultVoice,
+    );
+    return !inList;
+  });
 
   const [isSaving, setIsSaving] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
@@ -986,7 +1063,8 @@ export default function TTSConfigClient({
 
     if (p === "elevenlabs") {
       setModel(ELEVENLABS_MODELS[0]);
-      setVoiceId("TX3LPaxmHKxFdv7VOQHJ");
+      setVoiceId("");
+      setIsManualInput(false);
     }
     /* 
     else if (p === "rime") {
@@ -1201,62 +1279,119 @@ export default function TTSConfigClient({
 
                 {/* 3. VOICE ID (Always Visible for ElevenLabs & Rime) */}
                 {/* Deepgram conditional check removed since it is commented out */}
+                {/* 3. VOICE ID (Hybrid: Text Input + Dropdown List) */}
+                {/* 3. VOICE ID (Hybrid: List or Manual Input) */}
                 <div className="space-y-2">
-                  <LabelWithInfo
-                    label="Voice"
-                    info={
-                      provider === "elevenlabs" && model === "eleven_v3"
-                        ? "Select a curated V3 voice."
-                        : "Enter your ElevenLabs Voice ID string."
-                    }
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <LabelWithInfo
+                      label="Voice"
+                      info={
+                        provider === "elevenlabs" && model === "eleven_v3"
+                          ? "Select a curated V3 voice or enter a custom Voice ID."
+                          : "Enter your ElevenLabs Voice ID string."
+                      }
+                    />
 
-                  {provider === "elevenlabs" && model === "eleven_v3" && (
+                    {/* Toggle Button for Input Method */}
+                    {provider === "elevenlabs" && model === "eleven_v3" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const nextStateIsManual = !isManualInput;
+                          setIsManualInput(nextStateIsManual);
+
+                          if (nextStateIsManual) {
+                            setVoiceId("");
+                          } else {
+                            const existsInList = ELEVENLABS_V3_VOICES.some(
+                              (v) => v.voice_id === voiceId,
+                            );
+
+                            if (!existsInList) {
+                              setVoiceId("");
+                            }
+                          }
+                        }}
+                        className="h-7 px-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 gap-1.5"
+                      >
+                        {isManualInput ? (
+                          <>
+                            <List className="h-3.5 w-3.5" />
+                            Select from List
+                          </>
+                        ) : (
+                          <>
+                            <Keyboard className="h-3.5 w-3.5" />
+                            Enter Custom ID
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+
+                  {provider === "elevenlabs" && model === "eleven_v3" ? (
+                    isManualInput ? (
+                      // MANUAL INPUT MODE
+                      <div className="relative">
+                        <Mic className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={voiceId}
+                          onChange={(e) => setVoiceId(e.target.value)}
+                          placeholder="e.g. 21m00Tcm4TlvDq8ikWAM"
+                          className="w-full pl-10 pr-4 h-12 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
+                        />
+                      </div>
+                    ) : (
+                      // DROPDOWN SELECT MODE
+                      <div className="relative">
+                        <Mic className="absolute left-3 top-4 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
+                        <Select value={voiceId} onValueChange={setVoiceId}>
+                          <SelectTrigger className="w-full h-auto min-h-[3rem] py-2 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-left">
+                            <SelectValue placeholder="Select a V3 voice..." />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-[400px]">
+                            {ELEVENLABS_V3_VOICES.map((voice) => (
+                              <SelectItem
+                                key={voice.voice_id}
+                                value={voice.voice_id}
+                                className="py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer"
+                              >
+                                <div className="flex flex-col gap-1 text-left">
+                                  <span className="font-semibold text-slate-900 dark:text-slate-100 text-base">
+                                    {voice.name} - {voice.tagline}
+                                  </span>
+                                  <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+                                    {voice.description}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )
+                  ) : (
+                    // Default fallback for other models (Strictly Manual)
                     <div className="relative">
-                      <Mic className="absolute left-3 top-4 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
-
-                      <Select value={voiceId} onValueChange={setVoiceId}>
-                        <SelectTrigger className="w-full h-auto min-h-[3rem] py-2 pl-10 bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-left">
-                          <SelectValue placeholder="Select a V3 voice..." />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[400px]">
-                          {ELEVENLABS_V3_VOICES.map((voice) => (
-                            <SelectItem
-                              key={voice.voice_id}
-                              value={voice.voice_id}
-                              className="py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer"
-                            >
-                              <div className="flex flex-col gap-1 text-left">
-                                <span className="font-semibold text-slate-900 dark:text-slate-100 text-base">
-                                  {voice.name} - {voice.tagline}
-                                </span>
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
-                                  {voice.description}
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* SCENARIO B: ElevenLabs + ANY OTHER Model (or just provider check default) -> Show TEXT INPUT */}
-                  {/* This preserves the original behavior for V2, Flash, etc. */}
-                  {provider === "elevenlabs" && model !== "eleven_v3" && (
-                    <div className="relative">
+                      <Mic className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
                       <input
                         type="text"
                         value={voiceId}
                         onChange={(e) => setVoiceId(e.target.value)}
                         placeholder="e.g. 21m00Tcm4TlvDq8ikWAM"
-                        className="w-full px-4 h-12 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
+                        className="w-full pl-10 pr-4 h-12 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition dark:text-slate-100"
                       />
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+            {/* 
+             {provider === "rime" && (
 
-                  {/*
-                  {provider === "rime" && (
+             todo move it in div
                     <div className="relative">
                       <Layers className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 z-10 pointer-events-none" />
                       <Select value={voiceId} onValueChange={setVoiceId}>
@@ -1274,9 +1409,6 @@ export default function TTSConfigClient({
                     </div>
                   )}
                   */}
-                </div>
-              </div>
-            </div>
 
             {/* FOOTER */}
             <div className="pt-6 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-4">
@@ -1305,8 +1437,8 @@ export default function TTSConfigClient({
                 {isSaving
                   ? "Saving..."
                   : isDirty
-                  ? "Save Configuration"
-                  : "No Changes to Save"}
+                    ? "Save Configuration"
+                    : "No Changes to Save"}
               </Button>
             </div>
           </div>

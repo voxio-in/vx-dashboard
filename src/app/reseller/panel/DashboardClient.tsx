@@ -9,12 +9,14 @@ import {
   Search,
   Trash2,
   AlertTriangle,
+  Pencil,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { IFlow } from "@/types";
-import { createFlow, deleteFlow } from "@/features/flow/actions";
+import { createFlow, deleteFlow, renameFlow } from "@/features/flow/actions";
 import TestFlowDialog from "@/components/TestFlowDialog";
 
 import {
@@ -52,6 +54,10 @@ export default function DashboardClient({
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [isRenaming, setIsRenaming] = useState(false);
+
   // --- STATE FOR TESTING FLOW ---
   const [testFlowData, setTestFlowData] = useState<{
     id: string;
@@ -62,7 +68,7 @@ export default function DashboardClient({
   const filteredFlows = useMemo(() => {
     if (!searchQuery) return initialFlows;
     return initialFlows.filter((flow) =>
-      flow.name.toLowerCase().includes(searchQuery.toLowerCase())
+      flow.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [initialFlows, searchQuery]);
 
@@ -120,6 +126,37 @@ export default function DashboardClient({
       console.error("Failed to delete", e);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleStartRename = (flow: IFlow) => {
+    setRenamingId(flow._id);
+    setRenameValue(flow.name);
+  };
+
+  const handleCancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+
+  const handleSaveRename = async () => {
+    if (!renamingId || !renameValue.trim()) return;
+
+    const currentFlow = initialFlows.find((f) => f._id === renamingId);
+    if (currentFlow && currentFlow.name === renameValue.trim()) {
+      handleCancelRename();
+      return;
+    }
+
+    setIsRenaming(true);
+    const result = await renameFlow(renamingId, renameValue);
+    setIsRenaming(false);
+
+    if (result.success) {
+      setRenamingId(null);
+      router.refresh();
+    } else {
+      alert(result.message);
     }
   };
 
@@ -283,8 +320,70 @@ export default function DashboardClient({
               key={flow._id}
               className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 grid grid-cols-12 items-center gap-4 shadow-sm hover:shadow-lg transition-all animate-in fade-in slide-in-from-bottom-2 duration-300"
             >
-              <div className="col-span-4 font-bold text-slate-900 dark:text-slate-100 text-base truncate pr-4">
-                {flow.name}
+              <div className="col-span-4 h-9 flex items-center">
+                {renamingId === flow._id ? (
+                  <div className="flex items-center gap-1 animate-in fade-in zoom-in-95 duration-200 w-full pr-4">
+                    <Input
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      className="h-8 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-950"
+                      autoFocus
+                      disabled={isRenaming}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveRename();
+                        if (e.key === "Escape") handleCancelRename();
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSaveRename();
+                      }}
+                      disabled={isRenaming}
+                      className="h-8 w-8 shrink-0 text-green-600 hover:bg-green-50 hover:text-green-700"
+                    >
+                      {isRenaming ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelRename();
+                      }}
+                      disabled={isRenaming}
+                      className="h-8 w-8 shrink-0 text-red-500 hover:bg-red-50 hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 group w-full pr-4">
+                    <span
+                      className="font-bold text-slate-900 dark:text-slate-100 text-base truncate cursor-pointer hover:text-indigo-600 transition-colors"
+                      onClick={() => handleConfigure(flow._id)}
+                    >
+                      {flow.name}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartRename(flow);
+                      }}
+                      className="text-slate-400 hover:text-indigo-600 transition-all p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
+                      title="Rename Flow"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="col-span-3">

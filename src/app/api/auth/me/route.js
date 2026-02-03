@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/jwt";
+import { verifyToken } from "../../../../lib/jwt";
 import connectDB from "@/lib/db";
 import User from "@/features/auth/model";
 
