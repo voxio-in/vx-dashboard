@@ -2,18 +2,10 @@ import * as React from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginInput } from "../lib/validators/auth";
-
-// SHADCN IMPORTS (Adjust paths if your structure is slightly different)
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { loginSchema, type LoginInput } from "../lib/validators/auth.schema";
+import { loginFn } from "../server/functions/auth.server";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import {
   Form,
@@ -24,8 +16,6 @@ import {
   FormMessage,
 } from "../components/ui/form";
 
-// ROUTE DEFINITION
-// In TanStack Start, this defines the /login URL
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
@@ -33,9 +23,9 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [showPassword, setShowPassword] = React.useState(false);
 
-  // 1. SETUP FORM
-  // We use the zodResolver to connect React Hook Form to our Zod schema
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -44,38 +34,78 @@ function LoginPage() {
     },
   });
 
-  // 2. HANDLE SUBMISSION
   async function onSubmit(data: LoginInput) {
     setIsLoading(true);
+    setError(null);
 
-    // SIMULATION (We will replace this with a Server Function later)
-    console.log("Login Data:", data);
-
-    setTimeout(() => {
+    try {
+      // Call with { data } object for v1.158.0
+      await loginFn({ data });
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Login failed.";
+      setError(message);
+    } finally {
       setIsLoading(false);
-      // Navigate to dashboard after success
-      navigate({ to: "/" });
-    }, 1000);
+    }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      {/* CARD: The container for our login form */}
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Sign in to Voxio
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your email and password to access your dashboard
-          </CardDescription>
-        </CardHeader>
+    <div className="flex min-h-screen w-full">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-50 dark:bg-slate-900 items-center justify-center p-12 border-r border-slate-200 dark:border-slate-800">
+        <div className="relative w-full max-w-2xl">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-2xl p-6 transform rotate-1 transition hover:rotate-0 duration-500">
+            <div className="space-y-4">
+              <div className="flex gap-4 mb-8">
+                <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded w-1/3 animate-pulse" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={`login-skeleton-${i}`}
+                    className="h-24 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse delay-75"
+                  />
+                ))}
+              </div>
+              <div className="h-48 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse delay-150" />
+            </div>
+          </div>
+          <div className="absolute -z-10 top-10 -right-10 w-full h-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-full blur-3xl" />
+        </div>
+      </div>
 
-        <CardContent>
-          {/* FORM: The wrapper context for React Hook Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-background">
+        <div className="w-full max-w-md space-y-8">
+          <div className="space-y-2 text-center lg:text-left">
+            <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+            <p className="text-muted-foreground">
+              Enter your email and password to access your account.
+            </p>
+          </div>
+
+          {error ? (
+            <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 flex-shrink-0"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" x2="12" y1="8" y2="12" />
+                <line x1="12" x2="12.01" y1="16" y2="16" />
+              </svg>
+              {error}
+            </div>
+          ) : null}
+
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* EMAIL FIELD */}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="email"
@@ -83,24 +113,12 @@ function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="name@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* PASSWORD FIELD */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
                       <Input
-                        type="password"
-                        placeholder="••••••••"
+                        type="email"
+                        placeholder="name@example.com"
+                        autoComplete="email"
+                        className="h-11"
+                        disabled={isLoading}
                         {...field}
                       />
                     </FormControl>
@@ -109,25 +127,69 @@ function LoginPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In"}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="********"
+                          autoComplete="current-password"
+                          className="h-11 pr-10"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer p-1"
+                        tabIndex={-1}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <Eye className="h-5 w-5" />
+                        ) : (
+                          <EyeOff className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                className="w-full h-11 text-base"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
           </Form>
-        </CardContent>
 
-        <CardFooter className="justify-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground text-center lg:text-left">
             Don't have an account?{" "}
-            <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:underline"
-            >
+            <Link to="/register" className="font-medium hover:underline">
               Sign up
             </Link>
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
