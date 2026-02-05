@@ -31,8 +31,6 @@ import {
   MessageCircle,
   Phone,
   ArrowUpDown,
-  Moon,
-  Sun,
   CheckCircle2,
   AlertCircle,
   TrendingUp,
@@ -112,10 +110,6 @@ type Interaction = {
   status: string;
 };
 
-// ============================================================================
-// REUSABLE UI COMPONENTS
-// ============================================================================
-
 interface CardProps {
   className?: string;
   children: React.ReactNode;
@@ -128,10 +122,10 @@ const Card = ({ className, children, gradient = false }: CardProps) => (
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4 }}
     className={cn(
-      "rounded-2xl border bg-white dark:bg-gray-900 shadow-sm transition-all",
+      "rounded-2xl border bg-white shadow-sm transition-all",
       gradient
         ? "border-transparent bg-gradient-to-br from-teal-500 to-emerald-500 text-white"
-        : "border-gray-200/60 dark:border-gray-800",
+        : "border-gray-200/60",
       className,
     )}
   >
@@ -159,12 +153,9 @@ const Button = ({
   const variants = {
     primary:
       "bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105",
-    outline:
-      "border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
-    ghost:
-      "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400",
-    secondary:
-      "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700",
+    outline: "border border-gray-200 bg-white hover:bg-gray-50 text-gray-700",
+    ghost: "hover:bg-gray-100 text-gray-600",
+    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
   };
 
   return (
@@ -194,14 +185,12 @@ const Badge = ({
   className?: string;
 }) => {
   const styles: any = {
-    teal: "bg-teal-500/10 text-teal-600 dark:text-teal-400 ring-1 ring-teal-500/20",
-    blue: "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20",
-    orange:
-      "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/20",
-    red: "bg-red-500/10 text-red-600 dark:text-red-400 ring-1 ring-red-500/20",
-    green:
-      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20",
-    gray: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-gray-700",
+    teal: "bg-teal-500/10 text-teal-600 ring-1 ring-teal-500/20",
+    blue: "bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/20",
+    orange: "bg-orange-500/10 text-orange-600 ring-1 ring-orange-500/20",
+    red: "bg-red-500/10 text-red-600 ring-1 ring-red-500/20",
+    green: "bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20",
+    gray: "bg-gray-100 text-gray-600 ring-1 ring-gray-200",
   };
   return (
     <span
@@ -217,17 +206,8 @@ const Badge = ({
 };
 
 const Skeleton = ({ className }: { className?: string }) => (
-  <div
-    className={cn(
-      "animate-pulse rounded-xl bg-gray-200/50 dark:bg-gray-800/50",
-      className,
-    )}
-  />
+  <div className={cn("animate-pulse rounded-xl bg-gray-200/50", className)} />
 );
-
-// ============================================================================
-// METRIC CARD WITH SPARKLINE
-// ============================================================================
 
 const MetricCard = ({
   title,
@@ -246,24 +226,18 @@ const MetricCard = ({
       <div className="relative">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              {title}
-            </p>
+            <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
             <div className="flex items-baseline gap-2">
               {loading ? (
                 <Skeleton className="h-8 w-24" />
               ) : (
                 <>
-                  <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {value}
-                  </h3>
+                  <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
                   {change && (
                     <span
                       className={cn(
                         "text-xs font-semibold flex items-center gap-1",
-                        trend === "up"
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-600 dark:text-red-400",
+                        trend === "up" ? "text-emerald-600" : "text-red-600",
                       )}
                     >
                       {trend === "up" ? (
@@ -280,7 +254,7 @@ const MetricCard = ({
           </div>
 
           <div className="p-3 rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/10 group-hover:from-teal-500/20 group-hover:to-emerald-500/20 transition-all">
-            <Icon className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <Icon className="w-5 h-5 text-teal-600" />
           </div>
         </div>
 
@@ -305,10 +279,6 @@ const MetricCard = ({
   );
 };
 
-// ============================================================================
-// HERO CHART COMPONENT
-// ============================================================================
-
 const HeroChart = ({ data, loading }: any) => {
   if (loading) return <Skeleton className="h-full w-full" />;
 
@@ -316,10 +286,10 @@ const HeroChart = ({ data, loading }: any) => {
     <Card className="p-8 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+          <h2 className="text-xl font-bold text-gray-900 mb-1">
             Interaction Volume
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             Real-time activity across all channels
           </p>
         </div>
@@ -345,7 +315,6 @@ const HeroChart = ({ data, loading }: any) => {
               strokeDasharray="3 3"
               vertical={false}
               stroke="#e5e7eb"
-              className="dark:stroke-gray-800"
             />
             <XAxis
               dataKey="label"
@@ -387,18 +356,16 @@ const HeroChart = ({ data, loading }: any) => {
       </div>
 
       {/* Chart Legend */}
-      <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+      <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-teal-500" />
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+          <span className="text-xs font-medium text-gray-600">
             Total Sessions
           </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-            Active Now
-          </span>
+          <span className="text-xs font-medium text-gray-600">Active Now</span>
         </div>
       </div>
     </Card>
@@ -482,13 +449,13 @@ const InteractionsTable = ({ data, loading }: any) => {
   return (
     <Card className="overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+      <div className="p-6 border-b border-gray-100">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">
               Recent Interactions
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500">
               {processedData.length} total results
             </p>
           </div>
@@ -500,7 +467,7 @@ const InteractionsTable = ({ data, loading }: any) => {
               <input
                 type="text"
                 placeholder="Search interactions..."
-                className="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 w-64"
+                className="pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 w-64"
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -513,7 +480,7 @@ const InteractionsTable = ({ data, loading }: any) => {
               variant={isFilterOpen ? "secondary" : "outline"}
               size="sm"
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={cn(isFilterOpen && "bg-gray-200 dark:bg-gray-800")}
+              className={cn(isFilterOpen && "bg-gray-200")}
             >
               <Filter className="w-4 h-4" />
               Filter
@@ -536,7 +503,7 @@ const InteractionsTable = ({ data, loading }: any) => {
               className="overflow-hidden"
             >
               <div className="pt-4 flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <span className="text-sm font-medium text-gray-500">
                   Filter by Type:
                 </span>
                 <div className="flex items-center gap-2">
@@ -551,7 +518,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                         "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                         typeFilter === type
                           ? "bg-teal-500 text-white shadow-md shadow-teal-500/20"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700",
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200",
                       )}
                     >
                       {type}
@@ -560,7 +527,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                   {typeFilter !== "All" && (
                     <button
                       onClick={() => setTypeFilter("All")}
-                      className="ml-2 p-1.5 rounded-full hover:bg-red-50 text-red-500 dark:hover:bg-red-900/20 transition-colors"
+                      className="ml-2 p-1.5 rounded-full hover:bg-red-50 text-red-500 transition-colors"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -575,7 +542,7 @@ const InteractionsTable = ({ data, loading }: any) => {
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50/50 dark:bg-gray-900/50">
+          <thead className="bg-gray-50/50">
             <tr>
               {[
                 { label: "Type", key: "type" },
@@ -588,7 +555,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                 <th
                   key={header.label}
                   className={cn(
-                    "px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
+                    "px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider",
                     header.key &&
                       "cursor-pointer hover:text-teal-600 select-none",
                   )}
@@ -612,7 +579,7 @@ const InteractionsTable = ({ data, loading }: any) => {
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+          <tbody className="divide-y divide-gray-100">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i}>
@@ -625,10 +592,10 @@ const InteractionsTable = ({ data, loading }: any) => {
               <tr>
                 <td colSpan={6} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                       <Search className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
                       No interactions found
                     </h3>
                     <p className="text-sm text-gray-500">
@@ -647,7 +614,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                     <motion.tr
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group"
+                      className="hover:bg-gray-50/50 transition-colors group"
                     >
                       <td className="px-6 py-4">
                         <Badge variant={color}>
@@ -655,18 +622,18 @@ const InteractionsTable = ({ data, loading }: any) => {
                           {item.type}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                      <td className="px-6 py-4 font-medium text-gray-900">
                         {item.flowName}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-4 text-sm text-gray-500">
                         {item.date}
                       </td>
-                      <td className="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400">
+                      <td className="px-6 py-4 font-mono text-xs text-gray-600">
                         {item.duration}
                       </td>
                       <td className="px-6 py-4">
                         {item.status === "Success" ? (
-                          <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                          <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium">
                             <CheckCircle2 className="w-3.5 h-3.5" />
                             Success
                           </div>
@@ -682,7 +649,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                           onClick={() =>
                             setExpandedRow(isExpanded ? null : item.id)
                           }
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                         >
                           <ChevronDown
                             className={cn(
@@ -702,15 +669,12 @@ const InteractionsTable = ({ data, loading }: any) => {
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
                         >
-                          <td
-                            colSpan={6}
-                            className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30"
-                          >
-                            <div className="p-4 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                          <td colSpan={6} className="px-6 py-4 bg-gray-50/50">
+                            <div className="p-4 rounded-xl bg-white border border-gray-200">
+                              <h4 className="text-sm font-semibold text-gray-900 mb-2">
                                 Summary
                               </h4>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                              <p className="text-sm text-gray-600">
                                 {item.summary}
                               </p>
                             </div>
@@ -728,18 +692,18 @@ const InteractionsTable = ({ data, loading }: any) => {
 
       {/* Pagination */}
       {!loading && paginatedData.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-500">
             Showing{" "}
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="font-medium text-gray-900">
               {(page - 1) * pageSize + 1}
             </span>{" "}
             to{" "}
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="font-medium text-gray-900">
               {Math.min(page * pageSize, processedData.length)}
             </span>{" "}
             of{" "}
-            <span className="font-medium text-gray-900 dark:text-white">
+            <span className="font-medium text-gray-900">
               {processedData.length}
             </span>{" "}
             results
@@ -765,7 +729,7 @@ const InteractionsTable = ({ data, loading }: any) => {
                     "w-10 h-10 rounded-xl text-sm font-medium transition-all",
                     page === pageNum
                       ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/30"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400",
+                      : "hover:bg-gray-100 text-gray-600",
                   )}
                 >
                   {pageNum}
@@ -788,15 +752,10 @@ const InteractionsTable = ({ data, loading }: any) => {
   );
 };
 
-// ============================================================================
-// MAIN DASHBOARD LAYOUT (WITHOUT SIDEBAR)
-// ============================================================================
-
 export default function ModernDashboard() {
   const [filter, setFilter] = useState<FilterType>("7d");
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   // Fetch data
   useEffect(() => {
@@ -820,33 +779,27 @@ export default function ModernDashboard() {
     fetch();
   }, [filter]);
 
-  // Dark mode
-  useEffect(() => {
-    if (darkMode) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [darkMode]);
-
   return (
-    <div className={cn("min-h-screen", darkMode && "dark")}>
+    <div className="min-h-screen">
       <Toaster position="top-right" richColors />
 
       {/* Main Content - Full Width */}
-      <main className="w-full overflow-y-auto bg-gray-50/50 dark:bg-gray-950">
+      <main className="w-full overflow-y-auto bg-gray-50/50">
         {/* Sticky Header */}
-        <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 dark:bg-gray-950/80 border-b border-gray-200 dark:border-gray-800">
+        <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-200">
           <div className="px-8 py-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
                 Analytics
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-500 mt-0.5">
                 Last updated: {format(new Date(), "MMM dd, yyyy 'at' HH:mm")}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               {/* Filter Pills */}
-              <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-900 rounded-xl">
+              <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl">
                 {(["7d", "30d", "3m"] as const).map((f) => (
                   <button
                     key={f}
@@ -855,7 +808,7 @@ export default function ModernDashboard() {
                       "px-4 py-2 text-sm font-medium rounded-lg transition-all relative",
                       filter === f
                         ? "text-white"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white",
+                        : "text-gray-500 hover:text-gray-900",
                     )}
                   >
                     {filter === f && (
@@ -875,18 +828,6 @@ export default function ModernDashboard() {
                   </button>
                 ))}
               </div>
-
-              {/* Dark Mode Toggle */}
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
-              >
-                {darkMode ? (
-                  <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-600" />
-                )}
-              </button>
             </div>
           </div>
         </header>
