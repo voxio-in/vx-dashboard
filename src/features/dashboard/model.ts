@@ -1,21 +1,26 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+﻿import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ITranscriptionItem {
   role: string;
   content: string;
-  timestamp?: number;
+  timestamp?: Date;
 }
 
 export interface ISession {
-  flow_id: mongoose.Types.ObjectId;
+  sessionId?: string;
+  flow_id?: mongoose.Types.ObjectId;
   recordingUrl?: string | null;
   startTime?: Date | null;
   endTime?: Date | null;
   type: "voice" | "chat" | "call" | "avatar" | "glass";
-  tokensUsed?: number | null;
+  totalConnectedTime?: number;
+  totalAiTime?: number;
+  totalHumanTime?: number;
+  timeRatio?: number;
   transcription: ITranscriptionItem[];
-  summary?: string;
-  timeConnected?: number;
+  humanTokens?: number;
+  aiTokens?: number;
+  totkenRatio?: number;
 }
 
 export interface SessionDocument extends ISession, Document {
@@ -25,10 +30,14 @@ export interface SessionDocument extends ISession, Document {
 
 const SessionSchema = new Schema<SessionDocument>(
   {
+    sessionId: {
+      type: String,
+      index: true,
+    },
     flow_id: {
       type: Schema.Types.ObjectId,
       ref: "Flow",
-      required: true,
+      required: false,
       index: true,
     },
     recordingUrl: {
@@ -41,28 +50,45 @@ const SessionSchema = new Schema<SessionDocument>(
     },
     endTime: {
       type: Date,
+      default: null,
     },
     type: {
       type: String,
       enum: ["voice", "chat", "call", "avatar", "glass"],
       required: true,
     },
-    tokensUsed: {
+    totalConnectedTime: {
       type: Number,
-      default: null,
+      default: 0,
+    },
+    totalAiTime: {
+      type: Number,
+      default: 0,
+    },
+    totalHumanTime: {
+      type: Number,
+      default: 0,
+    },
+    timeRatio: {
+      type: Number,
+      default: 0,
     },
     transcription: [
       {
         role: { type: String },
         content: { type: String },
-        timestamp: { type: Number },
+        timestamp: { type: Date },
       },
     ],
-    summary: {
-      type: String,
-      default: "",
+    humanTokens: {
+      type: Number,
+      default: 0,
     },
-    timeConnected: {
+    aiTokens: {
+      type: Number,
+      default: 0,
+    },
+    totkenRatio: {
       type: Number,
       default: 0,
     },

@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 
 const ROLE_PATHS = {
   admin: "/admin/dashboard",
-  reseller: "/reseller/panel",
+  reseller: "/reseller/dashboard",
   user: "/dashboard",
 };
 

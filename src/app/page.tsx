@@ -20,7 +20,7 @@ export default function Home() {
       case "admin":
         return "/admin/dashboard";
       case "reseller":
-        return "/reseller/panel";
+        return "/reseller/dashboard";
       default:
         return "/dashboard";
     }

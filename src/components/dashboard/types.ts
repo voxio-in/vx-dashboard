@@ -15,6 +15,11 @@ export interface Interaction {
   timeRatio: number;
   tokenRatio: number;
   aiTokens: number;
+  transcription?: {
+    role: string;
+    content: string;
+    timestamp?: string;
+  }[];
 }
 
 export interface DashboardMetrics {

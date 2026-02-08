@@ -14,6 +14,7 @@ import {
   X,
   FileText,
   Video,
+  Copy,
   Settings,
   MoreVertical,
 } from "lucide-react";
@@ -22,6 +23,12 @@ import { cn } from "@/lib/utils";
 import { HeaderTooltip } from "./HeaderTooltip";
 import { DashboardData, Interaction } from "./types";
 import { ALL_COLUMNS, TYPE_FILTERS } from "./constants";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={cn("animate-pulse rounded-xl bg-gray-200/50", className)} />
@@ -41,6 +48,8 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState("All");
+  const [selectedInteraction, setSelectedInteraction] =
+    useState<Interaction | null>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(
     ALL_COLUMNS.map((col) => col.key),
   );
@@ -52,6 +61,36 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
 
   const pageSize = 6;
   const totalColumns = visibleColumns.length + 3;
+
+  const formatTimestamp = (value?: string) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const handleCopyTranscription = () => {
+    if (!selectedInteraction?.transcription?.length) {
+      toast.error("No transcription to copy");
+      return;
+    }
+
+    const lines = selectedInteraction.transcription.map((item) => {
+      const role = item.role?.toLowerCase() || "assistant";
+      const roleLabel =
+        role === "assistant" || role === "bot" || role === "ai"
+          ? "Assistant"
+          : "User";
+      const timeLabel = formatTimestamp(item.timestamp);
+      const prefix = timeLabel ? `[${timeLabel}] ` : "";
+      return `${prefix}${roleLabel}: ${item.content || ""}`.trim();
+    });
+
+    navigator.clipboard
+      .writeText(lines.join("\n"))
+      .then(() => toast.success("Copied transcript to clipboard"))
+      .catch(() => toast.error("Failed to copy transcript"));
+  };
 
   const toggleColumn = (key: string) => {
     setVisibleColumns((prev) =>
@@ -376,10 +415,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                 {loading ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <tr key={i}>
-                      <td
-                        colSpan={totalColumns}
-                        className="px-4 py-3"
-                      >
+                      <td colSpan={totalColumns} className="px-4 py-3">
                         <Skeleton className="h-12 w-full" />
                       </td>
                     </tr>
@@ -484,6 +520,10 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                                   : "bg-gray-50 text-gray-300 cursor-not-allowed",
                               )}
                               disabled={!item.hasTranscription}
+                              onClick={() =>
+                                item.hasTranscription &&
+                                setSelectedInteraction(item)
+                              }
                               title={
                                 item.hasTranscription
                                   ? "View transcription"
@@ -634,6 +674,77 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
           </div>
         </div>
       )}
+
+      <Dialog
+        open={!!selectedInteraction}
+        onOpenChange={(open) => !open && setSelectedInteraction(null)}
+      >
+        <DialogContent className="sm:max-w-[720px]">
+          <DialogHeader>
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle>
+                Transcription
+                {selectedInteraction?.flowName
+                  ? ` • ${selectedInteraction.flowName}`
+                  : ""}
+              </DialogTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyTranscription}
+                className="gap-2"
+                disabled={!selectedInteraction?.transcription?.length}
+              >
+                <Copy className="w-4 h-4" />
+                Copy Chat
+              </Button>
+            </div>
+          </DialogHeader>
+
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-1">
+            {selectedInteraction?.transcription &&
+            selectedInteraction.transcription.length > 0 ? (
+              selectedInteraction.transcription.map((item, index) => {
+                const role = item.role?.toLowerCase() || "assistant";
+                const isAssistant =
+                  role === "assistant" || role === "bot" || role === "ai";
+                const timeLabel = formatTimestamp(item.timestamp);
+
+                return (
+                  <div
+                    key={`${role}-${index}`}
+                    className={cn(
+                      "flex",
+                      isAssistant ? "justify-end" : "justify-start",
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm",
+                        isAssistant
+                          ? "bg-teal-500 text-white"
+                          : "bg-gray-100 text-gray-800",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-1 text-[10px] uppercase tracking-wide opacity-80">
+                        <span>{isAssistant ? "Assistant" : "User"}</span>
+                        {timeLabel ? <span>{timeLabel}</span> : null}
+                      </div>
+                      <p className="whitespace-pre-wrap leading-relaxed">
+                        {item.content || "—"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-sm text-gray-500">
+                No transcription available for this session.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

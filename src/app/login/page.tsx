@@ -45,7 +45,7 @@ function LoginForm() {
             router.push("/admin/dashboard");
             break;
           case "reseller":
-            router.push("/reseller/panel");
+            router.push("/reseller/dashboard");
             break;
           case "user":
           default:
@@ -97,7 +97,7 @@ function LoginForm() {
             router.push("/admin/dashboard");
             break;
           case "reseller":
-            router.push("/reseller/panel");
+            router.push("/reseller/dashboard");
             break;
           case "user":
           default:
