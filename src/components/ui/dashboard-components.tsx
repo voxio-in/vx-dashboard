@@ -1,11 +1,5 @@
 import React from "react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-// Utility for merging tailwind classes
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "@/lib/utils";
 
 // --- CARD ---
 export const Card = ({
@@ -24,7 +18,7 @@ export const Card = ({
 
 // --- BUTTON ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "outline" | "ghost" | "icon";
+  variant?: "primary" | "outline" | "ghost" | "icon" | "secondary";
   size?: "sm" | "md" | "icon";
 }
 export const Button = ({
@@ -38,6 +32,7 @@ export const Button = ({
     outline: "border border-gray-200 bg-white hover:bg-gray-100 text-gray-900",
     ghost: "hover:bg-gray-100 text-gray-700",
     icon: "h-9 w-9 p-0",
+    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200",
   };
   const sizes = {
     sm: "h-8 px-3 text-xs",
@@ -84,13 +79,14 @@ export const Badge = ({
 }: {
   children: React.ReactNode;
   className?: string;
-  variant?: "gray" | "teal" | "blue" | "orange";
+  variant?: "gray" | "teal" | "blue" | "orange" | "green";
 }) => {
   const variants = {
     gray: "bg-gray-100 text-gray-800",
     teal: "bg-teal-50 text-teal-700",
     blue: "bg-blue-50 text-blue-700",
     orange: "bg-orange-50 text-orange-700",
+    green: "bg-emerald-50 text-emerald-700",
   };
   return (
     <div
