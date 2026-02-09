@@ -6,6 +6,7 @@ import {
   startOfDay,
   subDays,
 } from "date-fns";
+import mongoose from "mongoose";
 import connectDB from "@/lib/db";
 import Session from "@/features/dashboard/model";
 import Flow from "@/features/flow/model";
@@ -81,6 +82,7 @@ export async function GET(req: Request) {
   const toDate = endOfDay(toRaw);
 
   const user = await getCurrentUser();
+
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -92,18 +94,22 @@ export async function GET(req: Request) {
     .select({ name: 1, sessions: 1 })
     .lean();
 
+  // Extract session ObjectIds from flows
   const sessionRefs = flows.flatMap((flow: any) =>
     Array.isArray(flow.sessions)
       ? flow.sessions.map((id: any) => id.toString())
       : [],
   );
 
-  const sessionObjectIds = sessionRefs.filter(isObjectIdLike);
-  const sessionExternalIds = sessionRefs.filter((id) => !isObjectIdLike(id));
+  // Convert to MongoDB ObjectIds
+  const sessionObjectIds = sessionRefs
+    .filter(isObjectIdLike)
+    .map((id) => new mongoose.Types.ObjectId(id));
 
   const days = eachDayOfInterval({ start: fromDate, end: toDate });
 
-  if (sessionRefs.length === 0 && flowIds.length === 0) {
+  // Early return if no sessions to query
+  if (sessionObjectIds.length === 0) {
     const emptyChart = days.map((day) => ({
       date: format(day, "yyyy-MM-dd"),
       label: format(day, "MMM dd"),
@@ -125,33 +131,20 @@ export async function GET(req: Request) {
     });
   }
 
-  const idOrFlowFilters: Record<string, any>[] = [];
-  if (sessionObjectIds.length > 0) {
-    idOrFlowFilters.push({ _id: { $in: sessionObjectIds } });
-  }
-  if (sessionExternalIds.length > 0) {
-    idOrFlowFilters.push({ sessionId: { $in: sessionExternalIds } });
-  }
-  if (flowIds.length > 0) {
-    idOrFlowFilters.push({ flow_id: { $in: flowIds } });
-  }
-
+  // Query sessions by ObjectId and date range
   let sessions = await Session.find({
-    ...(idOrFlowFilters.length > 0 ? { $or: idOrFlowFilters } : {}),
+    _id: { $in: sessionObjectIds },
     startTime: { $gte: fromDate, $lte: toDate },
   }).lean();
 
+  // Fallback: if no sessions found in date range, get all sessions (for filtering later)
   if (sessions.length === 0) {
     sessions = await Session.find({
-      ...(idOrFlowFilters.length > 0 ? { $or: idOrFlowFilters } : {}),
+      _id: { $in: sessionObjectIds },
     }).lean();
   }
 
-  const flowIdToName = new Map<string, string>();
-  for (const flow of flows) {
-    flowIdToName.set(flow._id.toString(), flow.name);
-  }
-
+  // Create session ID -> flow name mapping
   const sessionToFlowName = new Map<string, string>();
   for (const flow of flows) {
     if (!Array.isArray(flow.sessions)) continue;
@@ -163,6 +156,7 @@ export async function GET(req: Request) {
     }
   }
 
+  // Filter sessions by date range (in case we got all sessions in fallback)
   const filteredSessions = sessions.filter((session: any) => {
     const start = getDateOrFallback(
       session.startTime,
@@ -172,6 +166,7 @@ export async function GET(req: Request) {
     return start >= fromDate && start <= toDate;
   });
 
+  // Build interactions data and count sessions per day
   const counts = new Map<string, number>();
   const interactions = filteredSessions
     .map((session: any) => {
@@ -199,29 +194,25 @@ export async function GET(req: Request) {
         durationSeconds > 0
           ? Math.min(
               100,
-              Math.max(0, Math.round((connectedSeconds / durationSeconds) * 100)),
+              Math.max(
+                0,
+                Math.round((connectedSeconds / durationSeconds) * 100),
+              ),
             )
           : 0;
 
+      // Handle both tokenRatio and totkenRatio (typo) for backward compatibility
       const tokenRatio =
-        typeof session.totkenRatio === "number"
-          ? session.totkenRatio
-          : typeof session.tokenRatio === "number"
-            ? session.tokenRatio
+        typeof session.tokenRatio === "number"
+          ? session.tokenRatio
+          : typeof session.totkenRatio === "number"
+            ? session.totkenRatio
             : 0;
 
       return {
         id: session._id.toString(),
         type: titleCase(session.type || "voice"),
-        flowName:
-          sessionToFlowName.get(session._id.toString()) ||
-          (session.sessionId
-            ? sessionToFlowName.get(session.sessionId)
-            : undefined) ||
-          (session.flow_id
-            ? flowIdToName.get(session.flow_id.toString())
-            : undefined) ||
-          "Unknown",
+        flowName: sessionToFlowName.get(session._id.toString()) || "Unknown",
         startTime: start ? format(start, "MMM dd, HH:mm") : "—",
         endTime: end ? format(end, "MMM dd, HH:mm") : "—",
         sessionDuration: formatDuration(durationSeconds),
@@ -241,7 +232,9 @@ export async function GET(req: Request) {
               return {
                 role: item?.role || "assistant",
                 content: item?.content || "",
-                timestamp: transcriptTime ? transcriptTime.toISOString() : undefined,
+                timestamp: transcriptTime
+                  ? transcriptTime.toISOString()
+                  : undefined,
               };
             })
           : [],
@@ -251,6 +244,7 @@ export async function GET(req: Request) {
     .sort((a, b) => b._sort - a._sort)
     .map(({ _sort, ...rest }) => rest);
 
+  // Build chart data for each day in the range
   const chartData = days.map((day) => {
     const key = format(day, "yyyy-MM-dd");
     const count = counts.get(key) || 0;
@@ -262,6 +256,7 @@ export async function GET(req: Request) {
     };
   });
 
+  // Calculate metrics
   const total = interactions.length;
   const totalDurationSeconds = filteredSessions.reduce(
     (acc: number, session: any) => {
@@ -280,10 +275,13 @@ export async function GET(req: Request) {
     0,
   );
 
-  const avgDurationSeconds = total > 0 ? Math.round(totalDurationSeconds / total) : 0;
+  const avgDurationSeconds =
+    total > 0 ? Math.round(totalDurationSeconds / total) : 0;
   const avgTimeRatio =
     total > 0
-      ? Math.round(interactions.reduce((acc, item) => acc + item.timeRatio, 0) / total)
+      ? Math.round(
+          interactions.reduce((acc, item) => acc + item.timeRatio, 0) / total,
+        )
       : 0;
 
   const uniqueFlows = new Set(
@@ -295,7 +293,8 @@ export async function GET(req: Request) {
   const successRate =
     total > 0
       ? Math.round(
-          (interactions.filter((item) => item.hasTranscription).length / total) *
+          (interactions.filter((item) => item.hasTranscription).length /
+            total) *
             100,
         )
       : 0;

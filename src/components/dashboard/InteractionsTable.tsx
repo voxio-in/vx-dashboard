@@ -332,7 +332,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Table - continues in next message due to length */}
+      {/* Table */}
       <div className="w-full overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="relative">
@@ -675,19 +675,23 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
         </div>
       )}
 
+      {/* Transcription Dialog - Chat Style */}
       <Dialog
         open={!!selectedInteraction}
         onOpenChange={(open) => !open && setSelectedInteraction(null)}
       >
-        <DialogContent className="sm:max-w-[720px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
             <div className="flex items-center justify-between gap-3">
-              <DialogTitle>
-                Transcription
-                {selectedInteraction?.flowName
-                  ? ` • ${selectedInteraction.flowName}`
-                  : ""}
-              </DialogTitle>
+              <div className="flex-1">
+                <DialogTitle className="text-lg font-bold text-gray-900">
+                  Conversation Transcript
+                </DialogTitle>
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedInteraction?.flowName} •{" "}
+                  {selectedInteraction?.startTime}
+                </p>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -696,12 +700,12 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                 disabled={!selectedInteraction?.transcription?.length}
               >
                 <Copy className="w-4 h-4" />
-                Copy Chat
+                Copy
               </Button>
             </div>
           </DialogHeader>
 
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 pr-1">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-gray-50">
             {selectedInteraction?.transcription &&
             selectedInteraction.transcription.length > 0 ? (
               selectedInteraction.transcription.map((item, index) => {
@@ -714,23 +718,29 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                   <div
                     key={`${role}-${index}`}
                     className={cn(
-                      "flex",
-                      isAssistant ? "justify-end" : "justify-start",
+                      "flex w-full",
+                      isAssistant ? "justify-start" : "justify-end",
                     )}
                   >
                     <div
                       className={cn(
-                        "max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow-sm",
+                        "max-w-[80%] rounded-2xl px-4 py-3 shadow-sm",
                         isAssistant
-                          ? "bg-teal-500 text-white"
-                          : "bg-gray-100 text-gray-800",
+                          ? "bg-white text-gray-800 border border-gray-200"
+                          : "bg-gradient-to-br from-teal-500 to-emerald-500 text-white",
                       )}
                     >
-                      <div className="flex items-center justify-between gap-3 mb-1 text-[10px] uppercase tracking-wide opacity-80">
-                        <span>{isAssistant ? "Assistant" : "User"}</span>
-                        {timeLabel ? <span>{timeLabel}</span> : null}
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-xs font-semibold uppercase tracking-wide opacity-70">
+                          {isAssistant ? "🤖 Assistant" : "👤 User"}
+                        </span>
+                        {timeLabel && (
+                          <span className="text-[10px] opacity-50">
+                            {timeLabel}
+                          </span>
+                        )}
                       </div>
-                      <p className="whitespace-pre-wrap leading-relaxed">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
                         {item.content || "—"}
                       </p>
                     </div>
@@ -738,8 +748,11 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                 );
               })
             ) : (
-              <div className="text-sm text-gray-500">
-                No transcription available for this session.
+              <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                <MessageCircle className="w-12 h-12 mb-3 opacity-30" />
+                <p className="text-sm">
+                  No transcription available for this session.
+                </p>
               </div>
             )}
           </div>

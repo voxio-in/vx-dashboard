@@ -15,7 +15,7 @@ export async function getCurrentUser(): Promise<UserDocument | null> {
 
   await connectDB();
 
-  const user = await User.findById(payload.id).lean();
+  const user = await User.findById(payload.id).select("+flows").lean();
 
   return user as unknown as UserDocument;
 }

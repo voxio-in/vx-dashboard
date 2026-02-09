@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     await connectDB();
-    const user = await User.findById(payload.id);
+    const user = await User.findById(payload.id).select("+flows");
 
     if (!user) {
       return NextResponse.json({ user: null });
@@ -32,6 +32,7 @@ export async function GET() {
         email: user.email,
         name: user.name,
         role: user.role,
+        flows: user.flows || [],
       },
     });
   } catch (error) {

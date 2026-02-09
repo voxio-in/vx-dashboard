@@ -13,44 +13,44 @@ export const ALL_COLUMNS = [
   },
   {
     key: "sessionDuration",
-    label: "Duration",
+    label: "Total Session Duration",
 
     fixed: false,
     description: "Total elapsed time of the session from start to finish.",
   },
   {
     key: "timeConnected",
-    label: "Connected",
+    label: "Total Time Connected",
     fixed: false,
     description: "Time spent actively connected to a human or AI agent.",
   },
   {
     key: "totalAiTime",
-    label: "AI Time",
+    label: "Total AI Time",
     fixed: false,
     description: "Duration where the AI was speaking or processing.",
   },
   {
     key: "totalHumanTime",
-    label: "Human",
+    label: "Total Human Time",
     fixed: false,
     description: "Duration where the human participant was speaking.",
   },
   {
     key: "transcription",
-    label: "Trans.",
+    label: "Transcription",
     fixed: false,
     description: "Availability of the text transcript for this session.",
   },
   {
     key: "recording",
-    label: "Rec.",
+    label: "Recording",
     fixed: false,
     description: "Availability of the audio recording.",
   },
   {
     key: "timeRatio",
-    label: "Ratio %",
+    label: "Time Ratio",
     fixed: false,
     description:
       "Percentage of total session time spent in active conversation.",
@@ -63,11 +63,13 @@ export const ALL_COLUMNS = [
   },
   {
     key: "aiTokens",
-    label: "AI Tok.",
+    label: "AI Tokens",
     fixed: false,
     description: "Total LLM tokens consumed by the AI during this session.",
   },
 ];
+
+//todo :need to add human tokens,token ratio
 
 export const TYPE_FILTERS = ["All", "Voice", "Chat"] as const;
 

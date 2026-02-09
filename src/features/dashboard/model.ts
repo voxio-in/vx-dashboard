@@ -20,7 +20,7 @@ export interface ISession {
   transcription: ITranscriptionItem[];
   humanTokens?: number;
   aiTokens?: number;
-  totkenRatio?: number;
+  tokenRatio?: number;
 }
 
 export interface SessionDocument extends ISession, Document {
@@ -88,7 +88,7 @@ const SessionSchema = new Schema<SessionDocument>(
       type: Number,
       default: 0,
     },
-    totkenRatio: {
+    tokenRatio: {
       type: Number,
       default: 0,
     },

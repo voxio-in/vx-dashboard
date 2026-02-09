@@ -9,6 +9,7 @@ interface AuthUser {
   username: string;
   name?: string;
   role: "admin" | "reseller" | "user";
+  flows?: string[];
 }
 
 interface AuthContextType {
