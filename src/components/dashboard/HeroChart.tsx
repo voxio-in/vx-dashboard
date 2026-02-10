@@ -26,7 +26,6 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
 
   const chartData = data?.chartData ?? [];
 
-  // Calculate total sessions
   const totalSessions = chartData.reduce(
     (acc, day) => acc + (day.sessions || 0),
     0,
@@ -56,7 +55,6 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
         </div>
       </div>
 
-      {/* Fixed height container - this is the key! */}
       <div className="w-full h-[350px]">
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full text-gray-400">

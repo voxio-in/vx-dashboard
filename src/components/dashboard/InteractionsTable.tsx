@@ -22,6 +22,7 @@ import { Card, Button } from "../ui/dashboard-components";
 import { cn } from "@/lib/utils";
 import { DashboardData, Interaction } from "./types";
 import { ALL_COLUMNS, TYPE_FILTERS } from "./constants";
+import { createPortal } from "react-dom";
 import {
   Dialog,
   DialogContent,
@@ -38,8 +39,6 @@ interface InteractionsTableProps {
   loading: boolean;
 }
 
-// Inline Tooltip Component
-// Inline Tooltip Component
 const InlineTooltip = ({
   content,
   children,
@@ -58,7 +57,6 @@ const InlineTooltip = ({
     setIsVisible(false);
   };
 
-  // Calculate position dynamically based on current element position
   const getPosition = () => {
     if (!targetRef.current) return { top: 0, left: 0 };
 
@@ -71,6 +69,30 @@ const InlineTooltip = ({
 
   const position = getPosition();
 
+  const tooltipContent = isVisible && typeof window !== "undefined" && (
+    <div
+      className="fixed px-3 py-2 bg-gray-900/95 backdrop-blur-sm text-white text-xs rounded-lg shadow-xl border border-gray-700/50 pointer-events-none"
+      style={{
+        top: `${position.top - 8}px`,
+        left: `${position.left}px`,
+        transform: "translate(-50%, -100%)",
+        zIndex: 9999,
+        whiteSpace: "nowrap",
+        textTransform: "none",
+      }}
+    >
+      <div className="font-medium leading-relaxed">{content}</div>
+      <div
+        className="absolute w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-gray-900/95"
+        style={{
+          bottom: "-6px",
+          left: "50%",
+          transform: "translateX(-50%)",
+        }}
+      />
+    </div>
+  );
+
   return (
     <>
       <div
@@ -81,26 +103,7 @@ const InlineTooltip = ({
       >
         {children}
       </div>
-      {isVisible && typeof window !== "undefined" && (
-        <div
-          className="fixed px-3 py-2 bg-gray-900/95 backdrop-blur-sm text-white text-xs rounded-lg shadow-xl border border-gray-700/50 w-48 pointer-events-none z-[9999]"
-          style={{
-            top: `${position.top - 8}px`,
-            left: `${position.left}px`,
-            transform: "translate(-50%, -100%)",
-          }}
-        >
-          <div className="font-medium leading-relaxed">{content}</div>
-          <div
-            className="absolute w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-gray-900/95"
-            style={{
-              bottom: "-6px",
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          />
-        </div>
-      )}
+      {tooltipContent && createPortal(tooltipContent, document.body)}
     </>
   );
 };
@@ -527,7 +530,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                         </td>
 
                         <td className="sticky left-[72px] z-40 bg-white group-hover:bg-gray-50 px-4 py-3 border-r border-gray-100">
-                          <span className="text-sm font-medium text-gray-900">
+                          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
                             {item.flowName}
                           </span>
                         </td>
@@ -617,26 +620,8 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                         {visibleColumns.includes("timeRatio") && (
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center">
-                              <span
-                                className={cn(
-                                  "inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all",
-                                  item.timeRatio >= 300
-                                    ? "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 ring-2 ring-amber-200 shadow-md shadow-amber-500/20"
-                                    : item.timeRatio >= 200
-                                      ? "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300"
-                                      : item.timeRatio >= 150
-                                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-                                        : item.timeRatio >= 100
-                                          ? "bg-teal-50 text-teal-700 ring-1 ring-teal-200"
-                                          : item.timeRatio >= 50
-                                            ? "bg-teal-50 text-teal-600 ring-1 ring-teal-200"
-                                            : "bg-orange-50 text-orange-600 ring-1 ring-orange-200",
-                                )}
-                              >
-                                {(item.timeRatio / 100).toFixed(1)}x
-                                {item.timeRatio >= 300 && (
-                                  <span className="text-amber-500">✨</span>
-                                )}
+                              <span className="inline-flex items-center text-sm  px-3 py-1.5">
+                                {(item.timeRatio / 100).toFixed(2)}
                               </span>
                             </div>
                           </td>

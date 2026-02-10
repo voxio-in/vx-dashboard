@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
-import { Clock, Smile, Activity } from "lucide-react";
+import { Clock, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { MetricCard } from "@/components/dashboard/MetricCard";
@@ -94,14 +94,28 @@ export default function DashboardPage() {
                   sparklineData={data?.chartData.slice(-7)}
                   loading={loading}
                 />
+                {/* Dual Metric Card - Total Session Duration & Total Connected Duration */}
                 <MetricCard
-                  title="Satisfaction Score"
-                  value={loading ? "..." : data?.metrics.score}
-                  change="+0.2"
+                  title="Total Session Duration"
+                  value={
+                    loading
+                      ? "..."
+                      : data?.metrics.totalSessionDuration || "45 min"
+                  }
+                  change="+8%"
                   trend="up"
-                  icon={Smile}
+                  icon={Clock}
                   sparklineData={data?.chartData.slice(-7)}
                   loading={loading}
+                  isDualMetric={true}
+                  secondaryTitle="Total Connected Duration"
+                  secondaryValue={
+                    loading
+                      ? "..."
+                      : data?.metrics.totalConnectedDuration || "42 min"
+                  }
+                  secondaryChange="+10%"
+                  secondaryTrend="up"
                 />
               </div>
 

@@ -39,7 +39,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shadow-lg z-30 h-screen">
+    <aside className="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shadow-lg z-20 h-screen">
       <div className="p-6 border-b border-slate-200 dark:border-slate-800">
         <div className="flex justify-center">
           <Image

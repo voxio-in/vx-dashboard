@@ -74,8 +74,6 @@ export const ALL_COLUMNS = [
   },
 ];
 
-//todo :need to add human tokens,token ratio
-
 export const TYPE_FILTERS = ["All", "Voice", "Chat"] as const;
 
 export const FLOW_NAMES = [
