@@ -13,6 +13,7 @@ export interface Interaction {
   hasTranscription: boolean;
   hasRecording: boolean;
   timeRatio: number;
+  humanTokens: number;
   tokenRatio: number;
   aiTokens: number;
   transcription?: {

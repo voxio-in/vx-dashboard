@@ -24,9 +24,7 @@ export const fetchDashboardData = createAsyncThunk<
       try {
         const body = await res.json();
         if (body?.error) message = body.error;
-      } catch {
-        // Ignore JSON parse errors
-      }
+      } catch {}
       return rejectWithValue(message);
     }
 

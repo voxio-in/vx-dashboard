@@ -26,8 +26,14 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
 
   const chartData = data?.chartData ?? [];
 
+  // Calculate total sessions
+  const totalSessions = chartData.reduce(
+    (acc, day) => acc + (day.sessions || 0),
+    0,
+  );
+
   return (
-    <Card className="p-8 h-full flex flex-col">
+    <Card className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -39,6 +45,10 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="text-right mr-4">
+            <p className="text-2xl font-bold text-gray-900">{totalSessions}</p>
+            <p className="text-xs text-gray-500">Total Sessions</p>
+          </div>
           <Badge variant="green" className="gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Live
@@ -46,69 +56,79 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke="#e5e7eb"
-            />
-            <XAxis
-              dataKey="label"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#9ca3af", fontSize: 12 }}
-              dy={10}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#9ca3af", fontSize: 12 }}
-              width={40}
-            />
-            <Tooltip
-              contentStyle={{
-                borderRadius: "12px",
-                border: "none",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-                padding: "12px",
-              }}
-              cursor={{
-                stroke: "#14b8a6",
-                strokeWidth: 2,
-                strokeDasharray: "4 4",
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="#14b8a6"
-              strokeWidth={3}
-              fillOpacity={1}
-              fill="url(#heroGradient)"
-              animationDuration={1500}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+      {/* Fixed height container - this is the key! */}
+      <div className="w-full h-[350px]">
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            No data available
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#e5e7eb"
+              />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#9ca3af", fontSize: 12 }}
+                dy={10}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#9ca3af", fontSize: 12 }}
+                width={40}
+                allowDecimals={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "none",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+                  padding: "12px",
+                }}
+                cursor={{
+                  stroke: "#14b8a6",
+                  strokeWidth: 2,
+                  strokeDasharray: "4 4",
+                }}
+                formatter={(value: any, name: string) => {
+                  if (name === "sessions") {
+                    return [value, "Sessions"];
+                  }
+                  return [value, name];
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="sessions"
+                stroke="#14b8a6"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#heroGradient)"
+                animationDuration={1500}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <div className="flex items-center gap-6 mt-4 pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-teal-500" />
           <span className="text-xs font-medium text-gray-600">
-            Total Sessions
+            Sessions per Day
           </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-xs font-medium text-gray-600">Active Now</span>
         </div>
       </div>
     </Card>

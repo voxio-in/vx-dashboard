@@ -19,11 +19,11 @@ const safeNumber = (value: unknown) =>
 
 const formatDuration = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.round(seconds));
-  const mins = Math.floor(safeSeconds / 60);
-  const secs = safeSeconds % 60;
-  if (mins === 0) return `${secs}s`;
-  if (secs === 0) return `${mins} min`;
-  return `${mins}m ${secs}s`;
+
+  const mins = Math.ceil(safeSeconds / 60);
+
+  if (mins === 0) return "1 min";
+  return `${mins} min`;
 };
 
 const titleCase = (value: string) => {
@@ -45,12 +45,10 @@ const parseDate = (value: unknown): Date | null => {
     const direct = new Date(value);
     if (!Number.isNaN(direct.getTime())) return direct;
 
-    // Handle microseconds by trimming to milliseconds.
     const trimmed = value.replace(/(\.\d{3})\d+/, "$1");
     const normalized = new Date(trimmed);
     if (!Number.isNaN(normalized.getTime())) return normalized;
 
-    // If there's no timezone info, try appending Z.
     if (!/([zZ]|[+-]\d{2}:\d{2})$/.test(trimmed)) {
       const withZ = new Date(`${trimmed}Z`);
       if (!Number.isNaN(withZ.getTime())) return withZ;
@@ -94,21 +92,18 @@ export async function GET(req: Request) {
     .select({ name: 1, sessions: 1 })
     .lean();
 
-  // Extract session ObjectIds from flows
   const sessionRefs = flows.flatMap((flow: any) =>
     Array.isArray(flow.sessions)
       ? flow.sessions.map((id: any) => id.toString())
       : [],
   );
 
-  // Convert to MongoDB ObjectIds
   const sessionObjectIds = sessionRefs
     .filter(isObjectIdLike)
     .map((id) => new mongoose.Types.ObjectId(id));
 
   const days = eachDayOfInterval({ start: fromDate, end: toDate });
 
-  // Early return if no sessions to query
   if (sessionObjectIds.length === 0) {
     const emptyChart = days.map((day) => ({
       date: format(day, "yyyy-MM-dd"),
@@ -131,20 +126,17 @@ export async function GET(req: Request) {
     });
   }
 
-  // Query sessions by ObjectId and date range
   let sessions = await Session.find({
     _id: { $in: sessionObjectIds },
     startTime: { $gte: fromDate, $lte: toDate },
   }).lean();
 
-  // Fallback: if no sessions found in date range, get all sessions (for filtering later)
   if (sessions.length === 0) {
     sessions = await Session.find({
       _id: { $in: sessionObjectIds },
     }).lean();
   }
 
-  // Create session ID -> flow name mapping
   const sessionToFlowName = new Map<string, string>();
   for (const flow of flows) {
     if (!Array.isArray(flow.sessions)) continue;
@@ -156,7 +148,6 @@ export async function GET(req: Request) {
     }
   }
 
-  // Filter sessions by date range (in case we got all sessions in fallback)
   const filteredSessions = sessions.filter((session: any) => {
     const start = getDateOrFallback(
       session.startTime,
@@ -166,7 +157,6 @@ export async function GET(req: Request) {
     return start >= fromDate && start <= toDate;
   });
 
-  // Build interactions data and count sessions per day
   const counts = new Map<string, number>();
   const interactions = filteredSessions
     .map((session: any) => {
@@ -201,13 +191,13 @@ export async function GET(req: Request) {
             )
           : 0;
 
-      // Handle both tokenRatio and totkenRatio (typo) for backward compatibility
-      const tokenRatio =
+      const tokenRatioRaw =
         typeof session.tokenRatio === "number"
           ? session.tokenRatio
           : typeof session.totkenRatio === "number"
             ? session.totkenRatio
             : 0;
+      const tokenRatio = Math.round(tokenRatioRaw * 1000) / 1000;
 
       return {
         id: session._id.toString(),
@@ -225,6 +215,7 @@ export async function GET(req: Request) {
         hasRecording: Boolean(session.recordingUrl),
         timeRatio,
         tokenRatio,
+        humanTokens: safeNumber(session.humanTokens),
         aiTokens: safeNumber(session.aiTokens),
         transcription: Array.isArray(session.transcription)
           ? session.transcription.map((item: any) => {
@@ -244,7 +235,6 @@ export async function GET(req: Request) {
     .sort((a, b) => b._sort - a._sort)
     .map(({ _sort, ...rest }) => rest);
 
-  // Build chart data for each day in the range
   const chartData = days.map((day) => {
     const key = format(day, "yyyy-MM-dd");
     const count = counts.get(key) || 0;
@@ -256,7 +246,6 @@ export async function GET(req: Request) {
     };
   });
 
-  // Calculate metrics
   const total = interactions.length;
   const totalDurationSeconds = filteredSessions.reduce(
     (acc: number, session: any) => {

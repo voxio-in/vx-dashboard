@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Card, Button } from "../ui/dashboard-components";
 import { cn } from "@/lib/utils";
-import { HeaderTooltip } from "./HeaderTooltip";
 import { DashboardData, Interaction } from "./types";
 import { ALL_COLUMNS, TYPE_FILTERS } from "./constants";
 import {
@@ -39,6 +38,72 @@ interface InteractionsTableProps {
   loading: boolean;
 }
 
+// Inline Tooltip Component
+// Inline Tooltip Component
+const InlineTooltip = ({
+  content,
+  children,
+}: {
+  content: string;
+  children: React.ReactNode;
+}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const targetRef = React.useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = () => {
+    setIsVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsVisible(false);
+  };
+
+  // Calculate position dynamically based on current element position
+  const getPosition = () => {
+    if (!targetRef.current) return { top: 0, left: 0 };
+
+    const rect = targetRef.current.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left + rect.width / 2,
+    };
+  };
+
+  const position = getPosition();
+
+  return (
+    <>
+      <div
+        ref={targetRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="inline-block"
+      >
+        {children}
+      </div>
+      {isVisible && typeof window !== "undefined" && (
+        <div
+          className="fixed px-3 py-2 bg-gray-900/95 backdrop-blur-sm text-white text-xs rounded-lg shadow-xl border border-gray-700/50 w-48 pointer-events-none z-[9999]"
+          style={{
+            top: `${position.top - 8}px`,
+            left: `${position.left}px`,
+            transform: "translate(-50%, -100%)",
+          }}
+        >
+          <div className="font-medium leading-relaxed">{content}</div>
+          <div
+            className="absolute w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-gray-900/95"
+            style={{
+              bottom: "-6px",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          />
+        </div>
+      )}
+    </>
+  );
+};
 export const InteractionsTable: React.FC<InteractionsTableProps> = ({
   data,
   loading,
@@ -60,7 +125,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
   } | null>(null);
 
   const pageSize = 6;
-  const totalColumns = visibleColumns.length + 3;
+  const totalColumns = visibleColumns.length + 2; // make it 3 when uncommenting actions
 
   const formatTimestamp = (value?: string) => {
     if (!value) return "";
@@ -153,7 +218,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
 
   return (
     <Card className="overflow-hidden">
-      {/* Header */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -166,7 +230,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Column Customizer Dropdown */}
             <div className="relative">
               <Button
                 variant={isColumnDropdownOpen ? "secondary" : "outline"}
@@ -249,7 +312,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
               </AnimatePresence>
             </div>
 
-            {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -280,13 +342,12 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
               onClick={handleGlobalSort}
               className="gap-2"
             >
-              <ArrowUpDown className="w-4 h-4" />
+              <ArrowUpDown className="w-3.5 h-3.5" />
               Sort
             </Button>
           </div>
         </div>
 
-        {/* Filter Bar */}
         <AnimatePresence>
           {isFilterOpen && (
             <motion.div
@@ -332,82 +393,79 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Table */}
       <div className="w-full overflow-x-auto">
         <div className="inline-block min-w-full align-middle">
           <div className="relative">
             <table className="min-w-full">
               <thead className="bg-gray-50/50 sticky top-0 z-10">
                 <tr>
-                  {/* Fixed: Type */}
                   <th className="sticky left-0 z-20 bg-gray-50 px-4 py-3 text-left w-[72px] min-w-[72px]">
-                    <HeaderTooltip content="Communication channel (Voice or Chat)">
+                    <InlineTooltip content="Communication channel (Voice or Chat)">
                       <div className="flex items-center gap-1.5 cursor-help">
                         <div className="w-8 h-8 rounded-lg transition-all bg-gray-100 flex items-center justify-center">
-                          <Activity className="w-4 h-4 text-gray-600" />
+                          <Activity className="w-3.5 h-3.5 text-gray-600" />
                         </div>
                       </div>
-                    </HeaderTooltip>
+                    </InlineTooltip>
                   </th>
 
-                  {/* Fixed: Flow Name */}
                   <th className="sticky left-[72px] z-20 bg-gray-50 px-4 py-3 text-left border-r border-gray-200/60">
-                    <HeaderTooltip content="The specific AI agent workflow handling the interaction.">
-                      <button
-                        onClick={() => handleSort("flowName")}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-teal-600"
-                      >
-                        <span>Flow Name</span>
-                        <ArrowUpDown
-                          className={cn(
-                            "w-3 h-3 transition-opacity",
-                            sortConfig?.key === "flowName"
-                              ? "opacity-100"
-                              : "opacity-30",
-                          )}
-                        />
-                      </button>
-                    </HeaderTooltip>
+                    <button
+                      onClick={() => handleSort("flowName")}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-teal-600"
+                    >
+                      <InlineTooltip content="The specific AI agent workflow handling the interaction.">
+                        <span className="cursor-help">Flow Name</span>
+                      </InlineTooltip>
+                      <ArrowUpDown
+                        className={cn(
+                          "w-4 h-4 transition-opacity flex-shrink-0",
+                          sortConfig?.key === "flowName"
+                            ? "opacity-100"
+                            : "opacity-30",
+                        )}
+                      />
+                    </button>
                   </th>
 
-                  {/* Scrollable columns */}
                   {ALL_COLUMNS.map((col: any) =>
                     visibleColumns.includes(col.key) ? (
                       <th key={col.key} className="px-4 py-3 text-left">
-                        <HeaderTooltip content={col.description}>
-                          {["transcription", "recording"].includes(col.key) ? (
+                        {["transcription", "recording"].includes(col.key) ? (
+                          <InlineTooltip content={col.description}>
                             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-help">
                               {col.label}
                             </span>
-                          ) : (
-                            <button
-                              onClick={() => handleSort(col.key)}
-                              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-teal-600"
-                            >
-                              <span>{col.label}</span>
-                              <ArrowUpDown
-                                className={cn(
-                                  "w-3 h-3 transition-opacity",
-                                  sortConfig?.key === col.key
-                                    ? "opacity-100"
-                                    : "opacity-30",
-                                )}
-                              />
-                            </button>
-                          )}
-                        </HeaderTooltip>
+                          </InlineTooltip>
+                        ) : (
+                          <button
+                            onClick={() => handleSort(col.key)}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-teal-600"
+                          >
+                            <InlineTooltip content={col.description}>
+                              <span className="cursor-help">{col.label}</span>
+                            </InlineTooltip>
+                            <ArrowUpDown
+                              className={cn(
+                                "w-4 h-4 transition-opacity flex-shrink-0",
+                                sortConfig?.key === col.key
+                                  ? "opacity-100"
+                                  : "opacity-30",
+                              )}
+                            />
+                          </button>
+                        )}
                       </th>
                     ) : null,
                   )}
 
-                  {/* Fixed: Actions */}
-                  <th className="sticky right-0 z-20 bg-gray-50 px-4 py-3 text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                    <HeaderTooltip content="Manage this interaction">
+                  {/* <th className="sticky right-0 z-20 bg-gray-50 px-4 py-3 text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                    <InlineTooltip content="Manage this interaction">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-help">
                         Actions
                       </span>
-                    </HeaderTooltip>
-                  </th>
+                    </InlineTooltip>
+                  </th> */}
                 </tr>
               </thead>
 
@@ -450,7 +508,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                         animate={{ opacity: 1 }}
                         className="hover:bg-gray-50/50 transition-colors group"
                       >
-                        {/* Type Icon */}
                         <td className="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 w-[72px] min-w-[72px]">
                           <div
                             className={cn(
@@ -466,14 +523,12 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                           </div>
                         </td>
 
-                        {/* Flow Name */}
                         <td className="sticky left-[72px] z-10 bg-white group-hover:bg-gray-50 px-4 py-3 border-r border-gray-100">
                           <span className="text-sm font-medium text-gray-900">
                             {item.flowName}
                           </span>
                         </td>
 
-                        {/* Dynamic columns */}
                         {visibleColumns.includes("startTime") && (
                           <td className="px-4 py-3 text-sm text-gray-900 font-medium whitespace-nowrap">
                             {item.startTime}
@@ -558,22 +613,27 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
 
                         {visibleColumns.includes("timeRatio") && (
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2 min-w-[60px]">
-                                <div
-                                  className={cn(
-                                    "h-2 rounded-full transition-all",
-                                    item.timeRatio >= 80
-                                      ? "bg-emerald-500"
-                                      : item.timeRatio >= 50
-                                        ? "bg-teal-500"
-                                        : "bg-orange-500",
-                                  )}
-                                  style={{ width: `${item.timeRatio}%` }}
-                                />
-                              </div>
-                              <span className="text-sm font-medium text-gray-900 min-w-[40px]">
-                                {item.timeRatio}%
+                            <div className="flex items-center justify-center">
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all",
+                                  item.timeRatio >= 300
+                                    ? "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 ring-2 ring-amber-200 shadow-md shadow-amber-500/20"
+                                    : item.timeRatio >= 200
+                                      ? "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300"
+                                      : item.timeRatio >= 150
+                                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                                        : item.timeRatio >= 100
+                                          ? "bg-teal-50 text-teal-700 ring-1 ring-teal-200"
+                                          : item.timeRatio >= 50
+                                            ? "bg-teal-50 text-teal-600 ring-1 ring-teal-200"
+                                            : "bg-orange-50 text-orange-600 ring-1 ring-orange-200",
+                                )}
+                              >
+                                {(item.timeRatio / 100).toFixed(1)}x
+                                {item.timeRatio >= 300 && (
+                                  <span className="text-amber-500">✨</span>
+                                )}
                               </span>
                             </div>
                           </td>
@@ -582,7 +642,14 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                         {visibleColumns.includes("tokenRatio") && (
                           <td className="px-4 py-3">
                             <span className="text-sm font-medium text-gray-600">
-                              {item.tokenRatio}
+                              {item.tokenRatio.toFixed(3)}
+                            </span>
+                          </td>
+                        )}
+                        {visibleColumns.includes("humanTokens") && (
+                          <td className="px-4 py-3">
+                            <span className="text-sm font-semibold text-blue-600">
+                              {item.humanTokens.toLocaleString()}
                             </span>
                           </td>
                         )}
@@ -595,8 +662,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                           </td>
                         )}
 
-                        {/* Actions */}
-                        <td className="sticky right-0 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                        {/* <td className="sticky right-0 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
                           <div className="flex items-center gap-2">
                             <button
                               className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
@@ -605,7 +671,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                               <MoreVertical className="w-4 h-4" />
                             </button>
                           </div>
-                        </td>
+                        </td> */}
                       </motion.tr>
                     );
                   })
@@ -616,7 +682,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
         </div>
       </div>
 
-      {/* Pagination */}
       {!loading && paginatedData.length > 0 && (
         <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
           <p className="text-xs text-gray-500">
@@ -675,7 +740,6 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
         </div>
       )}
 
-      {/* Transcription Dialog - Chat Style */}
       <Dialog
         open={!!selectedInteraction}
         onOpenChange={(open) => !open && setSelectedInteraction(null)}

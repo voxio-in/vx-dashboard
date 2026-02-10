@@ -1,7 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-// --- CARD ---
 export const Card = ({
   className,
   children,
@@ -16,7 +15,6 @@ export const Card = ({
   </div>
 );
 
-// --- BUTTON ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "outline" | "ghost" | "icon" | "secondary";
   size?: "sm" | "md" | "icon";
@@ -52,7 +50,6 @@ export const Button = ({
   );
 };
 
-// --- INPUT ---
 export const Input = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement>
@@ -71,7 +68,6 @@ export const Input = React.forwardRef<
 });
 Input.displayName = "Input";
 
-// --- BADGE ---
 export const Badge = ({
   children,
   className,

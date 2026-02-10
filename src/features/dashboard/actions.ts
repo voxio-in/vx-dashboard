@@ -2,30 +2,26 @@
 
 import { addDays, format, differenceInDays } from "date-fns";
 
-// Helper to simulate network delay
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export async function getDashboardData(startDate: string, endDate: string) {
-  await delay(500); // Simulate network
+  await delay(500);
 
   const start = new Date(startDate);
   const end = new Date(endDate);
   const daysDiff = differenceInDays(end, start) + 1;
 
-  // Generate Chart Data
   const chartData = Array.from({ length: daysDiff }).map((_, i) => {
     const date = addDays(start, i);
     return {
       date: format(date, "yyyy-MM-dd"),
-      label: format(date, "MMM dd"), // "Nov 15"
-      value: Math.floor(Math.random() * 50) + 5, // Random count
+      label: format(date, "MMM dd"),
+      value: Math.floor(Math.random() * 50) + 5,
     };
   });
 
-  // Calculate Metrics based on the random data
   const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
-  // Mock Interactions Table
   const interactions = [
     {
       id: "1",

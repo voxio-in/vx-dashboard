@@ -6,15 +6,11 @@ import { Toaster } from "sonner";
 import { Clock, Smile, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Dashboard components
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { HeroChart } from "@/components/dashboard/HeroChart";
 import { InteractionsTable } from "@/components/dashboard/InteractionsTable";
 
-// Hook from src/hooks (global hooks folder)
 import { useDashboardData } from "@/hooks/useDashboardData";
-
-// Types
 
 export default function DashboardPage() {
   const { data, loading, filter, setFilter } = useDashboardData();
@@ -24,7 +20,6 @@ export default function DashboardPage() {
       <Toaster position="top-right" richColors />
 
       <main className="w-full overflow-y-auto bg-gray-50/50">
-        {/* Header */}
         <header className="sticky top-0 z-10 backdrop-blur-xl bg-white/80 border-b border-gray-200">
           <div className="px-8 py-4 flex items-center justify-between">
             <div>
@@ -36,7 +31,6 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            {/* Filter Pills */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-xl">
                 {(["7d", "30d", "3m"] as const).map((f) => (
@@ -71,7 +65,6 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Main Content */}
         <div className="p-8">
           <AnimatePresence mode="wait">
             <motion.div
@@ -82,7 +75,6 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              {/* Metric Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <MetricCard
                   title="Total Interactions"
@@ -113,12 +105,10 @@ export default function DashboardPage() {
                 />
               </div>
 
-              {/* Hero Chart */}
               <div className="w-full">
                 <HeroChart data={data} loading={loading} />
               </div>
 
-              {/* Interactions Table */}
               <div className="w-full">
                 <InteractionsTable data={data} loading={loading} />
               </div>

@@ -44,7 +44,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
-      {/* Test Flow Dialog Integration */}
       <TestFlowDialog
         isOpen={isTestDialogOpen}
         onClose={() => setIsTestDialogOpen(false)}
@@ -53,7 +52,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
         flowName={flow.name}
       />
 
-      {/* HEADER */}
       <header className="h-20 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex items-center px-8 justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <Link href="/reseller/panel">
@@ -87,7 +85,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
         </Button>
       </header>
 
-      {/* CONTENT */}
       <main className="flex-1 overflow-y-auto p-10">
         <div className="max-w-4xl mx-auto space-y-6 pb-20">
           <div className="mb-8">
@@ -101,7 +98,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
             </p>
           </div>
 
-          {/* 1. STT CARD */}
           <div
             onClick={() => router.push(`/reseller/flow/${flow._id}/stt`)}
             className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer"
@@ -122,7 +118,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
             <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-indigo-600" />
           </div>
 
-          {/* 2. AGENTS CARD */}
           <div
             onClick={() => router.push(`/reseller/flow/${flow._id}/agent`)}
             className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer"
@@ -143,7 +138,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
             <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-purple-600" />
           </div>
 
-          {/* 3. TTS CARD */}
           <div
             onClick={() => router.push(`/reseller/flow/${flow._id}/tts`)}
             className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center gap-6 hover:border-orange-400 dark:hover:border-orange-600 hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer"
@@ -183,7 +177,6 @@ export default function FlowConfigClient({ flow }: { flow: IFlow }) {
               </p>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-lg border border-slate-100 dark:border-slate-800">
               <Button
                 variant="outline"
