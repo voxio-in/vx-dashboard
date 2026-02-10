@@ -13,32 +13,32 @@ export const ALL_COLUMNS = [
   },
   {
     key: "sessionDuration",
-    label: "Total Session Duration",
+    label: "Session Duration",
 
     fixed: false,
     description: "Total elapsed time of the session from start to finish.",
   },
   {
     key: "timeConnected",
-    label: "Total Time Connected",
+    label: "Time Connected",
     fixed: false,
     description: "Time spent actively connected to a human or AI agent.",
   },
   {
     key: "totalAiTime",
-    label: "Total AI Time",
+    label: "AI Time",
     fixed: false,
     description: "Duration where the AI was speaking or processing.",
   },
   {
     key: "totalHumanTime",
-    label: "Total Human Time",
+    label: "Human Time",
     fixed: false,
     description: "Duration where the human participant was speaking.",
   },
   {
     key: "transcription",
-    label: "Transcription",
+    label: "Transcript",
     fixed: false,
     description: "Availability of the text transcript for this session.",
   },

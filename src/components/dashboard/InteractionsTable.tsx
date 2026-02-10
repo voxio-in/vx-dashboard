@@ -330,9 +330,9 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
               variant={isFilterOpen ? "secondary" : "outline"}
               size="sm"
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={cn(isFilterOpen && "bg-gray-200")}
+              className={cn("gap-2", isFilterOpen && "bg-gray-200")}
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-3.5 h-3.5" />
               Filter
             </Button>
 
@@ -399,7 +399,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
             <table className="min-w-full">
               <thead className="bg-gray-50/50 sticky top-0 z-10">
                 <tr>
-                  <th className="sticky left-0 z-20 bg-gray-50 px-4 py-3 text-left w-[72px] min-w-[72px]">
+                  <th className="sticky left-0 z-40 bg-gray-50 px-4 py-3 text-left w-[72px] min-w-[72px]">
                     <InlineTooltip content="Communication channel (Voice or Chat)">
                       <div className="flex items-center gap-1.5 cursor-help">
                         <div className="w-8 h-8 rounded-lg transition-all bg-gray-100 flex items-center justify-center">
@@ -409,7 +409,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                     </InlineTooltip>
                   </th>
 
-                  <th className="sticky left-[72px] z-20 bg-gray-50 px-4 py-3 text-left border-r border-gray-200/60">
+                  <th className="sticky left-[72px] z-40 bg-gray-50 px-4 py-3 text-left border-r border-gray-200/60">
                     <button
                       onClick={() => handleSort("flowName")}
                       className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-teal-600"
@@ -430,7 +430,10 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
 
                   {ALL_COLUMNS.map((col: any) =>
                     visibleColumns.includes(col.key) ? (
-                      <th key={col.key} className="px-4 py-3 text-left">
+                      <th
+                        key={col.key}
+                        className="px-4 py-3 text-left whitespace-nowrap"
+                      >
                         {["transcription", "recording"].includes(col.key) ? (
                           <InlineTooltip content={col.description}>
                             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-help">
@@ -459,7 +462,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                     ) : null,
                   )}
 
-                  {/* <th className="sticky right-0 z-20 bg-gray-50 px-4 py-3 text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                  {/* <th className="sticky right-0 z-40 bg-gray-50 px-4 py-3 text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
                     <InlineTooltip content="Manage this interaction">
                       <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-help">
                         Actions
@@ -508,7 +511,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                         animate={{ opacity: 1 }}
                         className="hover:bg-gray-50/50 transition-colors group"
                       >
-                        <td className="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 w-[72px] min-w-[72px]">
+                        <td className="sticky left-0 z-40 bg-white group-hover:bg-gray-50 px-4 py-3 w-[72px] min-w-[72px]">
                           <div
                             className={cn(
                               "inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all",
@@ -523,7 +526,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                           </div>
                         </td>
 
-                        <td className="sticky left-[72px] z-10 bg-white group-hover:bg-gray-50 px-4 py-3 border-r border-gray-100">
+                        <td className="sticky left-[72px] z-40 bg-white group-hover:bg-gray-50 px-4 py-3 border-r border-gray-100">
                           <span className="text-sm font-medium text-gray-900">
                             {item.flowName}
                           </span>
@@ -662,7 +665,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
                           </td>
                         )}
 
-                        {/* <td className="sticky right-0 z-10 bg-white group-hover:bg-gray-50 px-4 py-3 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                        {/* <td className="sticky right-0 z-40 bg-white group-hover:bg-gray-50 px-4 py-3 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.05)]">
                           <div className="flex items-center gap-2">
                             <button
                               className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-all"
