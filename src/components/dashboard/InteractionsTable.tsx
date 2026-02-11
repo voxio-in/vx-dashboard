@@ -671,7 +671,7 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
       </div>
 
       {!loading && paginatedData.length > 0 && (
-        <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between">
+        <div className="px-6 py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">
             Showing{" "}
             <span className="font-medium text-gray-900">
@@ -685,45 +685,183 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
             <span className="font-medium text-gray-900">
               {processedData.length}
             </span>{" "}
-            results
+            results • Page {page} of {totalPages}
           </p>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500 whitespace-nowrap">
+                Jump to:
+              </span>
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                placeholder={page.toString()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const value = parseInt(e.currentTarget.value);
+                    if (value >= 1 && value <= totalPages) {
+                      setPage(value);
+                      e.currentTarget.value = "";
+                      e.currentTarget.blur();
+                    } else {
+                      toast.error(
+                        `Please enter a page between 1 and ${totalPages}`,
+                      );
+                    }
+                  }
+                }}
+                className="w-20 px-3 py-1.5 text-sm text-center rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                title="First page (1)"
+              >
+                <span className="hidden sm:inline">First</span>
+                <span className="sm:hidden">|◄</span>
+              </Button>
 
-            {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
-              const pageNum = i + 1;
-              return (
-                <button
-                  key={i}
-                  onClick={() => setPage(pageNum)}
-                  className={cn(
-                    "w-10 h-10 rounded-xl text-sm font-medium transition-all",
-                    page === pageNum
-                      ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/30"
-                      : "hover:bg-gray-100 text-gray-600",
-                  )}
+              {totalPages > 20 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 10))}
+                  disabled={page <= 10}
+                  title="Back 10 pages"
+                  className="hidden sm:flex"
                 >
-                  {pageNum}
-                </button>
-              );
-            })}
+                  -10
+                </Button>
+              )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                title="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+
+              {(() => {
+                const pageNumbers = [];
+                const showEllipsis = totalPages > 7;
+
+                if (!showEllipsis) {
+                  for (let i = 1; i <= totalPages; i++) {
+                    pageNumbers.push(i);
+                  }
+                } else {
+                  pageNumbers.push(1);
+                  if (page > 4) {
+                    pageNumbers.push("ellipsis-start");
+                  }
+
+                  const start = Math.max(2, page - 1);
+                  const end = Math.min(totalPages - 1, page + 1);
+
+                  for (let i = start; i <= end; i++) {
+                    if (i !== 1 && i !== totalPages) {
+                      pageNumbers.push(i);
+                    }
+                  }
+
+                  if (page < totalPages - 3) {
+                    pageNumbers.push("ellipsis-end");
+                  }
+
+                  if (totalPages > 1) {
+                    pageNumbers.push(totalPages);
+                  }
+                }
+
+                return pageNumbers.map((pageNum, i) => {
+                  if (typeof pageNum === "string") {
+                    return (
+                      <span
+                        key={pageNum}
+                        className="px-2 text-gray-400 select-none hidden lg:inline"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  const isCurrent = page === pageNum;
+                  const isFirstOrLast = pageNum === 1 || pageNum === totalPages;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setPage(pageNum)}
+                      className={cn(
+                        "min-w-[40px] h-9 px-3 rounded-lg text-sm font-medium transition-all items-center justify-center",
+                        page === pageNum
+                          ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/30 flex"
+                          : "hover:bg-gray-100 text-gray-600 hidden lg:flex",
+                        isCurrent && "!flex",
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                });
+              })()}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                title="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              {totalPages > 20 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 10))}
+                  disabled={page > totalPages - 10}
+                  title="Forward 10 pages"
+                  className="hidden sm:flex"
+                >
+                  +10
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                title={`Last page (${totalPages})`}
+              >
+                <span className="hidden sm:inline">Last</span>
+                <span className="sm:hidden">►|</span>
+              </Button>
+            </div>
+            {totalPages > 100 && (
+              <div className="hidden xl:flex items-center gap-1.5 pl-2 border-l border-gray-200">
+                <span className="text-xs text-gray-400">Quick:</span>
+                {[0.25, 0.5, 0.75].map((fraction) => {
+                  const targetPage = Math.floor(totalPages * fraction);
+                  return (
+                    <button
+                      key={fraction}
+                      onClick={() => setPage(targetPage)}
+                      className="px-2 py-1 text-xs rounded-md hover:bg-gray-100 text-gray-600 transition-colors"
+                      title={`Jump to page ${targetPage}`}
+                    >
+                      {Math.floor(fraction * 100)}%
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

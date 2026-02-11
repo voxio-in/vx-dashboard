@@ -5,15 +5,27 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
 import { Clock, Activity, Calendar, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { HeroChart } from "@/components/dashboard/HeroChart";
 import { InteractionsTable } from "@/components/dashboard/InteractionsTable";
-
 import { useDashboardData } from "@/hooks/useDashboardData";
 
 export default function DashboardPage() {
   const { data, loading, filter, setFilter } = useDashboardData();
+
+  const formatChange = (value?: number) => {
+    if (value === undefined || Number.isNaN(value)) return undefined;
+    const rounded = Math.abs(value) < 0.05 ? 0 : Math.round(value * 10) / 10;
+    const sign = rounded > 0 ? "+" : "";
+    return `${sign}${rounded}%`;
+  };
+
+  const trendFor = (value?: number) => {
+    if (value === undefined || Number.isNaN(value)) return undefined;
+    return value >= 0 ? "up" : "down";
+  };
+
+  const metricChanges = data?.metricChanges;
 
   return (
     <div className="min-h-screen">
@@ -79,8 +91,8 @@ export default function DashboardPage() {
                 <MetricCard
                   title="Total Interactions"
                   value={loading ? "..." : data?.metrics.total}
-                  change="+12.5%"
-                  trend="up"
+                  change={formatChange(metricChanges?.total)}
+                  trend={trendFor(metricChanges?.total)}
                   icon={Activity}
                   loading={loading}
                 />
@@ -88,8 +100,8 @@ export default function DashboardPage() {
                 <MetricCard
                   title="Avg Duration"
                   value={loading ? "..." : data?.metrics.avgDuration}
-                  change="-5s"
-                  trend="down"
+                  change={formatChange(metricChanges?.avgDuration)}
+                  trend={trendFor(metricChanges?.avgDuration)}
                   icon={Clock}
                   loading={loading}
                 />
@@ -101,8 +113,8 @@ export default function DashboardPage() {
                       ? "..."
                       : (data?.metrics.totalSessionDuration ?? "0 min")
                   }
-                  change="+8%"
-                  trend="up"
+                  change={formatChange(metricChanges?.totalSessionDuration)}
+                  trend={trendFor(metricChanges?.totalSessionDuration)}
                   icon={Calendar}
                   loading={loading}
                 />
@@ -114,8 +126,8 @@ export default function DashboardPage() {
                       ? "..."
                       : (data?.metrics.totalConnectedDuration ?? "0 min")
                   }
-                  change="+10%"
-                  trend="up"
+                  change={formatChange(metricChanges?.totalConnectedDuration)}
+                  trend={trendFor(metricChanges?.totalConnectedDuration)}
                   icon={Link}
                   loading={loading}
                 />

@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import {
+  differenceInCalendarDays,
   eachDayOfInterval,
   endOfDay,
   format,
@@ -21,34 +22,28 @@ const formatDuration = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.round(seconds));
   const totalMinutes = safeSeconds / 60;
 
-  // Less than 1 minute
   if (totalMinutes < 1) return "1 min";
 
-  // Less than 60 minutes - show in minutes
   if (totalMinutes < 60) {
     const mins = Math.round(totalMinutes);
     return `${mins} min`;
   }
 
-  // 60-1439 minutes - show in hours
   if (totalMinutes < 1440) {
     const hours = Math.round((totalMinutes / 60) * 10) / 10;
     return `${hours} hrs`;
   }
 
-  // 1440-43199 minutes - show in days
   if (totalMinutes < 43200) {
     const days = Math.round((totalMinutes / 1440) * 10) / 10;
     return `${days} days`;
   }
 
-  // 43200-525599 minutes - show in months
   if (totalMinutes < 525600) {
     const months = Math.round((totalMinutes / 43200) * 10) / 10;
     return `${months} months`;
   }
 
-  // 525600+ minutes - show in years
   const years = Math.round((totalMinutes / 525600) * 10) / 10;
   return `${years} years`;
 };
@@ -89,6 +84,93 @@ const getDateOrFallback = (value: any, fallback: Date | null) => {
   return parsed ?? fallback;
 };
 
+const getSessionStart = (session: any) =>
+  getDateOrFallback(
+    session.startTime,
+    getDateOrFallback(session.createdAt, null),
+  );
+
+const getSessionEnd = (session: any) =>
+  getDateOrFallback(session.endTime, null);
+
+const filterSessionsByDate = (sessions: any[], start: Date, end: Date) =>
+  sessions.filter((session: any) => {
+    const sessionStart = getSessionStart(session);
+    return sessionStart ? sessionStart >= start && sessionStart <= end : false;
+  });
+
+const roundTo1 = (value: number) => Math.round(value * 10) / 10;
+
+const calculateChange = (current: number, previous: number) => {
+  if (previous <= 0) return current > 0 ? 100 : 0;
+  return roundTo1(((current - previous) / previous) * 100);
+};
+
+const summarizeSessions = (
+  sessions: any[],
+  sessionToFlowName: Map<string, string>,
+) => {
+  const total = sessions.length;
+  let totalDurationSeconds = 0;
+  let totalConnectedSeconds = 0;
+  let totalTimeRatio = 0;
+  let transcriptCount = 0;
+  const flowNames = new Set<string>();
+
+  for (const session of sessions) {
+    const start = getSessionStart(session);
+    const end = getSessionEnd(session);
+    const durationSeconds =
+      start && end
+        ? Math.max(0, Math.round((end.getTime() - start.getTime()) / 1000))
+        : 0;
+
+    totalDurationSeconds += durationSeconds;
+
+    const connectedSeconds = safeNumber(session.totalConnectedTime);
+    totalConnectedSeconds += connectedSeconds;
+
+    const timeRatio =
+      durationSeconds > 0
+        ? Math.min(
+            100,
+            Math.max(0, Math.round((connectedSeconds / durationSeconds) * 100)),
+          )
+        : 0;
+    totalTimeRatio += timeRatio;
+
+    if (
+      Array.isArray(session.transcription) &&
+      session.transcription.length > 0
+    ) {
+      transcriptCount += 1;
+    }
+
+    const flowName = sessionToFlowName.get(session._id.toString()) || "Unknown";
+    if (flowName && flowName !== "Unknown") {
+      flowNames.add(flowName);
+    }
+  }
+
+  const avgDurationSeconds =
+    total > 0 ? Math.round(totalDurationSeconds / total) : 0;
+  const avgTimeRatio = total > 0 ? Math.round(totalTimeRatio / total) : 0;
+  const successRate =
+    total > 0 ? Math.round((transcriptCount / total) * 100) : 0;
+  const score = total > 0 ? Math.round((avgTimeRatio / 10) * 10) / 10 : 0;
+
+  return {
+    total,
+    totalDurationSeconds,
+    totalConnectedSeconds,
+    avgDurationSeconds,
+    avgTimeRatio,
+    successRate,
+    score,
+    activeUsers: flowNames.size,
+  };
+};
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const today = new Date();
@@ -105,6 +187,10 @@ export async function GET(req: Request) {
 
   const fromDate = startOfDay(fromRaw);
   const toDate = endOfDay(toRaw);
+
+  const rangeDays = differenceInCalendarDays(toDate, fromDate) + 1;
+  const previousFromDate = startOfDay(subDays(fromDate, rangeDays));
+  const previousToDate = endOfDay(subDays(fromDate, 1));
 
   const user = await getCurrentUser();
 
@@ -150,6 +236,12 @@ export async function GET(req: Request) {
         totalSessionDuration: "0 min",
         totalConnectedDuration: "0 min",
       },
+      metricChanges: {
+        total: 0,
+        avgDuration: 0,
+        totalSessionDuration: 0,
+        totalConnectedDuration: 0,
+      },
       chartData: emptyChart,
       interactions: [],
     });
@@ -157,7 +249,7 @@ export async function GET(req: Request) {
 
   let sessions = await Session.find({
     _id: { $in: sessionObjectIds },
-    startTime: { $gte: fromDate, $lte: toDate },
+    startTime: { $gte: previousFromDate, $lte: toDate },
   }).lean();
 
   if (sessions.length === 0) {
@@ -177,23 +269,18 @@ export async function GET(req: Request) {
     }
   }
 
-  const filteredSessions = sessions.filter((session: any) => {
-    const start = getDateOrFallback(
-      session.startTime,
-      getDateOrFallback(session.createdAt, null),
-    );
-    if (!start) return false;
-    return start >= fromDate && start <= toDate;
-  });
+  const currentSessions = filterSessionsByDate(sessions, fromDate, toDate);
+  const previousSessions = filterSessionsByDate(
+    sessions,
+    previousFromDate,
+    previousToDate,
+  );
 
   const counts = new Map<string, number>();
-  const interactions = filteredSessions
+  const interactions = currentSessions
     .map((session: any) => {
-      const start = getDateOrFallback(
-        session.startTime,
-        getDateOrFallback(session.createdAt, null),
-      );
-      const end = getDateOrFallback(session.endTime, null);
+      const start = getSessionStart(session);
+      const end = getSessionEnd(session);
 
       const startKey = start ? format(start, "yyyy-MM-dd") : null;
       if (startKey) {
@@ -275,69 +362,41 @@ export async function GET(req: Request) {
     };
   });
 
-  const total = interactions.length;
-  const totalDurationSeconds = filteredSessions.reduce(
-    (acc: number, session: any) => {
-      const start = getDateOrFallback(
-        session.startTime,
-        getDateOrFallback(session.createdAt, null),
-      );
-      const end = getDateOrFallback(session.endTime, null);
-      if (!start || !end) return acc;
-      const diff = Math.max(
-        0,
-        Math.round((end.getTime() - start.getTime()) / 1000),
-      );
-      return acc + diff;
-    },
-    0,
+  const currentSummary = summarizeSessions(currentSessions, sessionToFlowName);
+  const previousSummary = summarizeSessions(
+    previousSessions,
+    sessionToFlowName,
   );
-
-  const totalConnectedSeconds = filteredSessions.reduce(
-    (acc: number, session: any) => {
-      const connectedTime = safeNumber(session.totalConnectedTime);
-      return acc + connectedTime;
-    },
-    0,
-  );
-
-  const avgDurationSeconds =
-    total > 0 ? Math.round(totalDurationSeconds / total) : 0;
-  const avgTimeRatio =
-    total > 0
-      ? Math.round(
-          interactions.reduce((acc, item) => acc + item.timeRatio, 0) / total,
-        )
-      : 0;
-
-  const uniqueFlows = new Set(
-    interactions
-      .map((item) => item.flowName)
-      .filter((name) => name && name !== "Unknown"),
-  ).size;
-
-  const successRate =
-    total > 0
-      ? Math.round(
-          (interactions.filter((item) => item.hasTranscription).length /
-            total) *
-            100,
-        )
-      : 0;
-
-  const score = total > 0 ? Math.round((avgTimeRatio / 10) * 10) / 10 : 0;
+  const metricChanges = {
+    total: calculateChange(currentSummary.total, previousSummary.total),
+    avgDuration: calculateChange(
+      currentSummary.avgDurationSeconds,
+      previousSummary.avgDurationSeconds,
+    ),
+    totalSessionDuration: calculateChange(
+      currentSummary.totalDurationSeconds,
+      previousSummary.totalDurationSeconds,
+    ),
+    totalConnectedDuration: calculateChange(
+      currentSummary.totalConnectedSeconds,
+      previousSummary.totalConnectedSeconds,
+    ),
+  };
 
   return NextResponse.json({
     metrics: {
-      total,
-      avgDuration: formatDuration(avgDurationSeconds),
-      score,
-      activeUsers: uniqueFlows,
-      successRate,
+      total: currentSummary.total,
+      avgDuration: formatDuration(currentSummary.avgDurationSeconds),
+      score: currentSummary.score,
+      activeUsers: currentSummary.activeUsers,
+      successRate: currentSummary.successRate,
       avgResponse: "0s",
-      totalSessionDuration: formatDuration(totalDurationSeconds),
-      totalConnectedDuration: formatDuration(totalConnectedSeconds),
+      totalSessionDuration: formatDuration(currentSummary.totalDurationSeconds),
+      totalConnectedDuration: formatDuration(
+        currentSummary.totalConnectedSeconds,
+      ),
     },
+    metricChanges,
     chartData,
     interactions,
   });

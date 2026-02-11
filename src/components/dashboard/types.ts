@@ -34,6 +34,13 @@ export interface DashboardMetrics {
   totalConnectedDuration: string;
 }
 
+export interface DashboardMetricChanges {
+  total: number;
+  avgDuration: number;
+  totalSessionDuration: number;
+  totalConnectedDuration: number;
+}
+
 export interface ChartDataPoint {
   date: string;
   label: string;
@@ -43,6 +50,7 @@ export interface ChartDataPoint {
 
 export interface DashboardData {
   metrics: DashboardMetrics;
+  metricChanges: DashboardMetricChanges;
   chartData: ChartDataPoint[];
   interactions: Interaction[];
 }
