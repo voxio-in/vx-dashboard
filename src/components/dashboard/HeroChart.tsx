@@ -48,10 +48,6 @@ export const HeroChart: React.FC<HeroChartProps> = ({ data, loading }) => {
             <p className="text-2xl font-bold text-gray-900">{totalSessions}</p>
             <p className="text-xs text-gray-500">Total Sessions</p>
           </div>
-          <Badge variant="green" className="gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Live
-          </Badge>
         </div>
       </div>
 

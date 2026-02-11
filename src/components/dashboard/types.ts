@@ -30,6 +30,8 @@ export interface DashboardMetrics {
   activeUsers: number;
   successRate: number;
   avgResponse: string;
+  totalSessionDuration: string;
+  totalConnectedDuration: string;
 }
 
 export interface ChartDataPoint {

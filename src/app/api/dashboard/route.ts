@@ -19,11 +19,38 @@ const safeNumber = (value: unknown) =>
 
 const formatDuration = (seconds: number) => {
   const safeSeconds = Math.max(0, Math.round(seconds));
+  const totalMinutes = safeSeconds / 60;
 
-  const mins = Math.ceil(safeSeconds / 60);
+  // Less than 1 minute
+  if (totalMinutes < 1) return "1 min";
 
-  if (mins === 0) return "1 min";
-  return `${mins} min`;
+  // Less than 60 minutes - show in minutes
+  if (totalMinutes < 60) {
+    const mins = Math.round(totalMinutes);
+    return `${mins} min`;
+  }
+
+  // 60-1439 minutes - show in hours
+  if (totalMinutes < 1440) {
+    const hours = Math.round((totalMinutes / 60) * 10) / 10;
+    return `${hours} hrs`;
+  }
+
+  // 1440-43199 minutes - show in days
+  if (totalMinutes < 43200) {
+    const days = Math.round((totalMinutes / 1440) * 10) / 10;
+    return `${days} days`;
+  }
+
+  // 43200-525599 minutes - show in months
+  if (totalMinutes < 525600) {
+    const months = Math.round((totalMinutes / 43200) * 10) / 10;
+    return `${months} months`;
+  }
+
+  // 525600+ minutes - show in years
+  const years = Math.round((totalMinutes / 525600) * 10) / 10;
+  return `${years} years`;
 };
 
 const titleCase = (value: string) => {
@@ -115,11 +142,13 @@ export async function GET(req: Request) {
     return NextResponse.json({
       metrics: {
         total: 0,
-        avgDuration: "0s",
+        avgDuration: "0 min",
         score: 0,
         activeUsers: 0,
         successRate: 0,
         avgResponse: "0s",
+        totalSessionDuration: "0 min",
+        totalConnectedDuration: "0 min",
       },
       chartData: emptyChart,
       interactions: [],
@@ -264,6 +293,14 @@ export async function GET(req: Request) {
     0,
   );
 
+  const totalConnectedSeconds = filteredSessions.reduce(
+    (acc: number, session: any) => {
+      const connectedTime = safeNumber(session.totalConnectedTime);
+      return acc + connectedTime;
+    },
+    0,
+  );
+
   const avgDurationSeconds =
     total > 0 ? Math.round(totalDurationSeconds / total) : 0;
   const avgTimeRatio =
@@ -298,6 +335,8 @@ export async function GET(req: Request) {
       activeUsers: uniqueFlows,
       successRate,
       avgResponse: "0s",
+      totalSessionDuration: formatDuration(totalDurationSeconds),
+      totalConnectedDuration: formatDuration(totalConnectedSeconds),
     },
     chartData,
     interactions,

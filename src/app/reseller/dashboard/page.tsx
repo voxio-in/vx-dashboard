@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Toaster } from "sonner";
-import { Clock, Activity } from "lucide-react";
+import { Clock, Activity, Calendar, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { MetricCard } from "@/components/dashboard/MetricCard";
@@ -75,47 +75,53 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {/* Card 1: Total Interactions - NO sparkline */}
                 <MetricCard
                   title="Total Interactions"
                   value={loading ? "..." : data?.metrics.total}
                   change="+12.5%"
                   trend="up"
                   icon={Activity}
-                  sparklineData={data?.chartData.slice(-7)}
                   loading={loading}
                 />
+
+                {/* Card 2: Avg Duration - NO sparkline */}
                 <MetricCard
                   title="Avg Duration"
                   value={loading ? "..." : data?.metrics.avgDuration}
                   change="-5s"
                   trend="down"
                   icon={Clock}
-                  sparklineData={data?.chartData.slice(-7)}
                   loading={loading}
                 />
-                {/* Dual Metric Card - Total Session Duration & Total Connected Duration */}
+
+                {/* Card 3: Total Session Duration - NO sparkline */}
                 <MetricCard
                   title="Total Session Duration"
                   value={
                     loading
                       ? "..."
-                      : data?.metrics.totalSessionDuration || "45 min"
+                      : (data?.metrics.totalSessionDuration ?? "0 min")
                   }
                   change="+8%"
                   trend="up"
-                  icon={Clock}
-                  sparklineData={data?.chartData.slice(-7)}
+                  icon={Calendar}
                   loading={loading}
-                  isDualMetric={true}
-                  secondaryTitle="Total Connected Duration"
-                  secondaryValue={
+                />
+
+                {/* Card 4: Total Connected Duration - NO sparkline */}
+                <MetricCard
+                  title="Total Connected Duration"
+                  value={
                     loading
                       ? "..."
-                      : data?.metrics.totalConnectedDuration || "42 min"
+                      : (data?.metrics.totalConnectedDuration ?? "0 min")
                   }
-                  secondaryChange="+10%"
-                  secondaryTrend="up"
+                  change="+10%"
+                  trend="up"
+                  icon={Link}
+                  loading={loading}
                 />
               </div>
 
