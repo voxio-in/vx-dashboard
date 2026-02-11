@@ -76,7 +76,6 @@ export default function DashboardPage() {
               className="space-y-6"
             >
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {/* Card 1: Total Interactions - NO sparkline */}
                 <MetricCard
                   title="Total Interactions"
                   value={loading ? "..." : data?.metrics.total}
@@ -86,7 +85,6 @@ export default function DashboardPage() {
                   loading={loading}
                 />
 
-                {/* Card 2: Avg Duration - NO sparkline */}
                 <MetricCard
                   title="Avg Duration"
                   value={loading ? "..." : data?.metrics.avgDuration}
@@ -96,7 +94,6 @@ export default function DashboardPage() {
                   loading={loading}
                 />
 
-                {/* Card 3: Total Session Duration - NO sparkline */}
                 <MetricCard
                   title="Total Session Duration"
                   value={
@@ -110,7 +107,6 @@ export default function DashboardPage() {
                   loading={loading}
                 />
 
-                {/* Card 4: Total Connected Duration - NO sparkline */}
                 <MetricCard
                   title="Total Connected Duration"
                   value={
