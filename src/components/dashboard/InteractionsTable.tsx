@@ -182,14 +182,31 @@ export const InteractionsTable: React.FC<InteractionsTableProps> = ({
 
     if (sortConfig) {
       filtered.sort((a: any, b: any) => {
-        if (a[sortConfig.key] < b[sortConfig.key])
+        const keyMap: Record<string, string> = {
+          startTime: "_startTimestamp",
+          endTime: "_endTimestamp",
+          sessionDuration: "_durationSeconds",
+          timeConnected: "_connectedSeconds",
+          totalAiTime: "_aiSeconds",
+          totalHumanTime: "_humanSeconds",
+        };
+
+        const sortKey = keyMap[sortConfig.key] || sortConfig.key;
+        const aValue = a[sortKey];
+        const bValue = b[sortKey];
+
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return sortConfig.direction === "asc" ? 1 : -1;
+        if (bValue == null) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aValue < bValue) {
           return sortConfig.direction === "asc" ? -1 : 1;
-        if (a[sortConfig.key] > b[sortConfig.key])
+        }
+        if (aValue > bValue) {
           return sortConfig.direction === "asc" ? 1 : -1;
+        }
         return 0;
       });
     }
-
     return filtered;
   }, [data, search, sortConfig, typeFilter]);
 

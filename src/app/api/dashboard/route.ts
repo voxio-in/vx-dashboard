@@ -325,6 +325,12 @@ export async function GET(req: Request) {
         timeConnected: formatDuration(connectedSeconds),
         totalAiTime: formatDuration(aiSeconds),
         totalHumanTime: formatDuration(humanSeconds),
+        _durationSeconds: durationSeconds,
+        _connectedSeconds: connectedSeconds,
+        _aiSeconds: aiSeconds,
+        _humanSeconds: humanSeconds,
+        _startTimestamp: start ? start.getTime() : 0,
+        _endTimestamp: end ? end.getTime() : 0,
         hasTranscription:
           Array.isArray(session.transcription) &&
           session.transcription.length > 0,
@@ -348,8 +354,7 @@ export async function GET(req: Request) {
         _sort: start ? start.getTime() : 0,
       };
     })
-    .sort((a, b) => b._sort - a._sort)
-    .map(({ _sort, ...rest }) => rest);
+    .sort((a, b) => b._sort - a._sort);
 
   const chartData = days.map((day) => {
     const key = format(day, "yyyy-MM-dd");
