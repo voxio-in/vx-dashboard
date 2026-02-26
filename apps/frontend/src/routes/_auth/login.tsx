@@ -3,6 +3,17 @@ import { useState } from "react";
 import { useLoginMutation } from "@/hooks/mutations/useLoginMutation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Role, ROLE_LEVEL } from "@vx/shared";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Shield } from "lucide-react";
 
 export const Route = createFileRoute("/_auth/login")({
   component: LoginPage,
@@ -25,8 +36,6 @@ function LoginPage() {
         onSuccess: (data) => {
           const user = data.data.user;
           setUser(user);
-
-          // Redirect based on role
           const role = user.role as Role;
           if (ROLE_LEVEL[role] >= ROLE_LEVEL[Role.SUPERADMIN]) {
             window.location.href = "/superadmin";
@@ -46,52 +55,56 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md p-8 rounded-xl border border-white/10 bg-white/5 backdrop-blur">
-      <h1 className="text-2xl font-bold text-white mb-2">Welcome back</h1>
-      <p className="text-muted-foreground text-sm mb-8">
-        Sign in to your account
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            {error}
+    <div className="w-full max-w-md px-4">
+      <div className="flex justify-center mb-8">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+            <Shield className="w-5 h-5 text-primary-foreground" />
           </div>
-        )}
-        <div>
-          <label className="block text-sm text-muted-foreground mb-1.5">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/30"
-            placeholder="you@example.com"
-            required
-          />
+          <span className="text-xl font-semibold">VX Dashboard</span>
         </div>
-        <div>
-          <label className="block text-sm text-muted-foreground mb-1.5">
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/30"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full py-2.5 rounded-lg bg-white text-black text-sm font-medium hover:bg-white/90 disabled:opacity-50 transition-colors"
-        >
-          {isPending ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+      </div>
+
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardDescription>Sign in to your account to continue</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

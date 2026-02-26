@@ -23,8 +23,9 @@ import { Route as DashboardResellerIndexRouteImport } from './routes/_dashboard/
 import { Route as DashboardAdminIndexRouteImport } from './routes/_dashboard/admin/index'
 import { Route as DashboardUserFlowsRouteImport } from './routes/_dashboard/user/flows'
 import { Route as DashboardSuperadminUsersRouteImport } from './routes/_dashboard/superadmin/users'
-import { Route as DashboardSuperadminResllersRouteImport } from './routes/_dashboard/superadmin/resllers'
-import { Route as DashboardSuperadminAdminRouteImport } from './routes/_dashboard/superadmin/admin'
+import { Route as DashboardSuperadminUiConfigRouteImport } from './routes/_dashboard/superadmin/ui-config'
+import { Route as DashboardSuperadminResellersRouteImport } from './routes/_dashboard/superadmin/resellers'
+import { Route as DashboardSuperadminAdminsRouteImport } from './routes/_dashboard/superadmin/admins'
 import { Route as DashboardResellerUsersRouteImport } from './routes/_dashboard/reseller/users'
 import { Route as DashboardAdminUsersRouteImport } from './routes/_dashboard/admin/users'
 
@@ -99,16 +100,22 @@ const DashboardSuperadminUsersRoute =
     path: '/users',
     getParentRoute: () => DashboardSuperadminRouteRoute,
   } as any)
-const DashboardSuperadminResllersRoute =
-  DashboardSuperadminResllersRouteImport.update({
-    id: '/resllers',
-    path: '/resllers',
+const DashboardSuperadminUiConfigRoute =
+  DashboardSuperadminUiConfigRouteImport.update({
+    id: '/ui-config',
+    path: '/ui-config',
     getParentRoute: () => DashboardSuperadminRouteRoute,
   } as any)
-const DashboardSuperadminAdminRoute =
-  DashboardSuperadminAdminRouteImport.update({
-    id: '/admin',
-    path: '/admin',
+const DashboardSuperadminResellersRoute =
+  DashboardSuperadminResellersRouteImport.update({
+    id: '/resellers',
+    path: '/resellers',
+    getParentRoute: () => DashboardSuperadminRouteRoute,
+  } as any)
+const DashboardSuperadminAdminsRoute =
+  DashboardSuperadminAdminsRouteImport.update({
+    id: '/admins',
+    path: '/admins',
     getParentRoute: () => DashboardSuperadminRouteRoute,
   } as any)
 const DashboardResellerUsersRoute = DashboardResellerUsersRouteImport.update({
@@ -132,8 +139,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardDashboardRoute
   '/admin/users': typeof DashboardAdminUsersRoute
   '/reseller/users': typeof DashboardResellerUsersRoute
-  '/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/superadmin/admins': typeof DashboardSuperadminAdminsRoute
+  '/superadmin/resellers': typeof DashboardSuperadminResellersRoute
+  '/superadmin/ui-config': typeof DashboardSuperadminUiConfigRoute
   '/superadmin/users': typeof DashboardSuperadminUsersRoute
   '/user/flows': typeof DashboardUserFlowsRoute
   '/admin/': typeof DashboardAdminIndexRoute
@@ -147,8 +155,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardDashboardRoute
   '/admin/users': typeof DashboardAdminUsersRoute
   '/reseller/users': typeof DashboardResellerUsersRoute
-  '/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/superadmin/admins': typeof DashboardSuperadminAdminsRoute
+  '/superadmin/resellers': typeof DashboardSuperadminResellersRoute
+  '/superadmin/ui-config': typeof DashboardSuperadminUiConfigRoute
   '/superadmin/users': typeof DashboardSuperadminUsersRoute
   '/user/flows': typeof DashboardUserFlowsRoute
   '/admin': typeof DashboardAdminIndexRoute
@@ -168,8 +177,9 @@ export interface FileRoutesById {
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/_dashboard/reseller/users': typeof DashboardResellerUsersRoute
-  '/_dashboard/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/_dashboard/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/_dashboard/superadmin/admins': typeof DashboardSuperadminAdminsRoute
+  '/_dashboard/superadmin/resellers': typeof DashboardSuperadminResellersRoute
+  '/_dashboard/superadmin/ui-config': typeof DashboardSuperadminUiConfigRoute
   '/_dashboard/superadmin/users': typeof DashboardSuperadminUsersRoute
   '/_dashboard/user/flows': typeof DashboardUserFlowsRoute
   '/_dashboard/admin/': typeof DashboardAdminIndexRoute
@@ -189,8 +199,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/users'
     | '/reseller/users'
-    | '/superadmin/admin'
-    | '/superadmin/resllers'
+    | '/superadmin/admins'
+    | '/superadmin/resellers'
+    | '/superadmin/ui-config'
     | '/superadmin/users'
     | '/user/flows'
     | '/admin/'
@@ -204,8 +215,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/users'
     | '/reseller/users'
-    | '/superadmin/admin'
-    | '/superadmin/resllers'
+    | '/superadmin/admins'
+    | '/superadmin/resellers'
+    | '/superadmin/ui-config'
     | '/superadmin/users'
     | '/user/flows'
     | '/admin'
@@ -224,8 +236,9 @@ export interface FileRouteTypes {
     | '/_dashboard/dashboard'
     | '/_dashboard/admin/users'
     | '/_dashboard/reseller/users'
-    | '/_dashboard/superadmin/admin'
-    | '/_dashboard/superadmin/resllers'
+    | '/_dashboard/superadmin/admins'
+    | '/_dashboard/superadmin/resellers'
+    | '/_dashboard/superadmin/ui-config'
     | '/_dashboard/superadmin/users'
     | '/_dashboard/user/flows'
     | '/_dashboard/admin/'
@@ -339,18 +352,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSuperadminUsersRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/_dashboard/superadmin/resllers': {
-      id: '/_dashboard/superadmin/resllers'
-      path: '/resllers'
-      fullPath: '/superadmin/resllers'
-      preLoaderRoute: typeof DashboardSuperadminResllersRouteImport
+    '/_dashboard/superadmin/ui-config': {
+      id: '/_dashboard/superadmin/ui-config'
+      path: '/ui-config'
+      fullPath: '/superadmin/ui-config'
+      preLoaderRoute: typeof DashboardSuperadminUiConfigRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/_dashboard/superadmin/admin': {
-      id: '/_dashboard/superadmin/admin'
-      path: '/admin'
-      fullPath: '/superadmin/admin'
-      preLoaderRoute: typeof DashboardSuperadminAdminRouteImport
+    '/_dashboard/superadmin/resellers': {
+      id: '/_dashboard/superadmin/resellers'
+      path: '/resellers'
+      fullPath: '/superadmin/resellers'
+      preLoaderRoute: typeof DashboardSuperadminResellersRouteImport
+      parentRoute: typeof DashboardSuperadminRouteRoute
+    }
+    '/_dashboard/superadmin/admins': {
+      id: '/_dashboard/superadmin/admins'
+      path: '/admins'
+      fullPath: '/superadmin/admins'
+      preLoaderRoute: typeof DashboardSuperadminAdminsRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
     '/_dashboard/reseller/users': {
@@ -412,16 +432,18 @@ const DashboardResellerRouteRouteWithChildren =
   )
 
 interface DashboardSuperadminRouteRouteChildren {
-  DashboardSuperadminAdminRoute: typeof DashboardSuperadminAdminRoute
-  DashboardSuperadminResllersRoute: typeof DashboardSuperadminResllersRoute
+  DashboardSuperadminAdminsRoute: typeof DashboardSuperadminAdminsRoute
+  DashboardSuperadminResellersRoute: typeof DashboardSuperadminResellersRoute
+  DashboardSuperadminUiConfigRoute: typeof DashboardSuperadminUiConfigRoute
   DashboardSuperadminUsersRoute: typeof DashboardSuperadminUsersRoute
   DashboardSuperadminIndexRoute: typeof DashboardSuperadminIndexRoute
 }
 
 const DashboardSuperadminRouteRouteChildren: DashboardSuperadminRouteRouteChildren =
   {
-    DashboardSuperadminAdminRoute: DashboardSuperadminAdminRoute,
-    DashboardSuperadminResllersRoute: DashboardSuperadminResllersRoute,
+    DashboardSuperadminAdminsRoute: DashboardSuperadminAdminsRoute,
+    DashboardSuperadminResellersRoute: DashboardSuperadminResellersRoute,
+    DashboardSuperadminUiConfigRoute: DashboardSuperadminUiConfigRoute,
     DashboardSuperadminUsersRoute: DashboardSuperadminUsersRoute,
     DashboardSuperadminIndexRoute: DashboardSuperadminIndexRoute,
   }

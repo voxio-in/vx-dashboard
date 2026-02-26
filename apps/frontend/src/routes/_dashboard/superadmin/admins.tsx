@@ -21,38 +21,39 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Role } from "@vx/shared";
 import { Plus } from "lucide-react";
 
-export const Route = createFileRoute("/_dashboard/superadmin/users")({
-  component: SuperAdminUsersPage,
+export const Route = createFileRoute("/_dashboard/superadmin/admins")({
+  component: AdminsPage,
 });
 
-function SuperAdminUsersPage() {
+function AdminsPage() {
   const { data: users, isLoading } = useUsersQuery();
   const { mutate: deleteUser } = useDeleteUserMutation();
   const { mutate: toggleUser } = useToggleUserMutation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const allUsers = users?.filter((u: any) => u.role === Role.USER) || [];
+  const admins = users?.filter((u: any) => u.role === Role.ADMIN) || [];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">All Users</h1>
+          <h1 className="text-2xl font-bold">Admins</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Manage all user accounts
+            Manage admin accounts
           </p>
         </div>
         <Button onClick={() => setIsOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Create User
+          Create Admin
         </Button>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            Users
+            All Admins
             <Badge variant="secondary" className="ml-2">
-              {allUsers.length}
+              {admins.length}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -74,27 +75,29 @@ function SuperAdminUsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allUsers.length === 0 ? (
+                {admins.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={4}
                       className="text-center text-muted-foreground py-8"
                     >
-                      No users found
+                      No admins found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  allUsers.map((user: any) => (
-                    <TableRow key={user._id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
+                  admins.map((admin: any) => (
+                    <TableRow key={admin._id}>
+                      <TableCell className="font-medium">
+                        {admin.name}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {user.email}
+                        {admin.email}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={user.isActive ? "default" : "secondary"}
+                          variant={admin.isActive ? "default" : "secondary"}
                         >
-                          {user.isActive ? "Active" : "Inactive"}
+                          {admin.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -102,14 +105,14 @@ function SuperAdminUsersPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toggleUser(user._id)}
+                            onClick={() => toggleUser(admin._id)}
                           >
-                            {user.isActive ? "Deactivate" : "Activate"}
+                            {admin.isActive ? "Deactivate" : "Activate"}
                           </Button>
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => deleteUser(user._id)}
+                            onClick={() => deleteUser(admin._id)}
                           >
                             Delete
                           </Button>
@@ -123,10 +126,11 @@ function SuperAdminUsersPage() {
           )}
         </CardContent>
       </Card>
+
       <UserFormModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        allowedRoles={[Role.USER]}
+        allowedRoles={[Role.ADMIN]}
       />
     </div>
   );
