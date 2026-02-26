@@ -6,7 +6,7 @@ import {
 } from "@/hooks/mutations/useUserMutations";
 import { Role } from "@vx/shared";
 
-export const Route = createFileRoute("/dashboard/superadmin/users")({
+export const Route = createFileRoute("/_dashboard/superadmin/users")({
   component: SuperAdminUsersPage,
 });
 

@@ -1,19 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useUsersQuery } from "@/hooks/queries/useUsersQuery";
-import {
-  useToggleUserMutation,
-  useDeleteUserMutation,
-} from "@/hooks/mutations/useUserMutations";
+import { useToggleUserMutation } from "@/hooks/mutations/useUserMutations";
 import { Role } from "@vx/shared";
 
-export const Route = createFileRoute("/dashboard/admin/users")({
-  component: AdminUsersPage,
+export const Route = createFileRoute("/_dashboard/reseller/users")({
+  component: ResellerUsersPage,
 });
 
-function AdminUsersPage() {
+function ResellerUsersPage() {
   const { data: users, isLoading } = useUsersQuery();
   const { mutate: toggleUser } = useToggleUserMutation();
-  const { mutate: deleteUser } = useDeleteUserMutation();
 
   const myUsers = users?.filter((u: any) => u.role === Role.USER) || [];
 
@@ -21,12 +17,7 @@ function AdminUsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Users</h1>
-        <button className="px-4 py-2 rounded-lg bg-white text-black text-sm font-medium">
-          + Create User
-        </button>
-      </div>
+      <h1 className="text-2xl font-bold text-white mb-6">My Users</h1>
       <div className="rounded-xl border border-white/10 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-white/5">
@@ -69,20 +60,12 @@ function AdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => toggleUser(user._id)}
-                        className="text-xs px-2 py-1 rounded border border-white/10 text-muted-foreground hover:bg-white/5"
-                      >
-                        {user.isActive ? "Deactivate" : "Activate"}
-                      </button>
-                      <button
-                        onClick={() => deleteUser(user._id)}
-                        className="text-xs px-2 py-1 rounded border border-red-500/20 text-red-400 hover:bg-red-500/10"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => toggleUser(user._id)}
+                      className="text-xs px-2 py-1 rounded border border-white/10 text-muted-foreground hover:bg-white/5"
+                    >
+                      {user.isActive ? "Deactivate" : "Activate"}
+                    </button>
                   </td>
                 </tr>
               ))

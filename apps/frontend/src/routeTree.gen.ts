@@ -9,33 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
-import { Route as AuthRouteRouteImport } from './routes/auth/route'
-import { Route as DashboardDashboardRouteImport } from './routes/dashboard/dashboard'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as DashboardUserRouteRouteImport } from './routes/dashboard/user/route'
-import { Route as DashboardSuperadminRouteRouteImport } from './routes/dashboard/superadmin/route'
-import { Route as DashboardResellerRouteRouteImport } from './routes/dashboard/reseller/route'
-import { Route as DashboardAdminRouteRouteImport } from './routes/dashboard/admin/route'
-import { Route as DashboardUserIndexRouteImport } from './routes/dashboard/user/index'
-import { Route as DashboardSuperadminIndexRouteImport } from './routes/dashboard/superadmin/index'
-import { Route as DashboardResellerIndexRouteImport } from './routes/dashboard/reseller/index'
-import { Route as DashboardAdminIndexRouteImport } from './routes/dashboard/admin/index'
-import { Route as DashboardUserFlowsRouteImport } from './routes/dashboard/user/flows'
-import { Route as DashboardSuperadminUsersRouteImport } from './routes/dashboard/superadmin/users'
-import { Route as DashboardSuperadminResllersRouteImport } from './routes/dashboard/superadmin/resllers'
-import { Route as DashboardSuperadminAdminRouteImport } from './routes/dashboard/superadmin/admin'
-import { Route as DashboardResellerUsersRouteImport } from './routes/dashboard/reseller/users'
-import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard/admin/users'
+import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
+import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as DashboardDashboardRouteImport } from './routes/_dashboard/dashboard'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as DashboardUserRouteRouteImport } from './routes/_dashboard/user/route'
+import { Route as DashboardSuperadminRouteRouteImport } from './routes/_dashboard/superadmin/route'
+import { Route as DashboardResellerRouteRouteImport } from './routes/_dashboard/reseller/route'
+import { Route as DashboardAdminRouteRouteImport } from './routes/_dashboard/admin/route'
+import { Route as DashboardUserIndexRouteImport } from './routes/_dashboard/user/index'
+import { Route as DashboardSuperadminIndexRouteImport } from './routes/_dashboard/superadmin/index'
+import { Route as DashboardResellerIndexRouteImport } from './routes/_dashboard/reseller/index'
+import { Route as DashboardAdminIndexRouteImport } from './routes/_dashboard/admin/index'
+import { Route as DashboardUserFlowsRouteImport } from './routes/_dashboard/user/flows'
+import { Route as DashboardSuperadminUsersRouteImport } from './routes/_dashboard/superadmin/users'
+import { Route as DashboardSuperadminResllersRouteImport } from './routes/_dashboard/superadmin/resllers'
+import { Route as DashboardSuperadminAdminRouteImport } from './routes/_dashboard/superadmin/admin'
+import { Route as DashboardResellerUsersRouteImport } from './routes/_dashboard/reseller/users'
+import { Route as DashboardAdminUsersRouteImport } from './routes/_dashboard/admin/users'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
@@ -125,119 +123,115 @@ const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/dashboard/admin': typeof DashboardAdminRouteRouteWithChildren
-  '/dashboard/reseller': typeof DashboardResellerRouteRouteWithChildren
-  '/dashboard/superadmin': typeof DashboardSuperadminRouteRouteWithChildren
-  '/dashboard/user': typeof DashboardUserRouteRouteWithChildren
-  '/auth/login': typeof AuthLoginRoute
-  '/dashboard/dashboard': typeof DashboardDashboardRoute
-  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
-  '/dashboard/reseller/users': typeof DashboardResellerUsersRoute
-  '/dashboard/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/dashboard/superadmin/resllers': typeof DashboardSuperadminResllersRoute
-  '/dashboard/superadmin/users': typeof DashboardSuperadminUsersRoute
-  '/dashboard/user/flows': typeof DashboardUserFlowsRoute
-  '/dashboard/admin/': typeof DashboardAdminIndexRoute
-  '/dashboard/reseller/': typeof DashboardResellerIndexRoute
-  '/dashboard/superadmin/': typeof DashboardSuperadminIndexRoute
-  '/dashboard/user/': typeof DashboardUserIndexRoute
+  '/': typeof DashboardRouteRouteWithChildren
+  '/admin': typeof DashboardAdminRouteRouteWithChildren
+  '/reseller': typeof DashboardResellerRouteRouteWithChildren
+  '/superadmin': typeof DashboardSuperadminRouteRouteWithChildren
+  '/user': typeof DashboardUserRouteRouteWithChildren
+  '/login': typeof AuthLoginRoute
+  '/dashboard': typeof DashboardDashboardRoute
+  '/admin/users': typeof DashboardAdminUsersRoute
+  '/reseller/users': typeof DashboardResellerUsersRoute
+  '/superadmin/admin': typeof DashboardSuperadminAdminRoute
+  '/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/superadmin/users': typeof DashboardSuperadminUsersRoute
+  '/user/flows': typeof DashboardUserFlowsRoute
+  '/admin/': typeof DashboardAdminIndexRoute
+  '/reseller/': typeof DashboardResellerIndexRoute
+  '/superadmin/': typeof DashboardSuperadminIndexRoute
+  '/user/': typeof DashboardUserIndexRoute
 }
 export interface FileRoutesByTo {
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/auth/login': typeof AuthLoginRoute
-  '/dashboard/dashboard': typeof DashboardDashboardRoute
-  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
-  '/dashboard/reseller/users': typeof DashboardResellerUsersRoute
-  '/dashboard/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/dashboard/superadmin/resllers': typeof DashboardSuperadminResllersRoute
-  '/dashboard/superadmin/users': typeof DashboardSuperadminUsersRoute
-  '/dashboard/user/flows': typeof DashboardUserFlowsRoute
-  '/dashboard/admin': typeof DashboardAdminIndexRoute
-  '/dashboard/reseller': typeof DashboardResellerIndexRoute
-  '/dashboard/superadmin': typeof DashboardSuperadminIndexRoute
-  '/dashboard/user': typeof DashboardUserIndexRoute
+  '/': typeof DashboardRouteRouteWithChildren
+  '/login': typeof AuthLoginRoute
+  '/dashboard': typeof DashboardDashboardRoute
+  '/admin/users': typeof DashboardAdminUsersRoute
+  '/reseller/users': typeof DashboardResellerUsersRoute
+  '/superadmin/admin': typeof DashboardSuperadminAdminRoute
+  '/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/superadmin/users': typeof DashboardSuperadminUsersRoute
+  '/user/flows': typeof DashboardUserFlowsRoute
+  '/admin': typeof DashboardAdminIndexRoute
+  '/reseller': typeof DashboardResellerIndexRoute
+  '/superadmin': typeof DashboardSuperadminIndexRoute
+  '/user': typeof DashboardUserIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/dashboard': typeof DashboardRouteRouteWithChildren
-  '/dashboard/admin': typeof DashboardAdminRouteRouteWithChildren
-  '/dashboard/reseller': typeof DashboardResellerRouteRouteWithChildren
-  '/dashboard/superadmin': typeof DashboardSuperadminRouteRouteWithChildren
-  '/dashboard/user': typeof DashboardUserRouteRouteWithChildren
-  '/auth/login': typeof AuthLoginRoute
-  '/dashboard/dashboard': typeof DashboardDashboardRoute
-  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
-  '/dashboard/reseller/users': typeof DashboardResellerUsersRoute
-  '/dashboard/superadmin/admin': typeof DashboardSuperadminAdminRoute
-  '/dashboard/superadmin/resllers': typeof DashboardSuperadminResllersRoute
-  '/dashboard/superadmin/users': typeof DashboardSuperadminUsersRoute
-  '/dashboard/user/flows': typeof DashboardUserFlowsRoute
-  '/dashboard/admin/': typeof DashboardAdminIndexRoute
-  '/dashboard/reseller/': typeof DashboardResellerIndexRoute
-  '/dashboard/superadmin/': typeof DashboardSuperadminIndexRoute
-  '/dashboard/user/': typeof DashboardUserIndexRoute
+  '/_auth': typeof AuthRouteRouteWithChildren
+  '/_dashboard': typeof DashboardRouteRouteWithChildren
+  '/_dashboard/admin': typeof DashboardAdminRouteRouteWithChildren
+  '/_dashboard/reseller': typeof DashboardResellerRouteRouteWithChildren
+  '/_dashboard/superadmin': typeof DashboardSuperadminRouteRouteWithChildren
+  '/_dashboard/user': typeof DashboardUserRouteRouteWithChildren
+  '/_auth/login': typeof AuthLoginRoute
+  '/_dashboard/dashboard': typeof DashboardDashboardRoute
+  '/_dashboard/admin/users': typeof DashboardAdminUsersRoute
+  '/_dashboard/reseller/users': typeof DashboardResellerUsersRoute
+  '/_dashboard/superadmin/admin': typeof DashboardSuperadminAdminRoute
+  '/_dashboard/superadmin/resllers': typeof DashboardSuperadminResllersRoute
+  '/_dashboard/superadmin/users': typeof DashboardSuperadminUsersRoute
+  '/_dashboard/user/flows': typeof DashboardUserFlowsRoute
+  '/_dashboard/admin/': typeof DashboardAdminIndexRoute
+  '/_dashboard/reseller/': typeof DashboardResellerIndexRoute
+  '/_dashboard/superadmin/': typeof DashboardSuperadminIndexRoute
+  '/_dashboard/user/': typeof DashboardUserIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/auth'
+    | '/'
+    | '/admin'
+    | '/reseller'
+    | '/superadmin'
+    | '/user'
+    | '/login'
     | '/dashboard'
-    | '/dashboard/admin'
-    | '/dashboard/reseller'
-    | '/dashboard/superadmin'
-    | '/dashboard/user'
-    | '/auth/login'
-    | '/dashboard/dashboard'
-    | '/dashboard/admin/users'
-    | '/dashboard/reseller/users'
-    | '/dashboard/superadmin/admin'
-    | '/dashboard/superadmin/resllers'
-    | '/dashboard/superadmin/users'
-    | '/dashboard/user/flows'
-    | '/dashboard/admin/'
-    | '/dashboard/reseller/'
-    | '/dashboard/superadmin/'
-    | '/dashboard/user/'
+    | '/admin/users'
+    | '/reseller/users'
+    | '/superadmin/admin'
+    | '/superadmin/resllers'
+    | '/superadmin/users'
+    | '/user/flows'
+    | '/admin/'
+    | '/reseller/'
+    | '/superadmin/'
+    | '/user/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/auth'
+    | '/'
+    | '/login'
     | '/dashboard'
-    | '/auth/login'
-    | '/dashboard/dashboard'
-    | '/dashboard/admin/users'
-    | '/dashboard/reseller/users'
-    | '/dashboard/superadmin/admin'
-    | '/dashboard/superadmin/resllers'
-    | '/dashboard/superadmin/users'
-    | '/dashboard/user/flows'
-    | '/dashboard/admin'
-    | '/dashboard/reseller'
-    | '/dashboard/superadmin'
-    | '/dashboard/user'
+    | '/admin/users'
+    | '/reseller/users'
+    | '/superadmin/admin'
+    | '/superadmin/resllers'
+    | '/superadmin/users'
+    | '/user/flows'
+    | '/admin'
+    | '/reseller'
+    | '/superadmin'
+    | '/user'
   id:
     | '__root__'
-    | '/auth'
-    | '/dashboard'
-    | '/dashboard/admin'
-    | '/dashboard/reseller'
-    | '/dashboard/superadmin'
-    | '/dashboard/user'
-    | '/auth/login'
-    | '/dashboard/dashboard'
-    | '/dashboard/admin/users'
-    | '/dashboard/reseller/users'
-    | '/dashboard/superadmin/admin'
-    | '/dashboard/superadmin/resllers'
-    | '/dashboard/superadmin/users'
-    | '/dashboard/user/flows'
-    | '/dashboard/admin/'
-    | '/dashboard/reseller/'
-    | '/dashboard/superadmin/'
-    | '/dashboard/user/'
+    | '/_auth'
+    | '/_dashboard'
+    | '/_dashboard/admin'
+    | '/_dashboard/reseller'
+    | '/_dashboard/superadmin'
+    | '/_dashboard/user'
+    | '/_auth/login'
+    | '/_dashboard/dashboard'
+    | '/_dashboard/admin/users'
+    | '/_dashboard/reseller/users'
+    | '/_dashboard/superadmin/admin'
+    | '/_dashboard/superadmin/resllers'
+    | '/_dashboard/superadmin/users'
+    | '/_dashboard/user/flows'
+    | '/_dashboard/admin/'
+    | '/_dashboard/reseller/'
+    | '/_dashboard/superadmin/'
+    | '/_dashboard/user/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,129 +241,129 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/dashboard': {
-      id: '/dashboard/dashboard'
+    '/_dashboard/dashboard': {
+      id: '/_dashboard/dashboard'
       path: '/dashboard'
-      fullPath: '/dashboard/dashboard'
+      fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardDashboardRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/auth/login': {
-      id: '/auth/login'
+    '/_auth/login': {
+      id: '/_auth/login'
       path: '/login'
-      fullPath: '/auth/login'
+      fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/dashboard/user': {
-      id: '/dashboard/user'
+    '/_dashboard/user': {
+      id: '/_dashboard/user'
       path: '/user'
-      fullPath: '/dashboard/user'
+      fullPath: '/user'
       preLoaderRoute: typeof DashboardUserRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/superadmin': {
-      id: '/dashboard/superadmin'
+    '/_dashboard/superadmin': {
+      id: '/_dashboard/superadmin'
       path: '/superadmin'
-      fullPath: '/dashboard/superadmin'
+      fullPath: '/superadmin'
       preLoaderRoute: typeof DashboardSuperadminRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/reseller': {
-      id: '/dashboard/reseller'
+    '/_dashboard/reseller': {
+      id: '/_dashboard/reseller'
       path: '/reseller'
-      fullPath: '/dashboard/reseller'
+      fullPath: '/reseller'
       preLoaderRoute: typeof DashboardResellerRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/admin': {
-      id: '/dashboard/admin'
+    '/_dashboard/admin': {
+      id: '/_dashboard/admin'
       path: '/admin'
-      fullPath: '/dashboard/admin'
+      fullPath: '/admin'
       preLoaderRoute: typeof DashboardAdminRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
-    '/dashboard/user/': {
-      id: '/dashboard/user/'
+    '/_dashboard/user/': {
+      id: '/_dashboard/user/'
       path: '/'
-      fullPath: '/dashboard/user/'
+      fullPath: '/user/'
       preLoaderRoute: typeof DashboardUserIndexRouteImport
       parentRoute: typeof DashboardUserRouteRoute
     }
-    '/dashboard/superadmin/': {
-      id: '/dashboard/superadmin/'
+    '/_dashboard/superadmin/': {
+      id: '/_dashboard/superadmin/'
       path: '/'
-      fullPath: '/dashboard/superadmin/'
+      fullPath: '/superadmin/'
       preLoaderRoute: typeof DashboardSuperadminIndexRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/dashboard/reseller/': {
-      id: '/dashboard/reseller/'
+    '/_dashboard/reseller/': {
+      id: '/_dashboard/reseller/'
       path: '/'
-      fullPath: '/dashboard/reseller/'
+      fullPath: '/reseller/'
       preLoaderRoute: typeof DashboardResellerIndexRouteImport
       parentRoute: typeof DashboardResellerRouteRoute
     }
-    '/dashboard/admin/': {
-      id: '/dashboard/admin/'
+    '/_dashboard/admin/': {
+      id: '/_dashboard/admin/'
       path: '/'
-      fullPath: '/dashboard/admin/'
+      fullPath: '/admin/'
       preLoaderRoute: typeof DashboardAdminIndexRouteImport
       parentRoute: typeof DashboardAdminRouteRoute
     }
-    '/dashboard/user/flows': {
-      id: '/dashboard/user/flows'
+    '/_dashboard/user/flows': {
+      id: '/_dashboard/user/flows'
       path: '/flows'
-      fullPath: '/dashboard/user/flows'
+      fullPath: '/user/flows'
       preLoaderRoute: typeof DashboardUserFlowsRouteImport
       parentRoute: typeof DashboardUserRouteRoute
     }
-    '/dashboard/superadmin/users': {
-      id: '/dashboard/superadmin/users'
+    '/_dashboard/superadmin/users': {
+      id: '/_dashboard/superadmin/users'
       path: '/users'
-      fullPath: '/dashboard/superadmin/users'
+      fullPath: '/superadmin/users'
       preLoaderRoute: typeof DashboardSuperadminUsersRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/dashboard/superadmin/resllers': {
-      id: '/dashboard/superadmin/resllers'
+    '/_dashboard/superadmin/resllers': {
+      id: '/_dashboard/superadmin/resllers'
       path: '/resllers'
-      fullPath: '/dashboard/superadmin/resllers'
+      fullPath: '/superadmin/resllers'
       preLoaderRoute: typeof DashboardSuperadminResllersRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/dashboard/superadmin/admin': {
-      id: '/dashboard/superadmin/admin'
+    '/_dashboard/superadmin/admin': {
+      id: '/_dashboard/superadmin/admin'
       path: '/admin'
-      fullPath: '/dashboard/superadmin/admin'
+      fullPath: '/superadmin/admin'
       preLoaderRoute: typeof DashboardSuperadminAdminRouteImport
       parentRoute: typeof DashboardSuperadminRouteRoute
     }
-    '/dashboard/reseller/users': {
-      id: '/dashboard/reseller/users'
+    '/_dashboard/reseller/users': {
+      id: '/_dashboard/reseller/users'
       path: '/users'
-      fullPath: '/dashboard/reseller/users'
+      fullPath: '/reseller/users'
       preLoaderRoute: typeof DashboardResellerUsersRouteImport
       parentRoute: typeof DashboardResellerRouteRoute
     }
-    '/dashboard/admin/users': {
-      id: '/dashboard/admin/users'
+    '/_dashboard/admin/users': {
+      id: '/_dashboard/admin/users'
       path: '/users'
-      fullPath: '/dashboard/admin/users'
+      fullPath: '/admin/users'
       preLoaderRoute: typeof DashboardAdminUsersRouteImport
       parentRoute: typeof DashboardAdminRouteRoute
     }

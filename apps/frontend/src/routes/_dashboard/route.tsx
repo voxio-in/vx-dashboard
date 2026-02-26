@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { UIConfigProvider } from "@/contexts/UIConfigContext";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_dashboard")({
   component: DashboardLayout,
 });
 

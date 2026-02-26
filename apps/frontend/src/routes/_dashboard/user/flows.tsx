@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useFlowsQuery } from "@/hooks/queries/useFlowsQuery";
 
-export const Route = createFileRoute("/dashboard/user/flows")({
+export const Route = createFileRoute("/_dashboard/user/flows")({
   component: UserFlowsPage,
 });
 

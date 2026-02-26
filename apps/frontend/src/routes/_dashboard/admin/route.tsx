@@ -2,7 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { Role, ROLE_LEVEL } from "@vx/shared";
 
-export const Route = createFileRoute("/dashboard/admin")({
+export const Route = createFileRoute("/_dashboard/admin")({
   component: AdminGuard,
 });
 

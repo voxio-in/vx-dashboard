@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useUsersQuery } from "@/hooks/queries/useUsersQuery";
 import { Role } from "@vx/shared";
 
-export const Route = createFileRoute("/dashboard/reseller/")({
+export const Route = createFileRoute("/_dashboard/reseller/")({
   component: ResellerDashboard,
 });
 

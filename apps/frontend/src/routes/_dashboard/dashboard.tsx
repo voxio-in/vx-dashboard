@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 
-export const Route = createFileRoute("/dashboard/dashboard")({
+export const Route = createFileRoute("/_dashboard/dashboard")({
   component: DashboardHome,
 });
 
