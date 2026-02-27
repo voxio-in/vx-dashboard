@@ -27,7 +27,12 @@ import { Route as DashboardSuperadminUiConfigRouteImport } from './routes/_dashb
 import { Route as DashboardSuperadminResellersRouteImport } from './routes/_dashboard/superadmin/resellers'
 import { Route as DashboardSuperadminAdminsRouteImport } from './routes/_dashboard/superadmin/admins'
 import { Route as DashboardResellerUsersRouteImport } from './routes/_dashboard/reseller/users'
+import { Route as DashboardResellerFlowsRouteImport } from './routes/_dashboard/reseller/flows'
 import { Route as DashboardAdminUsersRouteImport } from './routes/_dashboard/admin/users'
+import { Route as DashboardResellerFlowsFlowIdRouteImport } from './routes/_dashboard/reseller/flows/$flowId'
+import { Route as DashboardResellerFlowsFlowIdTtsRouteImport } from './routes/_dashboard/reseller/flows/$flowId.tts'
+import { Route as DashboardResellerFlowsFlowIdSttRouteImport } from './routes/_dashboard/reseller/flows/$flowId.stt'
+import { Route as DashboardResellerFlowsFlowIdAgentRouteImport } from './routes/_dashboard/reseller/flows/$flowId.agent'
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
@@ -123,11 +128,40 @@ const DashboardResellerUsersRoute = DashboardResellerUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => DashboardResellerRouteRoute,
 } as any)
+const DashboardResellerFlowsRoute = DashboardResellerFlowsRouteImport.update({
+  id: '/flows',
+  path: '/flows',
+  getParentRoute: () => DashboardResellerRouteRoute,
+} as any)
 const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
   getParentRoute: () => DashboardAdminRouteRoute,
 } as any)
+const DashboardResellerFlowsFlowIdRoute =
+  DashboardResellerFlowsFlowIdRouteImport.update({
+    id: '/$flowId',
+    path: '/$flowId',
+    getParentRoute: () => DashboardResellerFlowsRoute,
+  } as any)
+const DashboardResellerFlowsFlowIdTtsRoute =
+  DashboardResellerFlowsFlowIdTtsRouteImport.update({
+    id: '/tts',
+    path: '/tts',
+    getParentRoute: () => DashboardResellerFlowsFlowIdRoute,
+  } as any)
+const DashboardResellerFlowsFlowIdSttRoute =
+  DashboardResellerFlowsFlowIdSttRouteImport.update({
+    id: '/stt',
+    path: '/stt',
+    getParentRoute: () => DashboardResellerFlowsFlowIdRoute,
+  } as any)
+const DashboardResellerFlowsFlowIdAgentRoute =
+  DashboardResellerFlowsFlowIdAgentRouteImport.update({
+    id: '/agent',
+    path: '/agent',
+    getParentRoute: () => DashboardResellerFlowsFlowIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardRouteRouteWithChildren
@@ -138,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/admin/users': typeof DashboardAdminUsersRoute
+  '/reseller/flows': typeof DashboardResellerFlowsRouteWithChildren
   '/reseller/users': typeof DashboardResellerUsersRoute
   '/superadmin/admins': typeof DashboardSuperadminAdminsRoute
   '/superadmin/resellers': typeof DashboardSuperadminResellersRoute
@@ -148,12 +183,17 @@ export interface FileRoutesByFullPath {
   '/reseller/': typeof DashboardResellerIndexRoute
   '/superadmin/': typeof DashboardSuperadminIndexRoute
   '/user/': typeof DashboardUserIndexRoute
+  '/reseller/flows/$flowId': typeof DashboardResellerFlowsFlowIdRouteWithChildren
+  '/reseller/flows/$flowId/agent': typeof DashboardResellerFlowsFlowIdAgentRoute
+  '/reseller/flows/$flowId/stt': typeof DashboardResellerFlowsFlowIdSttRoute
+  '/reseller/flows/$flowId/tts': typeof DashboardResellerFlowsFlowIdTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof DashboardRouteRouteWithChildren
   '/login': typeof AuthLoginRoute
   '/dashboard': typeof DashboardDashboardRoute
   '/admin/users': typeof DashboardAdminUsersRoute
+  '/reseller/flows': typeof DashboardResellerFlowsRouteWithChildren
   '/reseller/users': typeof DashboardResellerUsersRoute
   '/superadmin/admins': typeof DashboardSuperadminAdminsRoute
   '/superadmin/resellers': typeof DashboardSuperadminResellersRoute
@@ -164,6 +204,10 @@ export interface FileRoutesByTo {
   '/reseller': typeof DashboardResellerIndexRoute
   '/superadmin': typeof DashboardSuperadminIndexRoute
   '/user': typeof DashboardUserIndexRoute
+  '/reseller/flows/$flowId': typeof DashboardResellerFlowsFlowIdRouteWithChildren
+  '/reseller/flows/$flowId/agent': typeof DashboardResellerFlowsFlowIdAgentRoute
+  '/reseller/flows/$flowId/stt': typeof DashboardResellerFlowsFlowIdSttRoute
+  '/reseller/flows/$flowId/tts': typeof DashboardResellerFlowsFlowIdTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,6 +220,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_dashboard/admin/users': typeof DashboardAdminUsersRoute
+  '/_dashboard/reseller/flows': typeof DashboardResellerFlowsRouteWithChildren
   '/_dashboard/reseller/users': typeof DashboardResellerUsersRoute
   '/_dashboard/superadmin/admins': typeof DashboardSuperadminAdminsRoute
   '/_dashboard/superadmin/resellers': typeof DashboardSuperadminResellersRoute
@@ -186,6 +231,10 @@ export interface FileRoutesById {
   '/_dashboard/reseller/': typeof DashboardResellerIndexRoute
   '/_dashboard/superadmin/': typeof DashboardSuperadminIndexRoute
   '/_dashboard/user/': typeof DashboardUserIndexRoute
+  '/_dashboard/reseller/flows/$flowId': typeof DashboardResellerFlowsFlowIdRouteWithChildren
+  '/_dashboard/reseller/flows/$flowId/agent': typeof DashboardResellerFlowsFlowIdAgentRoute
+  '/_dashboard/reseller/flows/$flowId/stt': typeof DashboardResellerFlowsFlowIdSttRoute
+  '/_dashboard/reseller/flows/$flowId/tts': typeof DashboardResellerFlowsFlowIdTtsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -198,6 +247,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/admin/users'
+    | '/reseller/flows'
     | '/reseller/users'
     | '/superadmin/admins'
     | '/superadmin/resellers'
@@ -208,12 +258,17 @@ export interface FileRouteTypes {
     | '/reseller/'
     | '/superadmin/'
     | '/user/'
+    | '/reseller/flows/$flowId'
+    | '/reseller/flows/$flowId/agent'
+    | '/reseller/flows/$flowId/stt'
+    | '/reseller/flows/$flowId/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/dashboard'
     | '/admin/users'
+    | '/reseller/flows'
     | '/reseller/users'
     | '/superadmin/admins'
     | '/superadmin/resellers'
@@ -224,6 +279,10 @@ export interface FileRouteTypes {
     | '/reseller'
     | '/superadmin'
     | '/user'
+    | '/reseller/flows/$flowId'
+    | '/reseller/flows/$flowId/agent'
+    | '/reseller/flows/$flowId/stt'
+    | '/reseller/flows/$flowId/tts'
   id:
     | '__root__'
     | '/_auth'
@@ -235,6 +294,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_dashboard/dashboard'
     | '/_dashboard/admin/users'
+    | '/_dashboard/reseller/flows'
     | '/_dashboard/reseller/users'
     | '/_dashboard/superadmin/admins'
     | '/_dashboard/superadmin/resellers'
@@ -245,6 +305,10 @@ export interface FileRouteTypes {
     | '/_dashboard/reseller/'
     | '/_dashboard/superadmin/'
     | '/_dashboard/user/'
+    | '/_dashboard/reseller/flows/$flowId'
+    | '/_dashboard/reseller/flows/$flowId/agent'
+    | '/_dashboard/reseller/flows/$flowId/stt'
+    | '/_dashboard/reseller/flows/$flowId/tts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -380,12 +444,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardResellerUsersRouteImport
       parentRoute: typeof DashboardResellerRouteRoute
     }
+    '/_dashboard/reseller/flows': {
+      id: '/_dashboard/reseller/flows'
+      path: '/flows'
+      fullPath: '/reseller/flows'
+      preLoaderRoute: typeof DashboardResellerFlowsRouteImport
+      parentRoute: typeof DashboardResellerRouteRoute
+    }
     '/_dashboard/admin/users': {
       id: '/_dashboard/admin/users'
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof DashboardAdminUsersRouteImport
       parentRoute: typeof DashboardAdminRouteRoute
+    }
+    '/_dashboard/reseller/flows/$flowId': {
+      id: '/_dashboard/reseller/flows/$flowId'
+      path: '/$flowId'
+      fullPath: '/reseller/flows/$flowId'
+      preLoaderRoute: typeof DashboardResellerFlowsFlowIdRouteImport
+      parentRoute: typeof DashboardResellerFlowsRoute
+    }
+    '/_dashboard/reseller/flows/$flowId/tts': {
+      id: '/_dashboard/reseller/flows/$flowId/tts'
+      path: '/tts'
+      fullPath: '/reseller/flows/$flowId/tts'
+      preLoaderRoute: typeof DashboardResellerFlowsFlowIdTtsRouteImport
+      parentRoute: typeof DashboardResellerFlowsFlowIdRoute
+    }
+    '/_dashboard/reseller/flows/$flowId/stt': {
+      id: '/_dashboard/reseller/flows/$flowId/stt'
+      path: '/stt'
+      fullPath: '/reseller/flows/$flowId/stt'
+      preLoaderRoute: typeof DashboardResellerFlowsFlowIdSttRouteImport
+      parentRoute: typeof DashboardResellerFlowsFlowIdRoute
+    }
+    '/_dashboard/reseller/flows/$flowId/agent': {
+      id: '/_dashboard/reseller/flows/$flowId/agent'
+      path: '/agent'
+      fullPath: '/reseller/flows/$flowId/agent'
+      preLoaderRoute: typeof DashboardResellerFlowsFlowIdAgentRouteImport
+      parentRoute: typeof DashboardResellerFlowsFlowIdRoute
     }
   }
 }
@@ -415,13 +514,49 @@ const DashboardAdminRouteRouteChildren: DashboardAdminRouteRouteChildren = {
 const DashboardAdminRouteRouteWithChildren =
   DashboardAdminRouteRoute._addFileChildren(DashboardAdminRouteRouteChildren)
 
+interface DashboardResellerFlowsFlowIdRouteChildren {
+  DashboardResellerFlowsFlowIdAgentRoute: typeof DashboardResellerFlowsFlowIdAgentRoute
+  DashboardResellerFlowsFlowIdSttRoute: typeof DashboardResellerFlowsFlowIdSttRoute
+  DashboardResellerFlowsFlowIdTtsRoute: typeof DashboardResellerFlowsFlowIdTtsRoute
+}
+
+const DashboardResellerFlowsFlowIdRouteChildren: DashboardResellerFlowsFlowIdRouteChildren =
+  {
+    DashboardResellerFlowsFlowIdAgentRoute:
+      DashboardResellerFlowsFlowIdAgentRoute,
+    DashboardResellerFlowsFlowIdSttRoute: DashboardResellerFlowsFlowIdSttRoute,
+    DashboardResellerFlowsFlowIdTtsRoute: DashboardResellerFlowsFlowIdTtsRoute,
+  }
+
+const DashboardResellerFlowsFlowIdRouteWithChildren =
+  DashboardResellerFlowsFlowIdRoute._addFileChildren(
+    DashboardResellerFlowsFlowIdRouteChildren,
+  )
+
+interface DashboardResellerFlowsRouteChildren {
+  DashboardResellerFlowsFlowIdRoute: typeof DashboardResellerFlowsFlowIdRouteWithChildren
+}
+
+const DashboardResellerFlowsRouteChildren: DashboardResellerFlowsRouteChildren =
+  {
+    DashboardResellerFlowsFlowIdRoute:
+      DashboardResellerFlowsFlowIdRouteWithChildren,
+  }
+
+const DashboardResellerFlowsRouteWithChildren =
+  DashboardResellerFlowsRoute._addFileChildren(
+    DashboardResellerFlowsRouteChildren,
+  )
+
 interface DashboardResellerRouteRouteChildren {
+  DashboardResellerFlowsRoute: typeof DashboardResellerFlowsRouteWithChildren
   DashboardResellerUsersRoute: typeof DashboardResellerUsersRoute
   DashboardResellerIndexRoute: typeof DashboardResellerIndexRoute
 }
 
 const DashboardResellerRouteRouteChildren: DashboardResellerRouteRouteChildren =
   {
+    DashboardResellerFlowsRoute: DashboardResellerFlowsRouteWithChildren,
     DashboardResellerUsersRoute: DashboardResellerUsersRoute,
     DashboardResellerIndexRoute: DashboardResellerIndexRoute,
   }

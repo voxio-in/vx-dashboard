@@ -60,3 +60,14 @@ export const deleteFlow = catchAsync(
     res.status(200).json({ success: true, message: "Flow deleted" });
   },
 );
+export const getFlowById = catchAsync(
+  async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+    const flow = await Flow.findOne({ _id: id, ownerId: req.user._id });
+    if (!flow)
+      return res
+        .status(404)
+        .json({ success: false, message: "Flow not found" });
+    res.status(200).json({ success: true, data: { flow } });
+  },
+);
