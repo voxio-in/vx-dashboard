@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth/AuthProvider";
+import { ReduxProvider } from "@/store/ReduxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <ReduxProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

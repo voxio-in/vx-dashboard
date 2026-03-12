@@ -1,97 +1,76 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+﻿import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { DashboardData, FilterType } from "@/components/dashboard/types";
 
-export type FilterType = "7d" | "30d" | "3m" | "custom";
-
-export interface DateRange {
-  from: string; // ISO Date String YYYY-MM-DD
-  to: string; // ISO Date String YYYY-MM-DD
-}
-
-export interface ChartDataPoint {
-  date: string; // YYYY-MM-DD
-  count: number;
-  label: string; // Mon, Tue, Nov 15, etc.
-}
-
-export interface Interaction {
-  id: string;
-  type: string;
-  flowName: string;
-  startTime: string;
-  endTime: string;
-  duration: string;
-  hasRecording: boolean;
-  hasTranscript: boolean;
-  summary: string;
-  tags: string[];
-}
-
-interface DashboardState {
-  filterType: FilterType;
-  customDateRange: DateRange; // Used if filterType is 'custom'
-  chartData: ChartDataPoint[];
-  interactions: Interaction[];
-  metrics: {
-    total: number;
-    avgDuration: string;
-    score: number | string;
-  };
+export interface DashboardState {
+  filter: FilterType;
+  data: DashboardData | null;
   status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
 }
 
-/* --- INITIAL STATE --- */
-// Helper to get default dates (Last 7 days)
-const today = new Date();
-const sevenDaysAgo = new Date();
-sevenDaysAgo.setDate(today.getDate() - 7);
+export const fetchDashboardData = createAsyncThunk<
+  DashboardData,
+  { from: string; to: string },
+  { rejectValue: string }
+>("dashboard/fetchDashboardData", async ({ from, to }, { rejectWithValue }) => {
+  try {
+    const params = new URLSearchParams({ from, to });
+    const res = await fetch(`/api/dashboard?${params.toString()}`, {
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      let message = "Failed to load dashboard data";
+      try {
+        const body = await res.json();
+        if (body?.error) message = body.error;
+      } catch {}
+      return rejectWithValue(message);
+    }
+
+    return (await res.json()) as DashboardData;
+  } catch {
+    return rejectWithValue("Failed to load dashboard data");
+  }
+});
 
 const initialState: DashboardState = {
-  filterType: "7d",
-  customDateRange: {
-    from: sevenDaysAgo.toISOString().split("T")[0],
-    to: today.toISOString().split("T")[0],
-  },
-  chartData: [],
-  interactions: [],
-  metrics: { total: 0, avgDuration: "00:00", score: "N/A" },
+  filter: "7d",
+  data: null,
   status: "idle",
+  error: null,
 };
 
-/* --- SLICE --- */
 const dashboardSlice = createSlice({
   name: "dashboard",
   initialState,
   reducers: {
-    setFilterType(state, action: PayloadAction<FilterType>) {
-      state.filterType = action.payload;
-      state.status = "idle"; // Reset status to trigger re-fetch
+    setFilter(state, action: PayloadAction<FilterType>) {
+      state.filter = action.payload;
     },
-    setCustomDateRange(state, action: PayloadAction<DateRange>) {
-      state.customDateRange = action.payload;
-      state.filterType = "custom";
+    resetDashboard(state) {
+      state.data = null;
       state.status = "idle";
+      state.error = null;
     },
-    setDashboardData(state, action: PayloadAction<any>) {
-      state.chartData = action.payload.chartData;
-      state.interactions = action.payload.interactions;
-      state.metrics = action.payload.metrics;
-      state.status = "succeeded";
-    },
-    setLoading(state) {
-      state.status = "loading";
-    },
-    setError(state) {
-      state.status = "failed";
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchDashboardData.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchDashboardData.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(fetchDashboardData.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to load dashboard data";
+      });
   },
 });
 
-export const {
-  setFilterType,
-  setCustomDateRange,
-  setDashboardData,
-  setLoading,
-  setError,
-} = dashboardSlice.actions;
+export const { setFilter, resetDashboard } = dashboardSlice.actions;
 
 export default dashboardSlice.reducer;

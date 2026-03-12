@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+﻿import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IFlow {
   name: string;
@@ -8,6 +8,7 @@ export interface IFlow {
   agent_id?: mongoose.Types.ObjectId;
   faces: any[];
   "max-silence-counter": number;
+  sessions?: mongoose.Types.ObjectId[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -45,6 +46,11 @@ const FlowSchema = new Schema<FlowDocument>(
       type: Number,
       default: 20,
       required: true,
+    },
+    sessions: {
+      type: [Schema.Types.ObjectId],
+      ref: "Session",
+      default: [],
     },
   },
   { timestamps: true },

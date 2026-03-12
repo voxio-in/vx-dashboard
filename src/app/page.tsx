@@ -20,7 +20,7 @@ export default function Home() {
       case "admin":
         return "/admin/dashboard";
       case "reseller":
-        return "/reseller/panel";
+        return "/reseller/dashboard";
       default:
         return "/dashboard";
     }
@@ -28,7 +28,6 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* Navbar */}
       <header className="flex h-16 items-center justify-between border-b px-6 lg:px-12">
         <div className="flex items-center gap-2 font-bold text-xl">
           <div className="h-8 w-8 bg-primary rounded-lg"></div>

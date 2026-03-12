@@ -1,4 +1,4 @@
-export interface IFlow {
+﻿export interface IFlow {
   _id: string;
   name: string;
   api_key: string;
@@ -6,6 +6,7 @@ export interface IFlow {
   tts_id?: string;
   agent_id?: string;
   "max-silence-counter": number;
+  sessions?: string[];
 
   createdAt?: string;
   updatedAt?: string;

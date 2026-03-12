@@ -1,0 +1,56 @@
+export type FilterType = "7d" | "30d" | "3m" | "custom";
+
+export interface Interaction {
+  id: string;
+  type: string;
+  flowName: string;
+  startTime: string;
+  endTime: string;
+  sessionDuration: string;
+  timeConnected: string;
+  totalAiTime: string;
+  totalHumanTime: string;
+  hasTranscription: boolean;
+  hasRecording: boolean;
+  timeRatio: number;
+  humanTokens: number;
+  tokenRatio: number;
+  aiTokens: number;
+  transcription?: {
+    role: string;
+    content: string;
+    timestamp?: string;
+  }[];
+}
+
+export interface DashboardMetrics {
+  total: number;
+  avgDuration: string;
+  score: number;
+  activeUsers: number;
+  successRate: number;
+  avgResponse: string;
+  totalSessionDuration: string;
+  totalConnectedDuration: string;
+}
+
+export interface DashboardMetricChanges {
+  total: number;
+  avgDuration: number;
+  totalSessionDuration: number;
+  totalConnectedDuration: number;
+}
+
+export interface ChartDataPoint {
+  date: string;
+  label: string;
+  value: number;
+  sessions: number;
+}
+
+export interface DashboardData {
+  metrics: DashboardMetrics;
+  metricChanges: DashboardMetricChanges;
+  chartData: ChartDataPoint[];
+  interactions: Interaction[];
+}

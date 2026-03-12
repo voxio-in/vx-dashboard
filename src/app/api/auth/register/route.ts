@@ -24,45 +24,45 @@ function generateApiKey(): string {
 }
 
 export async function POST(req: Request) {
-  console.log("🔵 [Register API] Request received");
+  console.log(" [Register API] Request received");
 
   try {
     const body = await req.json();
     const { username, email, password, name, role } = body;
 
-    console.log(`🔵 [Register API] Processing registration for: ${email}`);
+    console.log(`[Register API] Processing registration for: ${email}`);
 
     if (!email || !password) {
       console.log(
-        "🔴 [Register API] Validation failed: Missing email or password"
+        " [Register API] Validation failed: Missing email or password",
       );
       return NextResponse.json(
         { message: "Missing email or password" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    console.log("🔵 [Register API] Connecting to database...");
+    console.log("[Register API] Connecting to database...");
     await connectDB();
-    console.log("✅ [Register API] Database connected");
+    console.log("[Register API] Database connected");
 
-    console.log("🔵 [Register API] Checking for existing user...");
+    console.log(" [Register API] Checking for existing user...");
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log("🔴 [Register API] User already exists");
+      console.log("[Register API] User already exists");
       return NextResponse.json(
         { message: "User already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.log(
-      "🔵 [Register API] Proceeding with plain password (model will hash it)..."
+      " [Register API] Proceeding with plain password (model will hash it)...",
     );
 
-    console.log("🔵 [Register API] Creating default components...");
+    console.log(" [Register API] Creating default components...");
 
-    console.log("🔵 [Register API] Creating STT...");
+    console.log("[Register API] Creating STT...");
     const newSTT = await STT.create({
       service: "deepgram",
       "model-name": "nova-3",
@@ -74,9 +74,9 @@ export async function POST(req: Request) {
       sample_rate: 16000,
       sample_width: 2,
     });
-    console.log(`✅ [Register API] STT Created: ${newSTT._id}`);
+    console.log(`[Register API] STT Created: ${newSTT._id}`);
 
-    console.log("🔵 [Register API] Creating TTS...");
+    console.log("[Register API] Creating TTS...");
     const newTTS = await TTS.create({
       // --- RIME CONFIGURATION (COMMENTED OUT) ---
       // service: "rime",
@@ -89,9 +89,9 @@ export async function POST(req: Request) {
       "model-name": "eleven_v3",
       voice_id: "1FcaCa84nUabCNNwbzBa", // Default voice (Rachel)
     });
-    console.log(`✅ [Register API] TTS Created: ${newTTS._id}`);
+    console.log(`[Register API] TTS Created: ${newTTS._id}`);
 
-    console.log("🔵 [Register API] Creating Agent...");
+    console.log("[Register API] Creating Agent...");
     const newAgent = await Agent.create({
       workflow: {
         variables: {
@@ -152,12 +152,12 @@ export async function POST(req: Request) {
         },
       },
     });
-    console.log(`✅ [Register API] Agent Created: ${newAgent._id}`);
+    console.log(` [Register API] Agent Created: ${newAgent._id}`);
 
-    console.log("🔵 [Register API] Generating API key...");
+    console.log(" [Register API] Generating API key...");
     const generatedApiKey = generateApiKey();
 
-    console.log("🔵 [Register API] Creating Flow...");
+    console.log(" [Register API] Creating Flow...");
     const newFlow = await Flow.create({
       name: "My First Flow",
       api_key: generatedApiKey,
@@ -166,9 +166,9 @@ export async function POST(req: Request) {
       agent_id: newAgent._id,
       faces: [],
     });
-    console.log(`✅ [Register API] Flow Created: ${newFlow._id}`);
+    console.log(` [Register API] Flow Created: ${newFlow._id}`);
 
-    console.log("🔵 [Register API] Creating user...");
+    console.log(" [Register API] Creating user...");
 
     const newUser = await User.create({
       username: username || name || email.split("@")[0],
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
       flows: [newFlow._id],
     });
 
-    console.log(`✅ [Register API] User Created: ${newUser._id}`);
+    console.log(` [Register API] User Created: ${newUser._id}`);
 
     return NextResponse.json(
       {
@@ -199,18 +199,18 @@ export async function POST(req: Request) {
           flow_id: newFlow._id,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: any) {
-    console.error("🔴 [Register API] Error:", error);
-    console.error("🔴 [Register API] Error stack:", error.stack);
+    console.error(" [Register API] Error:", error);
+    console.error(" [Register API] Error stack:", error.stack);
     return NextResponse.json(
       {
         message: "Internal server error",
         error: error.message,
         details: error.toString(),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

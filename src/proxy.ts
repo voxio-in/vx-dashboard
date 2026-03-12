@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 
 const ROLE_PATHS = {
   admin: "/admin/dashboard",
-  reseller: "/reseller/panel",
+  reseller: "/reseller/dashboard",
   user: "/dashboard",
 };
 
@@ -19,6 +19,10 @@ const PUBLIC_PATHS = [
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
 
   if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
     return NextResponse.next();
